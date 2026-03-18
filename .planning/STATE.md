@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-18T10:24:36.664Z"
+status: in-progress
+last_updated: '2026-03-18T11:09:45Z'
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 3
+  completed_plans: 2
 ---
 
 # Project State
@@ -25,5 +25,20 @@ See: .planning/PROJECT.md (updated 2026-03-18)
 | Phase | Status   | Goal                                                                        |
 | ----- | -------- | --------------------------------------------------------------------------- |
 | 1     | Complete | Temporarily authenticate users automatically.                               |
-| 2     | Pending  | Move RTSP ingestion to a dedicated service, enabling Cloudflare deployment. |
+| 2     | Complete | Move RTSP ingestion to a dedicated service, enabling Cloudflare deployment. |
 | 3     | Pending  | Ensure the HLS stream and test endpoints are secure for production.         |
+
+## Current Position
+
+**Phase:** 02-serverless-media-streaming
+**Plan:** 02 of 02 (complete)
+**Progress:** [██████████] 100% (3/3 plans)
+
+## Decisions
+
+- **02-02:** Use `$env/dynamic/private` for Cloudflare Workers edge runtime — env vars resolved at request time, not build time
+
+## Last Session
+
+- **Stopped at:** Completed 02-02-PLAN.md
+- **Updated:** 2026-03-18
