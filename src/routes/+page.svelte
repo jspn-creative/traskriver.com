@@ -2,7 +2,7 @@
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 
 	let { data } = $props<{
-		data: { streamUrl: string | null };
+		data: { streamUrl: string };
 	}>();
 </script>
 
@@ -24,52 +24,21 @@
 				Private river conditions stream for subscribed guides.
 			</h1>
 			<p class="max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-				Local HLS playback from FFmpeg. POC uses a test-access gate; Stripe can be wired in later.
+				Local HLS playback from FFmpeg. Access is automatically granted.
 			</p>
 		</div>
 
-		{#if data.streamUrl}
-			<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-				<VideoPlayer src={data.streamUrl} />
+		<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+			<VideoPlayer src={data.streamUrl} />
 
-				<div class="rounded-3xl border border-white/10 bg-white/5 p-6">
-					<p class="text-sm font-medium text-emerald-300">Access active</p>
-					<h2 class="mt-3 text-2xl font-semibold">Live feed unlocked</h2>
-					<p class="mt-3 text-sm leading-6 text-slate-300">
-						The player is using `/stream/index.m3u8`. Run `bun run stream` to refresh the local HLS
-						output.
-					</p>
-				</div>
+			<div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+				<p class="text-sm font-medium text-emerald-300">Access active</p>
+				<h2 class="mt-3 text-2xl font-semibold">Live feed unlocked</h2>
+				<p class="mt-3 text-sm leading-6 text-slate-300">
+					The player is using `/stream/index.m3u8`. Run `bun run stream` to refresh the local HLS
+					output.
+				</p>
 			</div>
-		{:else}
-			<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
-				<div class="rounded-3xl border border-white/10 bg-white/5 p-8">
-					<h2 class="text-2xl font-semibold sm:text-3xl">View the test feed</h2>
-					<p class="mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-						Unlock the local HLS stream for this POC. No payment required.
-					</p>
-
-					<form method="POST" action="/api/test-access" class="mt-8">
-						<button
-							type="submit"
-							class="rounded-full bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
-						>
-							View the test feed
-						</button>
-					</form>
-				</div>
-
-				<div class="rounded-3xl border border-white/10 bg-slate-900/80 p-6">
-					<h3 class="text-lg font-semibold">Local setup</h3>
-					<ul class="mt-4 space-y-3 text-sm leading-6 text-slate-300">
-						<li>1. Add <code>CAMERA_RTSP_URL</code> to <code>.env</code>.</li>
-						<li>
-							2. Run <code>bun run stream</code> to write HLS into <code>static/stream</code>.
-						</li>
-						<li>3. Click “View the test feed” above.</li>
-					</ul>
-				</div>
-			</div>
-		{/if}
+		</div>
 	</div>
 </div>
