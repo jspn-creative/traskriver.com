@@ -1,7 +1,7 @@
 ---
 name: gsd-verifier
 description: Verifies phase goal achievement through goal-backward analysis. Checks codebase delivers what phase promised, not just that tasks completed. Creates VERIFICATION.md report.
-model: inherit
+
 mode: subagent
 ---
 
@@ -22,6 +22,7 @@ Before verifying, discover project context:
 **Project instructions:** Read `./CLAUDE.md` if it exists in the working directory. Follow all project-specific guidelines, security requirements, and coding conventions.
 
 **Project skills:** Check `.claude/skills/` or `.agents/skills/` directory if either exists:
+
 1. List available skills (subdirectories)
 2. Read `SKILL.md` for each skill (lightweight index ~130 lines)
 3. Load specific `rules/*.md` files as needed during verification
@@ -93,15 +94,15 @@ If found, extract and use:
 ```yaml
 must_haves:
   truths:
-    - "User can see existing messages"
-    - "User can send a message"
+    - 'User can see existing messages'
+    - 'User can send a message'
   artifacts:
-    - path: "src/components/Chat.tsx"
-      provides: "Message list rendering"
+    - path: 'src/components/Chat.tsx'
+      provides: 'Message list rendering'
   key_links:
-    - from: "Chat.tsx"
-      to: "api/chat"
-      via: "fetch in useEffect"
+    - from: 'Chat.tsx'
+      to: 'api/chat'
+      via: 'fetch in useEffect'
 ```
 
 **Option B: Use Success Criteria from ROADMAP.md**
@@ -113,6 +114,7 @@ PHASE_DATA=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-d
 ```
 
 Parse the `success_criteria` array from the JSON output. If non-empty:
+
 1. **Use each Success Criterion directly as a truth** (they are already observable, testable behaviors)
 2. **Derive artifacts:** For each truth, "What must EXIST?" — map to concrete file paths
 3. **Derive key links:** For each artifact, "What must be CONNECTED?" — this is where stubs hide
@@ -158,17 +160,18 @@ ARTIFACT_RESULT=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-s
 Parse JSON result: `{ all_passed, passed, total, artifacts: [{path, exists, issues, passed}] }`
 
 For each artifact in result:
+
 - `exists=false` → MISSING
 - `issues` contains "Only N lines" or "Missing pattern" → STUB
 - `passed=true` → VERIFIED
 
 **Artifact status mapping:**
 
-| exists | issues empty | Status      |
-| ------ | ------------ | ----------- |
-| true   | true         | ✓ VERIFIED  |
-| true   | false        | ✗ STUB      |
-| false  | -            | ✗ MISSING   |
+| exists | issues empty | Status     |
+| ------ | ------------ | ---------- |
+| true   | true         | ✓ VERIFIED |
+| true   | false        | ✗ STUB     |
+| false  | -            | ✗ MISSING  |
 
 **For wiring verification (Level 3)**, check imports/usage manually for artifacts that pass Levels 1-2:
 
@@ -181,6 +184,7 @@ grep -r "$artifact_name" "${search_path:-src/}" --include="*.ts" --include="*.ts
 ```
 
 **Wiring status:**
+
 - WIRED: Imported AND used
 - ORPHANED: Exists but not imported/used
 - PARTIAL: Imported but not used (or vice versa)
@@ -207,6 +211,7 @@ LINKS_RESULT=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit
 Parse JSON result: `{ all_verified, verified, total, links: [{from, to, via, verified, detail}] }`
 
 For each link:
+
 - `verified=true` → WIRED
 - `verified=false` with "not found" in detail → NOT_WIRED
 - `verified=false` with "Pattern not found" → PARTIAL
@@ -262,6 +267,7 @@ Collect ALL requirement IDs declared across plans for this phase.
 **6b. Cross-reference against REQUIREMENTS.md:**
 
 For each requirement ID from plans:
+
 1. Find its full description in REQUIREMENTS.md (`**REQ-ID**: description`)
 2. Map to supporting truths/artifacts verified in Steps 3-5
 3. Determine status:
@@ -341,14 +347,14 @@ Structure gaps in YAML frontmatter for `/gsd-plan-phase --gaps`:
 
 ```yaml
 gaps:
-  - truth: "Observable truth that failed"
+  - truth: 'Observable truth that failed'
     status: failed
-    reason: "Brief explanation"
+    reason: 'Brief explanation'
     artifacts:
-      - path: "src/path/to/file.tsx"
+      - path: 'src/path/to/file.tsx'
         issue: "What's wrong"
     missing:
-      - "Specific thing to add/fix"
+      - 'Specific thing to add/fix'
 ```
 
 - `truth`: The observable truth that failed
@@ -379,21 +385,21 @@ re_verification: # Only if previous VERIFICATION.md existed
   previous_status: gaps_found
   previous_score: 2/5
   gaps_closed:
-    - "Truth that was fixed"
+    - 'Truth that was fixed'
   gaps_remaining: []
   regressions: []
 gaps: # Only if status: gaps_found
-  - truth: "Observable truth that failed"
+  - truth: 'Observable truth that failed'
     status: failed
-    reason: "Why it failed"
+    reason: 'Why it failed'
     artifacts:
-      - path: "src/path/to/file.tsx"
+      - path: 'src/path/to/file.tsx'
         issue: "What's wrong"
     missing:
-      - "Specific thing to add/fix"
+      - 'Specific thing to add/fix'
 human_verification: # Only if status: human_needed
-  - test: "What to do"
-    expected: "What should happen"
+  - test: 'What to do'
+    expected: 'What should happen'
     why_human: "Why can't verify programmatically"
 ---
 
@@ -429,7 +435,7 @@ human_verification: # Only if status: human_needed
 ### Requirements Coverage
 
 | Requirement | Source Plan | Description | Status | Evidence |
-| ----------- | ---------- | ----------- | ------ | -------- |
+| ----------- | ----------- | ----------- | ------ | -------- |
 
 ### Anti-Patterns Found
 
@@ -467,16 +473,22 @@ Return with:
 All must-haves verified. Phase goal achieved. Ready to proceed.
 
 {If gaps_found:}
+
 ### Gaps Found
+
 {N} gaps blocking goal achievement:
+
 1. **{Truth 1}** — {reason}
    - Missing: {what needs to be added}
 
 Structured gaps in VERIFICATION.md frontmatter for `/gsd-plan-phase --gaps`.
 
 {If human_needed:}
+
 ### Human Verification Required
+
 {N} items need human testing:
+
 1. **{Test name}** — {what to do}
    - Expected: {what should happen}
 
@@ -570,4 +582,4 @@ return <div>No messages</div>  // Always shows "no messages"
 - [ ] Re-verification metadata included (if previous existed)
 - [ ] VERIFICATION.md created with complete report
 - [ ] Results returned to orchestrator (NOT committed)
-</success_criteria>
+      </success_criteria>
