@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}
