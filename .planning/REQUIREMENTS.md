@@ -29,25 +29,27 @@
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
+| Feature       | Reason                                                                             |
+| ------------- | ---------------------------------------------------------------------------------- |
 | User Database | Keeping authentication stateless; only necessary if the paywall model requires it. |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| AUTH-01 | Phase 1 | Complete |
-| STRM-01 | Phase 2 | Complete |
-| STRM-02 | Phase 2 | Complete |
-| SEC-01 | Phase 3 | Pending |
-| SEC-02 | Phase 3 | Pending |
+| Requirement | Phase   | Status   |
+| ----------- | ------- | -------- |
+| AUTH-01     | Phase 1 | Complete |
+| STRM-01     | Phase 2 | Complete |
+| STRM-02     | Phase 2 | Complete |
+| SEC-01      | Phase 3 | Pending  |
+| SEC-02      | Phase 3 | Pending  |
 
 **Coverage:**
+
 - v1 requirements: 5 total
 - Mapped to phases: 5
 - Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 after initial definition*
+
+_Requirements defined: 2026-03-18_
+_Last updated: 2026-03-18 after initial definition_

@@ -22,10 +22,12 @@ Read all files referenced by the invoking prompt's execution_context before star
 ## 2. Gather Milestone Goals
 
 **If MILESTONE-CONTEXT.md exists:**
+
 - Use features and scope from discuss-milestone
 - Present summary for confirmation
 
 **If no context file:**
+
 - Present what shipped in last milestone
 - Ask inline (freeform, NOT question): "What do you want to build next?"
 - Wait for their response, then use question to probe specifics
@@ -47,6 +49,7 @@ Add/update:
 **Goal:** [One sentence describing milestone focus]
 
 **Target features:**
+
 - [Feature 1]
 - [Feature 2]
 - [Feature 3]
@@ -91,12 +94,14 @@ Check `research_enabled` from init JSON (loaded from config).
 **If `research_enabled` is `true`:**
 
 question: "Research the domain ecosystem for new features before defining requirements?"
+
 - "Research first (Recommended)" — Discover patterns, features, architecture for NEW capabilities
 - "Skip research for this milestone" — Go straight to requirements (does not change your default)
 
 **If `research_enabled` is `false`:**
 
 question: "Research the domain ecosystem for new features before defining requirements?"
+
 - "Skip research (current default)" — Go straight to requirements
 - "Research first" — Discover patterns, features, architecture for NEW capabilities
 
@@ -120,6 +125,7 @@ mkdir -p .planning/research
 Spawn 4 parallel gsd-project-researcher agents. Each uses this template with dimension-specific fields:
 
 **Common structure for all 4 researchers:**
+
 ```
 Task(prompt="
 <research_type>Project Research — {DIMENSION} for [new features].</research_type>
@@ -149,13 +155,13 @@ Use template: /Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/t
 
 **Dimension-specific fields:**
 
-| Field | Stack | Features | Architecture | Pitfalls |
-|-------|-------|----------|-------------|----------|
-| EXISTING_CONTEXT | Existing validated capabilities (DO NOT re-research): [from PROJECT.md] | Existing features (already built): [from PROJECT.md] | Existing architecture: [from PROJECT.md or codebase map] | Focus on common mistakes when ADDING these features to existing system |
-| QUESTION | What stack additions/changes are needed for [new features]? | How do [target features] typically work? Expected behavior? | How do [target features] integrate with existing architecture? | Common mistakes when adding [target features] to [domain]? |
-| CONSUMER | Specific libraries with versions for NEW capabilities, integration points, what NOT to add | Table stakes vs differentiators vs anti-features, complexity noted, dependencies on existing | Integration points, new components, data flow changes, suggested build order | Warning signs, prevention strategy, which phase should address it |
-| GATES | Versions current (verify with Context7), rationale explains WHY, integration considered | Categories clear, complexity noted, dependencies identified | Integration points identified, new vs modified explicit, build order considers deps | Pitfalls specific to adding these features, integration pitfalls covered, prevention actionable |
-| FILE | STACK.md | FEATURES.md | ARCHITECTURE.md | PITFALLS.md |
+| Field            | Stack                                                                                      | Features                                                                                     | Architecture                                                                        | Pitfalls                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| EXISTING_CONTEXT | Existing validated capabilities (DO NOT re-research): [from PROJECT.md]                    | Existing features (already built): [from PROJECT.md]                                         | Existing architecture: [from PROJECT.md or codebase map]                            | Focus on common mistakes when ADDING these features to existing system                          |
+| QUESTION         | What stack additions/changes are needed for [new features]?                                | How do [target features] typically work? Expected behavior?                                  | How do [target features] integrate with existing architecture?                      | Common mistakes when adding [target features] to [domain]?                                      |
+| CONSUMER         | Specific libraries with versions for NEW capabilities, integration points, what NOT to add | Table stakes vs differentiators vs anti-features, complexity noted, dependencies on existing | Integration points, new components, data flow changes, suggested build order        | Warning signs, prevention strategy, which phase should address it                               |
+| GATES            | Versions current (verify with Context7), rationale explains WHY, integration considered    | Categories clear, complexity noted, dependencies identified                                  | Integration points identified, new vs modified explicit, build order considers deps | Pitfalls specific to adding these features, integration pitfalls covered, prevention actionable |
+| FILE             | STACK.md                                                                                   | FEATURES.md                                                                                  | ARCHITECTURE.md                                                                     | PITFALLS.md                                                                                     |
 
 After all 4 complete, spawn synthesizer:
 
@@ -177,6 +183,7 @@ Commit after writing.
 ```
 
 Display key findings from SUMMARY.md:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► RESEARCH COMPLETE ✓
@@ -202,6 +209,7 @@ Read PROJECT.md: core value, current milestone goals, validated requirements (wh
 **If research exists:** Read FEATURES.md, extract feature categories.
 
 Present features by category:
+
 ```
 ## [Category 1]
 **Table stakes:** Feature A, Feature B
@@ -212,6 +220,7 @@ Present features by category:
 **If no research:** Gather requirements through conversation. Ask: "What are the main things users need to do with [new features]?" Clarify, probe for related capabilities, group into categories.
 
 **Scope each category** via question (multiSelect: true, header max 12 chars):
+
 - "[Feature 1]" — [brief description]
 - "[Feature 2]" — [brief description]
 - "None for this milestone" — Defer entire category
@@ -219,10 +228,12 @@ Present features by category:
 Track: Selected → this milestone. Unselected table stakes → future. Unselected differentiators → out of scope.
 
 **Identify gaps** via question:
+
 - "No, research covered it" — Proceed
 - "Yes, let me add some" — Capture additions
 
 **Generate REQUIREMENTS.md:**
+
 - v1 Requirements grouped by category (checkboxes, REQ-IDs)
 - Future Requirements (deferred)
 - Out of Scope (explicit exclusions with reasoning)
@@ -233,6 +244,7 @@ Track: Selected → this milestone. Unselected table stakes → future. Unselect
 **Requirement quality criteria:**
 
 Good requirements are:
+
 - **Specific and testable:** "User can reset password via email link" (not "Handle password reset")
 - **User-centric:** "User can X" (not "System does Y")
 - **Atomic:** One capability per requirement (not "User can login and manage profile")
@@ -256,6 +268,7 @@ Does this capture what you're building? (yes / adjust)
 If "adjust": Return to scoping.
 
 **Commit requirements:**
+
 ```bash
 node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: define milestone v[X.Y] requirements" --files .planning/REQUIREMENTS.md
 ```
@@ -325,6 +338,7 @@ Success criteria:
 ```
 
 **Ask for approval** via question:
+
 - "Approve" — Commit and continue
 - "Adjust phases" — Tell me what to change
 - "Review full file" — Show raw ROADMAP.md
@@ -333,6 +347,7 @@ Success criteria:
 **If "Review":** Display raw ROADMAP.md, re-ask.
 
 **Commit roadmap** (after approval):
+
 ```bash
 node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: create milestone v[X.Y] roadmap ([N] phases)" --files .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md
 ```
@@ -369,6 +384,7 @@ Also: `/gsd-plan-phase [N]` — skip discussion, plan directly
 </process>
 
 <success_criteria>
+
 - [ ] PROJECT.md updated with Current Milestone section
 - [ ] STATE.md reset for new milestone
 - [ ] MILESTONE-CONTEXT.md consumed and deleted (if existed)

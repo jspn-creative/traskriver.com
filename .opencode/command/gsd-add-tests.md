@@ -1,6 +1,6 @@
 ---
 description: Generate tests for a completed phase based on UAT criteria and implementation
-argument-hint: "<phase> [additional instructions]"
+argument-hint: '<phase> [additional instructions]'
 argument-instructions: |
   Parse the argument as a phase number (integer, decimal, or letter-suffix), plus optional free-text instructions.
   Example: /gsd-add-tests 12
@@ -15,6 +15,7 @@ tools:
   task: true
   question: true
 ---
+
 <objective>
 Generate unit and E2E tests for a completed phase, using its SUMMARY.md, CONTEXT.md, and VERIFICATION.md as specifications.
 

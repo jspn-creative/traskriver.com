@@ -11,6 +11,7 @@ Standalone research command. For most workflows, use `/gsd-plan-phase` which int
 @/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/references/model-profile-resolution.md
 
 Resolve model for:
+
 - `gsd-phase-researcher`
 
 ## Step 1: Normalize and Validate Phase

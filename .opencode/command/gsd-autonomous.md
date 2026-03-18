@@ -1,6 +1,6 @@
 ---
 description: Run all remaining phases autonomously — discuss→plan→execute per phase
-argument-hint: "[--from N]"
+argument-hint: '[--from N]'
 tools:
   read: true
   write: true
@@ -10,12 +10,14 @@ tools:
   question: true
   task: true
 ---
+
 <objective>
 Execute all remaining milestone phases autonomously. For each phase: discuss → plan → execute. Pauses only for user decisions (grey area acceptance, blockers, validation requests).
 
 Uses ROADMAP.md phase discovery and Skill() flat invocations for each phase command. After all phases complete: milestone audit → complete → cleanup.
 
 **Creates/Updates:**
+
 - `.planning/STATE.md` — updated after each phase
 - `.planning/ROADMAP.md` — progress updated after each phase
 - Phase artifacts — CONTEXT.md, PLANs, SUMMARYs per phase

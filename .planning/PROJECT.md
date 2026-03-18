@@ -42,9 +42,10 @@ Reliably deliver a continuous, high-quality livestream to authenticated users.
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
+| Decision                                | Rationale                                                                  | Outcome   |
+| --------------------------------------- | -------------------------------------------------------------------------- | --------- |
 | Automatic Authentication (Skip Paywall) | Client hasn't decided on the paywall structure (one-time vs. subscription) | — Pending |
 
 ---
-*Last updated: 2026-03-18 after initialization*
+
+_Last updated: 2026-03-18 after initialization_

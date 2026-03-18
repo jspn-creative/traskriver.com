@@ -538,11 +538,11 @@ onSubmit={(e) => e.preventDefault()}  // Only prevents default
 ```typescript
 // RED FLAGS:
 export async function POST() {
-  return Response.json({ message: "Not implemented" });
+	return Response.json({ message: 'Not implemented' });
 }
 
 export async function GET() {
-  return Response.json([]); // Empty array with no DB query
+	return Response.json([]); // Empty array with no DB query
 }
 ```
 

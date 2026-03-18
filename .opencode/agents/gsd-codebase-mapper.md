@@ -695,13 +695,13 @@ _Convention analysis: [date]_
 **Async Testing:**
 
 ```typescript
-[Pattern]
+[Pattern];
 ```
 
 **Error Testing:**
 
 ```typescript
-[Pattern]
+[Pattern];
 ```
 
 ---

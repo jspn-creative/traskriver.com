@@ -37,6 +37,7 @@ Extract from init JSON: `mapper_model`, `commit_docs`, `codebase_dir`, `existing
 Check if .planning/codebase/ already exists using `has_maps` from init context.
 
 If `codebase_dir_exists` is true:
+
 ```bash
 ls -la .planning/codebase/
 ```
@@ -71,6 +72,7 @@ mkdir -p .planning/codebase
 ```
 
 **Expected output files:**
+
 - STACK.md (from tech mapper)
 - INTEGRATIONS.md (from tech mapper)
 - ARCHITECTURE.md (from arch mapper)
@@ -177,6 +179,7 @@ Wait for all 4 agents to complete.
 Read each agent's output file to collect confirmations.
 
 **Expected confirmation format from each agent:**
+
 ```
 ## Mapping Complete
 
@@ -204,6 +207,7 @@ wc -l .planning/codebase/*.md
 ```
 
 **Verification checklist:**
+
 - All 7 documents exist
 - No empty documents (each should have >20 lines)
 
@@ -261,6 +265,7 @@ Continue to offer_next.
 Present completion summary and next steps.
 
 **Get line counts:**
+
 ```bash
 wc -l .planning/codebase/*.md
 ```
@@ -306,6 +311,7 @@ End workflow.
 </process>
 
 <success_criteria>
+
 - .planning/codebase/ directory created
 - 4 parallel gsd-codebase-mapper agents spawned with run_in_background=true
 - Agents write documents directly (orchestrator doesn't receive document contents)
@@ -313,4 +319,4 @@ End workflow.
 - All 7 codebase documents exist
 - Clear completion summary with line counts
 - User offered clear next steps in GSD style
-</success_criteria>
+  </success_criteria>

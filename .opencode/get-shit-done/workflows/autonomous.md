@@ -183,6 +183,7 @@ Go to handle_blocker: "Execute phase ${PHASE_NUM} did not produce verification r
 **If `passed`:**
 
 Display:
+
 ```
 Phase ${PHASE_NUM} ✅ ${PHASE_NAME} — Verification passed
 ```
@@ -194,10 +195,12 @@ Proceed to iterate step.
 Read the human_verification section from VERIFICATION.md to get the count and items requiring manual testing.
 
 Display the items, then ask user via question:
+
 - **question:** "Phase ${PHASE_NUM} has items needing manual verification. Validate now or continue to next phase?"
 - **options:** "Validate now" / "Continue without validation"
 
 On **"Validate now"**: Present the specific items from VERIFICATION.md's human_verification section. After user reviews, ask:
+
 - **question:** "Validation result?"
 - **options:** "All good — continue" / "Found issues"
 
@@ -210,12 +213,14 @@ On **"Continue without validation"**: Display `Phase ${PHASE_NUM} ⏭ Human vali
 **If `gaps_found`:**
 
 Read gap summary from VERIFICATION.md (score and missing items). Display:
+
 ```
 ⚠ Phase ${PHASE_NUM}: ${PHASE_NAME} — Gaps Found
 Score: {N}/{M} must-haves verified
 ```
 
 Ask user via question:
+
 - **question:** "Gaps found in phase ${PHASE_NUM}. How to proceed?"
 - **options:** "Run gap closure" / "Continue without fixing" / "Stop autonomous mode"
 
@@ -228,11 +233,13 @@ Skill(skill="gsd:plan-phase", args="${PHASE_NUM} --gaps")
 Verify gap plans were created — re-run `init phase-op ${PHASE_NUM}` and check `has_plans`. If no new gap plans → go to handle_blocker: "Gap closure planning for phase ${PHASE_NUM} did not produce plans."
 
 Re-execute:
+
 ```
 Skill(skill="gsd:execute-phase", args="${PHASE_NUM} --no-transition")
 ```
 
 Re-read verification status:
+
 ```bash
 VERIFY_STATUS=$(grep "^status:" "${PHASE_DIR}"/*-VERIFICATION.md 2>/dev/null | head -1 | cut -d: -f2 | tr -d ' ')
 ```
@@ -240,6 +247,7 @@ VERIFY_STATUS=$(grep "^status:" "${PHASE_DIR}"/*-VERIFICATION.md 2>/dev/null | h
 If `passed` or `human_needed`: Route normally (continue or ask user as above).
 
 If still `gaps_found` after this retry: Display "Gaps persist after closure attempt." and ask via question:
+
 - **question:** "Gap closure did not fully resolve issues. How to proceed?"
 - **options:** "Continue anyway" / "Stop autonomous mode"
 
@@ -285,6 +293,7 @@ cat .planning/STATE.md 2>/dev/null
 ```
 
 Extract from these:
+
 - **PROJECT.md** — Vision, principles, non-negotiables, user preferences
 - **REQUIREMENTS.md** — Acceptance criteria, constraints, must-haves vs nice-to-haves
 - **STATE.md** — Current progress, decisions logged so far
@@ -296,6 +305,7 @@ find .planning/phases -name "*-CONTEXT.md" 2>/dev/null | sort
 ```
 
 For each CONTEXT.md where phase number < current phase:
+
 - Read the `<decisions>` section — these are locked preferences
 - Read `<specifics>` — particular references or "I want it like X" moments
 - Note patterns (e.g., "user consistently prefers minimal UI", "user rejected verbose output")
@@ -343,6 +353,7 @@ ls src/components/ src/hooks/ src/lib/ src/utils/ 2>/dev/null
 Read the 3-5 most relevant files to understand existing patterns.
 
 **Build internal codebase_context** (do not write to file):
+
 - **Reusable assets** — existing components, hooks, utilities usable in this phase
 - **Established patterns** — how the codebase does state management, styling, data fetching
 - **Integration points** — where new code connects (routes, nav, providers)
@@ -362,6 +373,7 @@ Extract `goal`, `requirements`, `success_criteria` from the JSON response.
 **Infrastructure detection — check FIRST before generating grey areas:**
 
 A phase is pure infrastructure when ALL of these are true:
+
 1. Goal keywords match: "scaffolding", "plumbing", "setup", "configuration", "migration", "refactor", "rename", "restructure", "upgrade", "infrastructure"
 2. AND success criteria are all technical: "file exists", "test passes", "config valid", "command runs"
 3. AND no user-facing behavior is described (no "users can", "displays", "shows", "presents")
@@ -373,6 +385,7 @@ Phase ${PHASE_NUM}: Infrastructure phase — skipping discuss, writing minimal c
 ```
 
 Use these defaults for the CONTEXT.md:
+
 - `<domain>`: Phase boundary from ROADMAP goal
 - `<decisions>`: Single "### Claude's Discretion" subsection — "All implementation choices are at Claude's discretion — pure infrastructure phase"
 - `<code_context>`: Whatever the codebase scout found
@@ -382,6 +395,7 @@ Use these defaults for the CONTEXT.md:
 **If NOT infrastructure — generate grey area proposals:**
 
 Determine domain type from the phase goal:
+
 - Something users **SEE** → visual: layout, interactions, states, density
 - Something users **CALL** → interface: contracts, responses, errors, auth
 - Something users **RUN** → execution: invocation, output, behavior modes, flags
@@ -391,6 +405,7 @@ Determine domain type from the phase goal:
 Check prior_decisions — skip grey areas already decided in prior phases.
 
 Generate **3-4 grey areas** with **~4 questions each**. For each question:
+
 - **Pre-select a recommended answer** based on: prior decisions (consistency), codebase patterns (reuse), domain conventions (standard approaches), ROADMAP success criteria
 - Generate **1-2 alternatives** per question
 - **Annotate** with prior decision context ("You decided X in Phase N") and code context ("Component Y exists with Z variants") where relevant
@@ -415,6 +430,7 @@ Display a table:
 ```
 
 Then prompt the user via **question**:
+
 - **header:** "Area {M}/{N}"
 - **question:** "Accept these answers for {Area Name}?"
 - **options:** Build dynamically — always "Accept all" first, then "Change Q1" through "Change QN" for each question (up to 4), then "Discuss deeper" last. Cap at 6 explicit options max (question adds "Other" automatically).
@@ -422,6 +438,7 @@ Then prompt the user via **question**:
 **On "Accept all":** Record all recommended answers for this area. Move to next area.
 
 **On "Change QN":** Use question with the alternatives for that specific question:
+
 - **header:** "{Area Name}"
 - **question:** "Q{N}: {question text}"
 - **options:** List the 1-2 alternatives plus "You decide" (maps to Claude's Discretion)
@@ -429,6 +446,7 @@ Then prompt the user via **question**:
 Record the user's choice. Re-display the updated table with the change reflected. Re-present the full acceptance prompt so the user can make additional changes or accept.
 
 **On "Discuss deeper":** Switch to interactive mode for this area only — ask questions one at a time using question with 2-3 concrete options per question plus "You decide". After 4 questions, prompt:
+
 - **header:** "{Area Name}"
 - **question:** "More questions about {area name}, or move to next?"
 - **options:** "More questions" / "Next area"
@@ -475,31 +493,38 @@ Use **exactly** this structure (identical to discuss-phase output):
 ## Implementation Decisions
 
 ### {Area 1 Name}
+
 - {Accepted/chosen answer for Q1}
 - {Accepted/chosen answer for Q2}
 - {Accepted/chosen answer for Q3}
 - {Accepted/chosen answer for Q4}
 
 ### {Area 2 Name}
+
 - {Accepted/chosen answer for Q1}
 - {Accepted/chosen answer for Q2}
-...
+  ...
 
 ### Claude's Discretion
+
 {Any "You decide" answers collected — note Claude has flexibility here}
 
 </decisions>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - {From codebase scout — components, hooks, utilities}
 
 ### Established Patterns
+
 - {From codebase scout — state management, styling, data fetching}
 
 ### Integration Points
+
 - {From codebase scout — where new code connects}
 
 </code_context>
@@ -549,6 +574,7 @@ ROADMAP=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done
 ```
 
 Re-filter incomplete phases using the same logic as discover_phases:
+
 - Keep phases where `disk_status !== "complete"` OR `roadmap_complete === false`
 - Apply `--from N` filter if originally provided
 - Sort by number ascending
@@ -604,6 +630,7 @@ Go to handle_blocker: "Audit did not produce results — audit file missing or m
 **If `passed`:**
 
 Display:
+
 ```
 Audit ✅ passed — proceeding to complete milestone
 ```
@@ -613,11 +640,13 @@ Proceed to 5b (no user pause — per CTRL-01).
 **If `gaps_found`:**
 
 Read the gaps summary from the audit file. Display:
+
 ```
 ⚠ Audit: Gaps Found
 ```
 
 Ask user via question:
+
 - **question:** "Milestone audit found gaps. How to proceed?"
 - **options:** "Continue anyway — accept gaps" / "Stop — fix gaps manually"
 
@@ -628,11 +657,13 @@ On **"Stop"**: Go to handle_blocker with "User stopped — audit gaps remain. Ru
 **If `tech_debt`:**
 
 Read the tech debt summary from the audit file. Display:
+
 ```
 ⚠ Audit: Tech Debt Identified
 ```
 
 Show the summary, then ask user via question:
+
 - **question:** "Milestone audit found tech debt. How to proceed?"
 - **options:** "Continue with tech debt" / "Stop — address debt first"
 
@@ -689,6 +720,7 @@ When any phase operation fails or a blocker is detected, present 3 options via q
 **Prompt:** "Phase {N} ({Name}) encountered an issue: {description}"
 
 **Options:**
+
 1. **"Fix and retry"** — Re-run the failed step (discuss, plan, or execute) for this phase
 2. **"Skip this phase"** — Mark phase as skipped, continue to the next incomplete phase
 3. **"Stop autonomous mode"** — Display summary of progress so far and exit cleanly
@@ -716,6 +748,7 @@ When any phase operation fails or a blocker is detected, present 3 options via q
 </process>
 
 <success_criteria>
+
 - [ ] All incomplete phases executed in order (smart discuss → plan → execute each)
 - [ ] Smart discuss proposes grey area answers in tables, user accepts or overrides per area
 - [ ] Progress banners displayed between phases
@@ -740,4 +773,4 @@ When any phase operation fails or a blocker is detected, present 3 options via q
 - [ ] Final completion banner displayed after lifecycle
 - [ ] Progress bar uses phase number / total milestone phases (not position among incomplete)
 - [ ] Smart discuss documents relationship to discuss-phase with CTRL-03 note
-</success_criteria>
+      </success_criteria>

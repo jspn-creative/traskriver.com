@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: unknown
 stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-03-18T11:14:50.692Z"
+last_updated: '2026-03-18T11:14:50.692Z'
 progress:
   total_phases: 2
   completed_phases: 2

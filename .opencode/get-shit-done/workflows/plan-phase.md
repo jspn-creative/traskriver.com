@@ -34,6 +34,7 @@ Extract `--prd <filepath>` from $ARGUMENTS. If present, set PRD_FILE to the file
 **If no phase number:** Detect next unplanned phase from roadmap.
 
 **If `phase_found` is false:** Validate phase exists in ROADMAP.md. If valid, create the directory using `phase_slug` and `padded_phase` from init:
+
 ```bash
 mkdir -p ".planning/phases/${padded_phase}-${phase_slug}"
 ```
@@ -55,6 +56,7 @@ PHASE_INFO=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-d
 **If `--prd <filepath>` provided:**
 
 1. Read the PRD file:
+
 ```bash
 PRD_CONTENT=$(cat "$PRD_FILE" 2>/dev/null)
 if [ -z "$PRD_CONTENT" ]; then
@@ -64,6 +66,7 @@ fi
 ```
 
 2. Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► PRD EXPRESS PATH
@@ -81,6 +84,7 @@ Generating CONTEXT.md from requirements...
    - Create CONTEXT.md in the phase directory
 
 4. Write CONTEXT.md:
+
 ```markdown
 # Phase [X]: [Name] - Context
 
@@ -99,15 +103,19 @@ Generating CONTEXT.md from requirements...
 ## Implementation Decisions
 
 {For each requirement/story/criterion in the PRD:}
+
 ### [Category derived from content]
+
 - [Requirement as locked decision]
 
 ### Claude's Discretion
+
 [Areas not covered by PRD — implementation details, technical choices]
 
 </decisions>
 
 <canonical_refs>
+
 ## Canonical References
 
 **Downstream agents MUST read these before planning or implementing.**
@@ -116,6 +124,7 @@ Generating CONTEXT.md from requirements...
 Use full relative paths. Group by topic area.]
 
 ### [Topic area]
+
 - `path/to/spec-or-adr.md` — [What it decides/defines]
 
 [If no external specs: "No external specs — requirements fully captured in decisions above"]
@@ -139,11 +148,12 @@ Use full relative paths. Group by topic area.]
 
 ---
 
-*Phase: XX-name*
-*Context gathered: [date] via PRD Express Path*
+_Phase: XX-name_
+_Context gathered: [date] via PRD Express Path_
 ```
 
 5. Commit:
+
 ```bash
 node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs(${padded_phase}): generate context from PRD" --files "${phase_dir}/${padded_phase}-CONTEXT.md"
 ```
@@ -163,6 +173,7 @@ If `context_path` is not null, display: `Using phase context from: ${context_pat
 **If `context_path` is null (no CONTEXT.md exists):**
 
 Use question:
+
 - header: "No context"
 - question: "No CONTEXT.md found for Phase {X}. Plans will use research and requirements only — your design preferences won't be included. Continue or capture context first?"
 - options:
@@ -202,6 +213,7 @@ If user selects "Skip research": skip to step 6.
 **If `--auto` and `research_enabled` is false:** Skip research silently (preserves automated behavior).
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► RESEARCHING PHASE {X}
@@ -225,10 +237,11 @@ Answer: "What do I need to know to PLAN this phase well?"
 </objective>
 
 <files_to_read>
+
 - {context_path} (USER DECISIONS from /gsd-discuss-phase)
 - {requirements_path} (Project requirements)
 - {state_path} (Project decisions and history)
-</files_to_read>
+  </files_to_read>
 
 <additional_context>
 **Phase description:** {phase_description}
@@ -264,6 +277,7 @@ Skip if `nyquist_validation_enabled` is false OR `research_enabled` is false.
 If `research_enabled` is false and `nyquist_validation_enabled` is true: warn "Nyquist validation enabled but research disabled — VALIDATION.md cannot be created without RESEARCH.md. Plans will lack validation requirements (Dimension 8)." Continue to step 6.
 
 **But Nyquist is not applicable for this run** when all of the following are true:
+
 - `research_enabled` is false
 - `has_research` is false
 - no `--research` flag was provided
@@ -275,13 +289,16 @@ grep -l "## Validation Architecture" "${PHASE_DIR}"/*-RESEARCH.md 2>/dev/null
 ```
 
 **If found:**
+
 1. Read template: `/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/templates/VALIDATION.md`
 2. Write to `${PHASE_DIR}/${PADDED_PHASE}-VALIDATION.md` (use Write tool)
 3. Fill frontmatter: `{N}` → phase number, `{phase-slug}` → slug, `{date}` → current date
 4. Verify:
+
 ```bash
 test -f "${PHASE_DIR}/${PADDED_PHASE}-VALIDATION.md" && echo "VALIDATION_CREATED=true" || echo "VALIDATION_CREATED=false"
 ```
+
 5. If `VALIDATION_CREATED=false`: STOP — do not proceed to Step 6
 6. If `commit_docs`: `commit "docs(phase-${PHASE}): add validation strategy"`
 
@@ -309,6 +326,7 @@ HAS_UI=$?
 **If `HAS_UI` is 0 (frontend indicators found):**
 
 Check for existing UI-SPEC:
+
 ```bash
 UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
 ```
@@ -318,6 +336,7 @@ UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
 **If UI-SPEC.md missing AND `UI_GATE_CFG` is `true`:**
 
 Use question:
+
 - header: "UI Design Contract"
 - question: "Phase {N} has frontend indicators but no UI-SPEC.md. Generate a design contract before planning?"
 - options:
@@ -354,6 +373,7 @@ CONTEXT_PATH=$(printf '%s\n' "$INIT" | jq -r '.context_path // empty')
 Skip if `nyquist_validation_enabled` is false OR `research_enabled` is false.
 
 Also skip if all of the following are true:
+
 - `research_enabled` is false
 - `has_research` is false
 - no `--research` flag was provided
@@ -365,6 +385,7 @@ VALIDATION_EXISTS=$(ls "${PHASE_DIR}"/*-VALIDATION.md 2>/dev/null | head -1)
 ```
 
 If missing and Nyquist is still enabled/applicable — ask user:
+
 1. Re-run: `/gsd-plan-phase {PHASE} --research`
 2. Disable Nyquist with the exact command:
    `node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" config-set workflow.nyquist_validation false`
@@ -375,6 +396,7 @@ Proceed to Step 8 only if user selects 2 or 3.
 ## 8. Spawn gsd-planner Agent
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► PLANNING PHASE {X}
@@ -391,6 +413,7 @@ Planner prompt:
 **Mode:** {standard | gap_closure}
 
 <files_to_read>
+
 - {state_path} (Project State)
 - {roadmap_path} (Roadmap)
 - {requirements_path} (Requirements)
@@ -399,7 +422,7 @@ Planner prompt:
 - {verification_path} (Verification Gaps - if --gaps)
 - {uat_path} (UAT Gaps - if --gaps)
 - {UI_SPEC_PATH} (UI Design Contract — visual/interaction specs, if exists)
-</files_to_read>
+  </files_to_read>
 
 **Phase requirement IDs (every ID MUST appear in a plan's `requirements` field):** {phase_req_ids}
 
@@ -409,13 +432,15 @@ Planner prompt:
 
 <downstream_consumer>
 Output consumed by /gsd-execute-phase. Plans need:
+
 - Frontmatter (wave, depends_on, files_modified, autonomous)
 - Tasks in XML format with read_first and acceptance_criteria fields (MANDATORY on every task)
 - Verification criteria
 - must_haves for goal-backward verification
-</downstream_consumer>
+  </downstream_consumer>
 
 <deep_work_rules>
+
 ## Anti-Shallow Execution Rules (MANDATORY)
 
 Every task MUST include these fields — they are NOT optional:
@@ -445,6 +470,7 @@ Every task MUST include these fields — they are NOT optional:
 </deep_work_rules>
 
 <quality_gate>
+
 - [ ] PLAN.md files created in phase directory
 - [ ] Each plan has valid frontmatter
 - [ ] Tasks are specific and actionable
@@ -454,7 +480,7 @@ Every task MUST include these fields — they are NOT optional:
 - [ ] Dependencies correctly identified
 - [ ] Waves assigned for parallel execution
 - [ ] must_haves derived from phase goal
-</quality_gate>
+      </quality_gate>
 ```
 
 ```
@@ -475,6 +501,7 @@ Task(
 ## 10. Spawn gsd-plan-checker Agent
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► VERIFYING PLANS
@@ -491,12 +518,13 @@ Checker prompt:
 **Phase Goal:** {goal from ROADMAP}
 
 <files_to_read>
-- {PHASE_DIR}/*-PLAN.md (Plans to verify)
+
+- {PHASE_DIR}/\*-PLAN.md (Plans to verify)
 - {roadmap_path} (Roadmap)
 - {requirements_path} (Requirements)
 - {context_path} (USER DECISIONS from /gsd-discuss-phase)
 - {research_path} (Technical Research — includes Validation Architecture)
-</files_to_read>
+  </files_to_read>
 
 **Phase requirement IDs (MUST ALL be covered):** {phase_req_ids}
 
@@ -505,9 +533,10 @@ Checker prompt:
 </verification_context>
 
 <expected_output>
+
 - ## VERIFICATION PASSED — all checks pass
 - ## ISSUES FOUND — structured issue list
-</expected_output>
+  </expected_output>
 ```
 
 ```
@@ -540,9 +569,10 @@ Revision prompt:
 **Mode:** revision
 
 <files_to_read>
-- {PHASE_DIR}/*-PLAN.md (Existing plans)
+
+- {PHASE_DIR}/\*-PLAN.md (Existing plans)
 - {context_path} (USER DECISIONS from /gsd-discuss-phase)
-</files_to_read>
+  </files_to_read>
 
 **Checker issues:** {structured_issues_from_checker}
 </revision_context>
@@ -595,6 +625,7 @@ Check for auto-advance trigger:
 **If `--auto` flag present OR `AUTO_CHAIN` is true OR `AUTO_CFG` is true:**
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► AUTO-ADVANCING TO EXECUTE
@@ -604,6 +635,7 @@ Plans ready. Launching execute-phase...
 ```
 
 Launch execute-phase using the Skill tool to avoid nested Task sessions (which cause runtime freezes due to deep agent nesting):
+
 ```
 Skill(skill="gsd:execute-phase", args="${PHASE} --auto --no-transition")
 ```
@@ -611,7 +643,9 @@ Skill(skill="gsd:execute-phase", args="${PHASE} --auto --no-transition")
 The `--no-transition` flag tells execute-phase to return status after verification instead of chaining further. This keeps the auto-advance chain flat — each phase runs at the same nesting level rather than spawning deeper Task agents.
 
 **Handle execute-phase return:**
+
 - **PHASE COMPLETE** → Display final summary:
+
   ```
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    GSD ► PHASE ${PHASE} COMPLETE ✓
@@ -621,7 +655,9 @@ The `--no-transition` flag tells execute-phase to return status after verificati
 
   Next: /gsd-discuss-phase ${NEXT_PHASE} --auto
   ```
+
 - **GAPS FOUND / VERIFICATION FAILED** → Display result, stop chain:
+
   ```
   Auto-advance stopped: Execution needs review.
 
@@ -638,15 +674,15 @@ Route to `<offer_next>` (existing behavior).
 Output this markdown directly (not as a code block):
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► PHASE {X} PLANNED ✓
+GSD ► PHASE {X} PLANNED ✓
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **Phase {X}: {Name}** — {N} plan(s) in {M} wave(s)
 
-| Wave | Plans | What it builds |
-|------|-------|----------------|
-| 1    | 01, 02 | [objectives] |
-| 2    | 03     | [objective]  |
+| Wave | Plans  | What it builds |
+| ---- | ------ | -------------- |
+| 1    | 01, 02 | [objectives]   |
+| 2    | 03     | [objective]    |
 
 Research: {Completed | Used existing | Skipped}
 Verification: {Passed | Passed with override | Skipped}
@@ -664,13 +700,15 @@ Verification: {Passed | Passed with override | Skipped}
 ───────────────────────────────────────────────────────────────
 
 **Also available:**
-- cat .planning/phases/{phase-dir}/*-PLAN.md — review plans
+
+- cat .planning/phases/{phase-dir}/\*-PLAN.md — review plans
 - /gsd-plan-phase {X} --research — re-research first
 
 ───────────────────────────────────────────────────────────────
 </offer_next>
 
 <success_criteria>
+
 - [ ] .planning/ directory validated
 - [ ] Phase validated against roadmap
 - [ ] Phase directory created if needed
@@ -684,4 +722,4 @@ Verification: {Passed | Passed with override | Skipped}
 - [ ] Verification passed OR user override OR max iterations with user decision
 - [ ] User sees status between agent spawns
 - [ ] User knows next steps
-</success_criteria>
+      </success_criteria>

@@ -1,6 +1,6 @@
 ---
 description: Gather phase context through adaptive questioning before planning. Use --auto to skip interactive questions (Claude picks recommended defaults).
-argument-hint: "<phase> [--auto]"
+argument-hint: '<phase> [--auto]'
 tools:
   read: true
   write: true
@@ -17,6 +17,7 @@ tools:
 Extract implementation decisions that downstream agents need — researcher and planner will use CONTEXT.md to know what to investigate and what choices are locked.
 
 **How it works:**
+
 1. Load prior context (PROJECT.md, REQUIREMENTS.md, STATE.md, prior CONTEXT.md files)
 2. Scout codebase for reusable assets and patterns
 3. Analyze phase — skip gray areas already decided in prior phases
@@ -50,6 +51,7 @@ Context files are resolved in-workflow using `init phase-op` and roadmap/state t
 9. Offer next steps (research or plan)
 
 **CRITICAL: Scope guardrail**
+
 - Phase boundary from ROADMAP.md is FIXED
 - Discussion clarifies HOW to implement, not WHETHER to add more
 - If user suggests new capabilities: "That's its own phase. I'll note it for later."
@@ -57,6 +59,7 @@ Context files are resolved in-workflow using `init phase-op` and roadmap/state t
 
 **Domain-aware gray areas:**
 Gray areas depend on what's being built. Analyze the phase goal:
+
 - Something users SEE → layout, density, interactions, states
 - Something users CALL → responses, errors, auth, versioning
 - Something users RUN → output format, flags, modes, error handling
@@ -66,6 +69,7 @@ Gray areas depend on what's being built. Analyze the phase goal:
 Generate 3-4 **phase-specific** gray areas, not generic categories.
 
 **Probing depth:**
+
 - Ask 4 questions per area before checking
 - "More questions about [area], or move to next? (Remaining: [list unvisited areas])"
 - Show remaining unvisited areas so user knows what's still ahead
@@ -73,13 +77,15 @@ Generate 3-4 **phase-specific** gray areas, not generic categories.
 - After all areas → "Ready to create context?"
 
 **Do NOT ask about (Claude handles these):**
+
 - Technical implementation
 - Architecture choices
 - Performance concerns
 - Scope expansion
-</process>
+  </process>
 
 <success_criteria>
+
 - Prior context loaded and applied (no re-asking decided questions)
 - Gray areas identified through intelligent analysis
 - User chose which areas to discuss
@@ -87,4 +93,4 @@ Generate 3-4 **phase-specific** gray areas, not generic categories.
 - Scope creep redirected to deferred ideas
 - CONTEXT.md captures decisions, not vague vision
 - User knows next steps
-</success_criteria>
+  </success_criteria>

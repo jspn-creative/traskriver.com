@@ -1,6 +1,6 @@
 ---
 description: Surface Claude's assumptions about a phase approach before planning
-argument-hint: "[phase]"
+argument-hint: '[phase]'
 tools:
   read: true
   bash: true

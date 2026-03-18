@@ -33,12 +33,14 @@ npx get-shit-done-cc@latest
 Initialize new project through unified flow.
 
 One command takes you from idea to ready-for-planning:
+
 - Deep questioning to understand what you're building
 - Optional domain research (spawns 4 parallel researcher agents)
 - Requirements definition with v1/v2/out-of-scope scoping
 - Roadmap creation with phase breakdown and success criteria
 
 Creates all `.planning/` artifacts:
+
 - `PROJECT.md` — vision and requirements
 - `config.json` — workflow mode (interactive/yolo)
 - `research/` — domain research (if selected)
@@ -136,11 +138,13 @@ Usage: `/gsd-do I want to start a new milestone`
 Execute small, ad-hoc tasks with GSD guarantees but skip optional agents.
 
 Quick mode uses the same system with a shorter path:
+
 - Spawns planner + executor (skips researcher, checker, verifier by default)
 - Quick tasks live in `.planning/quick/` separate from planned phases
 - Updates STATE.md tracking (not ROADMAP.md)
 
 Flags enable additional quality steps:
+
 - `--discuss` — Lightweight discussion to surface gray areas before planning
 - `--research` — Focused research agent investigates approaches before planning
 - `--full` — Adds plan-checking (max 2 iterations) and post-execution verification
@@ -445,25 +449,29 @@ Change anytime by editing `.planning/config.json`
 Configure how planning artifacts are managed in `.planning/config.json`:
 
 **`planning.commit_docs`** (default: `true`)
+
 - `true`: Planning artifacts committed to git (standard workflow)
 - `false`: Planning artifacts kept local-only, not committed
 
 When `commit_docs: false`:
+
 - Add `.planning/` to your `.gitignore`
 - Useful for OSS contributions, client projects, or keeping planning private
 - All planning files still work normally, just not tracked in git
 
 **`planning.search_gitignored`** (default: `false`)
+
 - `true`: Add `--no-ignore` to broad ripgrep searches
 - Only needed when `.planning/` is gitignored and you want project-wide searches to include it
 
 Example config:
+
 ```json
 {
-  "planning": {
-    "commit_docs": false,
-    "search_gitignored": true
-  }
+	"planning": {
+		"commit_docs": false,
+		"search_gitignored": true
+	}
 }
 ```
 
@@ -525,4 +533,4 @@ Example config:
 - Read `.planning/STATE.md` for current context
 - Check `.planning/ROADMAP.md` for phase status
 - Run `/gsd-progress` to check where you're up to
-</reference>
+  </reference>
