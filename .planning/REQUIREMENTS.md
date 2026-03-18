@@ -7,7 +7,7 @@
 
 ### Authentication
 
-- [ ] **AUTH-01**: The application automatically authenticates users (skipping the paywall) and issues valid session cookies to view the stream.
+- [x] **AUTH-01**: The application automatically authenticates users (skipping the paywall) and issues valid session cookies to view the stream.
 
 ### Streaming Infrastructure
 
@@ -37,7 +37,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
 | STRM-01 | Phase 2 | Pending |
 | STRM-02 | Phase 2 | Pending |
 | SEC-01 | Phase 3 | Pending |
