@@ -13,7 +13,7 @@
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
 		"gen": "wrangler types",
-		"stream": "bun run scripts/stream.ts"
+		"push-stream": "bun run scripts/push-stream.ts"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
