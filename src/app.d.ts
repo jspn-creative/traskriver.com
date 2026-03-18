@@ -1,19 +1,11 @@
-// See https://svelte.dev/docs/kit/types#app.d.ts
-// for information about these interfaces
-declare global {
-	namespace App {
-		interface Platform {
-			env: Env;
-			ctx: ExecutionContext;
-			caches: CacheStorage;
-			cf?: IncomingRequestCfProperties;
-		}
+/// <reference types="@sveltejs/kit" />
 
-		// interface Error {}
-		// interface Locals {}
-		// interface PageData {}
-		// interface PageState {}
-	}
+declare module '*.mp4' {
+	const src: string;
+	export default src;
 }
 
-export {};
+declare module '*.jpg' {
+	const src: string;
+	export default src;
+}

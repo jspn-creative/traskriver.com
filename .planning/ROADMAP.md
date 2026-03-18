@@ -38,6 +38,10 @@ Success criteria:
 **Phase 3: Asset Security & Cleanup**
 Goal: Ensure the HLS stream and test endpoints are secure for production.
 Requirements: SEC-01, SEC-02
+Plans: 1 plan
+
+- [ ] 03-01-PLAN.md — Restrict test-access endpoint to dev-only and remove stale HLS files
+
 Success criteria:
 
 1. The `/api/test-access` endpoint is either removed or restricted (`if (!dev) throw error(404);`).

@@ -1,0 +1,77 @@
+@import 'tailwindcss';
+@import 'vidstack/styles/base.css';
+
+@theme {
+	/* ─── Color ──────────────────────────────────────────────────── */
+	--color-light: #f5f0e8;
+	--color-telemetry: #ede7db;
+	--color-primary: #2a2621;
+	--color-secondary: #8c7e6a;
+	--color-accent-warm: #a67c52;
+	--color-sepia: rgba(140, 126, 106, 0.2);
+
+	/* ─── Font Families ──────────────────────────────────────────── */
+	/* Tailwind v4: --font-{name} → font-{name} utility class        */
+	/* Display: Syne — geometric, distinctive; product name/headings */
+	--font-display: 'Syne', 'Syne-Fallback', system-ui, sans-serif;
+	/* Body/UI: DM Sans — humanist, readable at small sizes          */
+	--font-body: 'DM Sans', 'DM-Sans-Fallback', -apple-system, BlinkMacSystemFont, sans-serif;
+	/* Mono: system stack for telemetry data values                  */
+	--font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+
+	/* ─── Type Scale ─────────────────────────────────────────────── */
+	/* Tailwind v4: --text-{name} → text-{name} utility class        */
+	/* These extend (not replace) Tailwind's built-in scale          */
+	--text-2xs: 0.625rem; /* 10px — eyebrow labels, badge text  */
+	--text-2xs--line-height: 1.4;
+	/* Tailwind's text-xs = 12px, text-sm = 14px, text-base = 16px  */
+	/* We use Tailwind's built-ins for those sizes directly          */
+	--text-display: 2.25rem; /* 36px — product heading h1          */
+	--text-display--line-height: 1.1;
+	--text-price: 3.5rem; /* 56px — price display               */
+	--text-price--line-height: 1;
+
+	/* ─── Letter Spacing ─────────────────────────────────────────── */
+	/* Tailwind v4: --tracking-{name} → tracking-{name} utility      */
+	/* Tailwind's built-ins: tight=-0.025em, wide=0.025em, wider=0.05em, widest=0.1em */
+	/* We override tight and add display/label variants              */
+	--tracking-tight: -0.02em; /* display headings (override default) */
+	--tracking-display: -0.04em; /* large price display text */
+	--tracking-label: 0.08em; /* uppercase micro labels */
+	--tracking-ui: 0.02em; /* CTA button text */
+}
+
+/* ─── Metric-matched fallback fonts ─────────────────────────────── */
+/* Minimises layout shift while web fonts load                       */
+@font-face {
+	font-family: 'Syne-Fallback';
+	src: local('Arial');
+	size-adjust: 104%;
+	ascent-override: 96%;
+	descent-override: 22%;
+	line-gap-override: 0%;
+}
+
+@font-face {
+	font-family: 'DM-Sans-Fallback';
+	src: local('Arial');
+	size-adjust: 99%;
+	ascent-override: 94%;
+	descent-override: 21%;
+	line-gap-override: 0%;
+}
+
+/* ─── Global base ────────────────────────────────────────────────── */
+html {
+	font-kerning: normal;
+}
+
+body {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+:where(media-outlet video) {
+	object-fit: cover;
+	height: 100vh;
+}

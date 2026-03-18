@@ -1,22 +1,44 @@
 <script lang="ts">
 	import { defineCustomElements } from 'vidstack/elements';
 
-	let { src } = $props<{ src: string }>();
+	let {
+		liveSrc,
+		poster,
+		class: className,
+		sessionActive = false,
+		onPlaying
+	} = $props<{
+		liveSrc: string;
+		poster?: string;
+		class?: string;
+		sessionActive?: boolean;
+		onPlaying?: () => void;
+	}>();
 
 	let container: HTMLDivElement | undefined = $state();
 	let isFullscreen = $state(false);
+	let isPlaying = $state(false);
 
 	$effect(() => {
+		// Initialize vidstack
 		void defineCustomElements();
+	});
 
+	$effect(() => {
 		const onFsChange = () => {
 			isFullscreen = !!document.fullscreenElement;
 		};
 
 		document.addEventListener('fullscreenchange', onFsChange);
-
 		return () => document.removeEventListener('fullscreenchange', onFsChange);
 	});
+
+	const fsLabel = $derived(isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
+
+	const onLivePlaying = () => {
+		isPlaying = true;
+		onPlaying?.();
+	};
 
 	const toggleFullscreen = () => {
 		if (!container) return;
@@ -27,31 +49,41 @@
 
 <div
 	bind:this={container}
-	class="group relative overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl shadow-black/30"
+	class="group relative overflow-hidden bg-black {className ||
+		'rounded-3xl border border-white/10 shadow-2xl shadow-black/30'}"
 >
 	<media-player
 		title="River Stream"
-		{src}
+		src={liveSrc}
+		{poster}
 		autoplay
 		muted
 		playsinline
 		stream-type="live"
-		class="block w-full"
+		class="absolute inset-0 h-full w-full"
+		onplaying={onLivePlaying}
 	>
 		<media-outlet></media-outlet>
 	</media-player>
 
 	<div
-		class="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/70 to-transparent px-4 py-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+		class="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between bg-gradient-to-t from-black/70 to-transparent px-6 py-6 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100"
 	>
-		<span class="rounded bg-red-600 px-1.5 py-0.5 text-xs font-bold tracking-widest text-white">
-			LIVE
+		<span
+			class="rounded-sm px-2 py-1 text-2xs font-semibold tracking-label text-white shadow-sm {!isPlaying
+				? 'bg-amber-600/90'
+				: 'bg-[#BC4B31]/90'}"
+		>
+			{!isPlaying ? 'STANDBY' : 'LIVE'}
 		</span>
 
 		<button
 			onclick={toggleFullscreen}
-			aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-			class="text-white/70 transition-colors hover:text-white"
+			aria-label={fsLabel}
+			disabled={!sessionActive}
+			class="rounded-sm text-white/70 transition-all duration-200 focus-visible:outline-none {sessionActive
+				? 'cursor-pointer hover:scale-110 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50 active:scale-95'
+				: 'pointer-events-none opacity-0'}"
 		>
 			{#if isFullscreen}
 				<svg

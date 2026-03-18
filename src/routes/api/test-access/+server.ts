@@ -4,6 +4,7 @@ import { redirect } from '@sveltejs/kit';
 import { createSubscriptionCookie } from '$lib/server/subscription';
 
 export const POST = async ({ cookies }) => {
+	console.log('Creating subscription cookie');
 	cookies.set('subscription', await createSubscriptionCookie(), {
 		path: '/',
 		httpOnly: true,

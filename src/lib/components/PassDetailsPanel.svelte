@@ -1,0 +1,110 @@
+<script lang="ts">
+	let { sessionActive, isConnecting, streamStandby, onBeginConnection } = $props<{
+		sessionActive: boolean;
+		isConnecting?: boolean;
+		streamStandby: boolean;
+		onBeginConnection: () => void;
+	}>();
+
+	const specs = [
+		['Resolution', '2560×1920'],
+		['Frame Rate', '20 FPS'],
+		['Ad Interruptions', 'Only occasionally'],
+		['I-frame Interval', '2×'],
+		['Max Bitrate', '4096 Kbps']
+	] as const;
+
+	const ctaLabel = $derived(
+		isConnecting
+			? 'Establishing Link...'
+			: sessionActive
+				? 'Connection Established'
+				: 'Begin Connection'
+	);
+</script>
+
+<div class="flex flex-1 flex-col px-12 py-16">
+	<div>
+		<div class="text-2xs font-medium tracking-label text-secondary uppercase">
+			Limited Quantity Available:
+		</div>
+		<h1 class="mb-6 flex items-baseline font-display text-primary">
+			<span
+				class="text-6xl leading-[0.85] font-medium tracking-tight underline decoration-secondary/50 decoration-from-font [text-decoration-skip-ink:none]"
+				>24</span
+			>
+			<span class="ml-2 text-3xl font-bold tracking-tight">Hour Day Pass</span>
+		</h1>
+		<p class="mb-10 text-sm leading-relaxed text-secondary">
+			Immersive, uninterrupted access to our fixed-position river array. Video-only visual telemetry
+			(2560×1920) from the Oregon Coast.
+		</p>
+	</div>
+
+	<div class="mb-10 flex items-baseline gap-2">
+		<span class="font-display text-6xl leading-none font-medium tracking-tight text-primary">
+			<span class="mt-2 mr-1 font-display text-xl text-secondary">$</span>79
+		</span>
+		<span class="text-xs font-bold tracking-label text-secondary uppercase">USD</span>
+	</div>
+
+	<ul class="mb-12 flex list-none flex-col">
+		{#each specs as [label, value] (label)}
+			<li class="flex items-baseline justify-between border-b border-sepia py-3 text-sm first:pt-0">
+				<span class="text-secondary">{label}</span>
+				<span class="font-medium text-primary tabular-nums">{value}</span>
+			</li>
+		{/each}
+	</ul>
+
+	<div class="mt-auto flex flex-col gap-3">
+		{#if streamStandby && isConnecting}
+			<p class="animate-pulse text-center text-2xs text-secondary">
+				Live feed connecting — please wait.
+			</p>
+		{/if}
+
+		<button
+			onclick={onBeginConnection}
+			disabled={sessionActive || isConnecting}
+			class="relative w-full overflow-hidden rounded-sm py-[18px] text-xs font-medium tracking-ui text-light transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-light focus-visible:outline-none {sessionActive ||
+			isConnecting
+				? 'cursor-not-allowed shadow-inner'
+				: 'cursor-pointer bg-primary hover:bg-primary/90 active:scale-[0.98]'} {isConnecting
+				? 'bg-secondary/90'
+				: sessionActive
+					? 'bg-emerald-700/80'
+					: 'bg-primary'}"
+		>
+			<div class="relative flex items-center justify-center gap-2">
+				{#if isConnecting}
+					<svg
+						class="h-4 w-4 animate-spin text-white/70"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+						></circle>
+						<path
+							class="opacity-75"
+							fill="currentColor"
+							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+						></path>
+					</svg>
+				{:else if sessionActive}
+					<svg
+						class="h-4 w-4 text-white"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						stroke-width="2.5"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+					</svg>
+				{/if}
+				<span>{ctaLabel}</span>
+			</div>
+		</button>
+	</div>
+</div>
