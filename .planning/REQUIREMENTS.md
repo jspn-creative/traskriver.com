@@ -12,7 +12,7 @@
 ### Streaming Infrastructure
 
 - [x] **STRM-01**: Offload RTSP ingestion and HLS generation to a dedicated media streaming server/service, removing the local `ffmpeg` process from `scripts/stream.ts`.
-- [ ] **STRM-02**: The video player (`src/lib/components/VideoPlayer.svelte`) correctly points to the new, external HLS stream source.
+- [x] **STRM-02**: The video player (`src/lib/components/VideoPlayer.svelte`) correctly points to the new, external HLS stream source.
 
 ### Security
 
@@ -39,7 +39,7 @@
 |-------------|-------|--------|
 | AUTH-01 | Phase 1 | Complete |
 | STRM-01 | Phase 2 | Complete |
-| STRM-02 | Phase 2 | Pending |
+| STRM-02 | Phase 2 | Complete |
 | SEC-01 | Phase 3 | Pending |
 | SEC-02 | Phase 3 | Pending |
 

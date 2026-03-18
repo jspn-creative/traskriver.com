@@ -108,6 +108,14 @@ None.
 - Ready for Phase 2 Plan 02 (or next plan in the phase)
 - Users need to configure Cloudflare Stream credentials in `.env` before `bun run push-stream` works
 
+## Self-Check: PASSED
+
+- ✅ `scripts/push-stream.ts` exists on disk
+- ✅ `scripts/stream.ts` deleted
+- ✅ Commit `4f995e2` exists (Task 1)
+- ✅ Commit `b0ade0a` exists (Task 2)
+- ✅ Commit `9af7b55` exists (plan metadata)
+
 ---
 
 _Phase: 02-serverless-media-streaming_
