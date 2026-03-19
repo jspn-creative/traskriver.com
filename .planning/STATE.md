@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Signed URL Streaming
 status: planning
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-03-19T14:41:38.184Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-19T14:42:17.216Z"
 last_activity: 2026-03-19 — Roadmap created, Phase 4 ready
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -40,6 +40,7 @@ Last activity: 2026-03-19 — Roadmap created, Phase 4 ready
 - **02-02:** Use `$env/dynamic/private` for Cloudflare Workers edge runtime — env vars resolved at request time, not build time
 - **03-01:** Use `error(404)` not `error(403)` on test-access guard — 404 avoids leaking endpoint existence in production
 - [Phase 04-01]: CF_STREAM_SIGNING_JWK stored as-is from API response (base64-encoded JWK string) — format required by crypto.subtle.importKey
+- [Phase 04-signed-url-streaming]: Token replaces live input UID in CF Stream manifest URL path; JWT claims: sub=liveInputUid, kid=keyId, exp=now+3600
 
 ## Accumulated Context
 
@@ -53,5 +54,5 @@ Last activity: 2026-03-19 — Roadmap created, Phase 4 ready
 
 ## Last Session
 
-- **Stopped at:** Completed 04-01-PLAN.md
+- **Stopped at:** Completed 04-02-PLAN.md
 - **Updated:** 2026-03-19
