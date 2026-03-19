@@ -36,7 +36,7 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 
 **Requirements:** SIGN-01, SIGN-02, SIGN-03, SIGN-04
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 
@@ -59,7 +59,7 @@ Plans:
 | 1. Automated Auth             | v1.0      | 1/1            | Complete | 2026-03-18 |
 | 2. Serverless Media Streaming | v1.0      | 2/2            | Complete | 2026-03-18 |
 | 3. Asset Security & Cleanup   | v1.0      | 1/1            | Complete | 2026-03-19 |
-| 4. Signed URL Streaming       | v1.1      | 0/3            | Active   | —          |
+| 4. Signed URL Streaming       | 1/3 | In Progress|  | —          |
 
 ---
 
