@@ -4,6 +4,42 @@ import { hasActiveSubscription, createSubscriptionCookie } from '$lib/server/sub
 
 export type StreamInfo = {
 	liveHlsUrl: string;
+	customerCode: string;
+	inputId: string;
+};
+
+const encoder = new TextEncoder();
+const toBase64Url = (value: string) =>
+	btoa(value).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
+
+const generateStreamToken = async (
+	uid: string,
+	keyId: string,
+	jwkBase64: string
+): Promise<string> => {
+	const jwkJson = JSON.parse(atob(jwkBase64));
+	const privateKey = await crypto.subtle.importKey(
+		'jwk',
+		jwkJson,
+		{ name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+		false,
+		['sign']
+	);
+
+	const header = toBase64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: keyId }));
+	const payload = toBase64Url(
+		JSON.stringify({ sub: uid, kid: keyId, exp: Math.floor(Date.now() / 1000) + 3600 })
+	);
+	const signingInput = `${header}.${payload}`;
+
+	const signature = await crypto.subtle.sign(
+		'RSASSA-PKCS1-v1_5',
+		privateKey,
+		encoder.encode(signingInput)
+	);
+	const sigString = String.fromCharCode(...new Uint8Array(signature));
+
+	return `${signingInput}.${toBase64Url(sigString)}`;
 };
 
 export const getStreamInfo = query(async () => {
@@ -22,7 +58,15 @@ export const getStreamInfo = query(async () => {
 		throw new Error('Stream is not configured');
 	}
 
-	const liveHlsUrl = `https://customer-${customer}.cloudflarestream.com/${uid}/manifest/video.m3u8`;
+	const signingKeyId = env.CF_STREAM_SIGNING_KEY_ID;
+	const signingJwk = env.CF_STREAM_SIGNING_JWK;
 
-	return { liveHlsUrl } satisfies StreamInfo;
+	if (!signingKeyId?.trim() || !signingJwk?.trim()) {
+		throw new Error('Stream signing key is not configured');
+	}
+
+	const token = await generateStreamToken(uid, signingKeyId, signingJwk);
+	const liveHlsUrl = `https://customer-${customer}.cloudflarestream.com/${token}/manifest/video.m3u8`;
+
+	return { liveHlsUrl, customerCode: customer, inputId: uid } satisfies StreamInfo;
 });
