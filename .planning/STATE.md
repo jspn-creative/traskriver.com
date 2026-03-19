@@ -4,7 +4,7 @@ milestone: v1.1
 milestone_name: Signed URL Streaming
 status: planning
 stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-03-19T14:48:07.964Z"
+last_updated: '2026-03-19T14:48:07.964Z'
 last_activity: 2026-03-19 — Roadmap created, Phase 4 ready
 progress:
   total_phases: 1
@@ -42,6 +42,10 @@ Last activity: 2026-03-19 — Roadmap created, Phase 4 ready
 - [Phase 04-01]: CF_STREAM_SIGNING_JWK stored as-is from API response (base64-encoded JWK string) — format required by crypto.subtle.importKey
 - [Phase 04-signed-url-streaming]: Token replaces live input UID in CF Stream manifest URL path; JWT claims: sub=liveInputUid, kid=keyId, exp=now+3600
 - [Phase 04-signed-url-streaming]: Nested svelte:boundary scoped to VideoPlayer absolute-inset div, removing full-page loading state
+
+### Pending Todos
+
+- **Triage viewer count fluctuation** (`ui`) — LiveViewerCount polls /views every 10s; console shows 0/1/2 fluctuating with no user action. Investigate duplicate instances, CF API noise, smoothing strategy. `.planning/todos/pending/2026-03-19-triage-viewer-count-fluctuation.md`
 
 ## Accumulated Context
 
