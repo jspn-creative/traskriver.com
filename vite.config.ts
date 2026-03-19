@@ -5,6 +5,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit(), devtoolsJson()],
+	ssr: {
+		noExternal: ['vaul-svelte', 'bits-ui']
+	},
 	server: {
 		watch: {
 			ignored: ['**/static/stream/**']

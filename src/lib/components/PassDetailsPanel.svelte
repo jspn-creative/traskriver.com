@@ -19,11 +19,11 @@
 			? 'Establishing Link...'
 			: sessionActive
 				? 'Connection Established'
-				: 'Begin Connection'
+				: 'View Now (for Free!)'
 	);
 </script>
 
-<div class="flex flex-1 flex-col px-12 py-16">
+<div class="flex flex-1 flex-col px-5 py-8 md:px-12 md:py-16">
 	<div>
 		<div class="text-2xs font-medium tracking-label text-secondary uppercase">
 			Limited Quantity Available:

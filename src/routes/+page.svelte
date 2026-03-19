@@ -6,12 +6,30 @@
 	import TelemetryFooter from '$lib/components/TelemetryFooter.svelte';
 	import LocalWeather from '$lib/components/LocalWeather.svelte';
 	import LiveViewerCount from '$lib/components/LiveViewerCount.svelte';
+	import { Drawer, DrawerContent } from '$lib/components/ui/drawer';
 	import defaultJpg from '$lib/assets/default.jpg';
 	import { getStreamInfo } from './stream.remote';
 
 	let phase = $state<'sales' | 'connecting' | 'connected' | 'telemetry'>('sales');
 	let streamStandby = $state(true);
 	let streamError = $state(false);
+	let drawerOpen = $state(false);
+
+	let headerVisible = $state(true);
+	let hideTimer: ReturnType<typeof setTimeout>;
+
+	const resetHideTimer = () => {
+		clearTimeout(hideTimer);
+		headerVisible = true;
+		hideTimer = setTimeout(() => {
+			headerVisible = false;
+		}, 3000);
+	};
+
+	$effect(() => {
+		if (sessionActive) resetHideTimer();
+		return () => clearTimeout(hideTimer);
+	});
 
 	let sessionActive = $derived(phase !== 'sales');
 	let isConnecting = $derived(phase === 'connecting');
@@ -58,8 +76,12 @@
 	});
 </script>
 
-<div class="flex h-screen overflow-hidden bg-light font-body text-primary">
-	<main class="group relative flex flex-1 flex-col justify-between p-10">
+<div class="flex h-screen flex-col overflow-hidden bg-light font-body text-primary md:flex-row">
+	<main
+		class="group relative flex flex-1 flex-col justify-between p-4 md:p-10"
+		ontouchstart={sessionActive ? resetHideTimer : undefined}
+		onmousemove={sessionActive ? resetHideTimer : undefined}
+	>
 		<svelte:boundary>
 			{#snippet pending()}
 				<div class="absolute inset-0 z-0 flex items-center justify-center">
@@ -111,13 +133,17 @@
 			></div>
 			<div
 				class="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-linear-to-b from-primary to-transparent opacity-0 transition-opacity duration-700 ease-out {sessionActive
-					? 'opacity-100 group-hover:opacity-0'
+					? headerVisible
+						? 'opacity-100'
+						: 'opacity-0'
 					: ''}"
 			></div>
 
 			<header
 				class="relative z-10 flex w-full items-end justify-between transition-opacity duration-700 ease-out {sessionActive
-					? 'opacity-100 group-hover:opacity-0'
+					? headerVisible
+						? 'opacity-100'
+						: 'pointer-events-none opacity-0'
 					: ''}"
 			>
 				<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
@@ -156,18 +182,43 @@
 					{streamError ? 'Error' : streamStandby ? 'Standby' : 'Live'}
 				</div>
 			</header>
+
+			<!-- Mobile drawer trigger pill — only visible on mobile -->
+			<button
+				class="absolute bottom-4 left-1/2 z-20 flex min-h-[44px] min-w-[44px] -translate-x-1/2 items-center gap-2 rounded-full border border-sepia bg-light/90 px-5 py-2.5 text-xs font-medium tracking-ui text-primary shadow-md backdrop-blur-md md:hidden"
+				onclick={() => (drawerOpen = true)}
+			>
+				<svg
+					class="h-3.5 w-3.5"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					stroke-width="2"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M9 5l7 7-7 7"
+						transform="rotate(-90 12 12)"
+					/>
+				</svg>
+				{phase === 'telemetry' ? 'Conditions' : 'View Pass'}
+			</button>
 		</svelte:boundary>
 	</main>
 
+	<!-- Desktop sidebar — hidden on mobile -->
 	<aside
-		style="width: {phase === 'telemetry' ? '300px' : '420px'}"
-		class="z-20 flex flex-col overflow-x-hidden overflow-y-auto border-l border-sepia bg-light shadow-[-10px_0_40px_rgba(0,0,0,0.04)] transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]"
+		class="z-20 hidden flex-col overflow-x-hidden overflow-y-auto border-l border-sepia bg-light shadow-[-10px_0_40px_rgba(0,0,0,0.04)] transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex {phase ===
+		'telemetry'
+			? 'md:w-[300px]'
+			: 'md:w-[420px]'}"
 	>
 		{#if phase === 'telemetry'}
 			<div
 				out:fade={{ duration: 200, easing: cubicOut }}
 				in:fade={{ duration: 400, delay: 100, easing: cubicOut }}
-				class="flex min-w-[300px] flex-1 flex-col"
+				class="flex min-w-0 flex-1 flex-col"
 			>
 				<LocalWeather />
 			</div>
@@ -175,7 +226,7 @@
 			<div
 				out:fade={{ duration: 250, easing: cubicOut }}
 				in:fade={{ duration: 300, easing: cubicOut }}
-				class="flex min-w-[420px] flex-1 flex-col"
+				class="flex min-w-0 flex-1 flex-col"
 			>
 				<PassDetailsPanel
 					{sessionActive}
@@ -187,4 +238,23 @@
 		{/if}
 		<TelemetryFooter />
 	</aside>
+
+	<!-- Mobile bottom drawer — only rendered on mobile -->
+	<div class="md:hidden">
+		<Drawer bind:open={drawerOpen}>
+			<DrawerContent class="max-h-[85vh] overflow-y-auto border-sepia bg-light">
+				{#if phase === 'telemetry'}
+					<LocalWeather />
+				{:else}
+					<PassDetailsPanel
+						{sessionActive}
+						{isConnecting}
+						{streamStandby}
+						onBeginConnection={handleBeginConnection}
+					/>
+				{/if}
+				<TelemetryFooter />
+			</DrawerContent>
+		</Drawer>
+	</div>
 </div>

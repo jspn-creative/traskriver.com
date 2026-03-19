@@ -42,7 +42,7 @@
 
 <div
 	in:fly={{ y: 16, duration: 700, delay: 200, easing: cubicOut }}
-	class="flex flex-col px-12 py-16"
+	class="flex flex-col px-5 py-8 md:px-12 md:py-16"
 >
 	<div class="mb-8">
 		<h2 class="mb-2 text-2xs font-medium tracking-label text-secondary uppercase">
