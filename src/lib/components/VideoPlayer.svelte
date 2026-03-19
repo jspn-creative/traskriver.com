@@ -7,16 +7,19 @@
 		poster = defaultPoster,
 		class: className,
 		sessionActive = false,
-		onPlaying
+		onPlaying,
+		onError
 	} = $props<{
 		liveSrc: string;
 		poster?: string;
 		class?: string;
 		sessionActive?: boolean;
 		onPlaying?: () => void;
+		onError?: () => void;
 	}>();
 
 	let container: HTMLDivElement | undefined = $state();
+	let player: any = $state();
 	let isFullscreen = $state(false);
 	let isPlaying = $state(false);
 	let hasError = $state(false);
@@ -24,6 +27,29 @@
 	$effect(() => {
 		// Initialize vidstack
 		void defineCustomElements();
+	});
+
+	$effect(() => {
+		if (!player) return;
+
+		const handleError = (e: any) => {
+			console.error('Stream error:', e);
+			hasError = true;
+			isPlaying = false;
+			onError?.();
+		};
+
+		player.addEventListener('error', handleError);
+		player.addEventListener('provider-error', handleError);
+		player.addEventListener('hls-error', handleError);
+		player.addEventListener('fatal-error', handleError);
+
+		return () => {
+			player.removeEventListener('error', handleError);
+			player.removeEventListener('provider-error', handleError);
+			player.removeEventListener('hls-error', handleError);
+			player.removeEventListener('fatal-error', handleError);
+		};
 	});
 
 	$effect(() => {
@@ -47,6 +73,7 @@
 		// When a 401 or other error occurs, show the error state
 		hasError = true;
 		isPlaying = false;
+		onError?.();
 	};
 
 	const toggleFullscreen = () => {
@@ -62,6 +89,7 @@
 		'rounded-3xl border border-white/10 shadow-2xl shadow-black/30'}"
 >
 	<media-player
+		bind:this={player}
 		title="River Stream"
 		src={liveSrc}
 		{poster}
@@ -87,18 +115,8 @@
 	/>
 
 	<div
-		class="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between bg-gradient-to-t from-black/70 to-transparent px-6 py-6 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100"
+		class="absolute inset-x-0 bottom-0 z-20 flex items-center justify-end bg-gradient-to-t from-black/70 to-transparent px-6 py-6 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100"
 	>
-		<span
-			class="rounded-sm px-2 py-1 text-2xs font-semibold tracking-label text-white shadow-sm {hasError
-				? 'bg-red-600/90'
-				: !isPlaying
-					? 'bg-amber-600/90'
-					: 'bg-[#BC4B31]/90'}"
-		>
-			{hasError ? 'ERROR' : !isPlaying ? 'STANDBY' : 'LIVE'}
-		</span>
-
 		<button
 			onclick={toggleFullscreen}
 			aria-label={fsLabel}

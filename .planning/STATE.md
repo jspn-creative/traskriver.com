@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-status: shipped
-stopped_at: Completed v1.0 milestone
+milestone: v1.1
+milestone_name: Signed URL Streaming
+status: active
+stopped_at: null
 last_updated: '2026-03-19T00:00:00.000Z'
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
-  percent: 100
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -20,27 +20,37 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Reliably deliver a continuous, high-quality livestream to authenticated users.
-**Current focus:** v1.0 shipped. Planning next milestone (v2.0 Paywall).
+**Current focus:** v1.1 — Signed URL Streaming
 
 ## Phase Progress
 
-| Phase | Status   | Goal                                                                        |
-| ----- | -------- | --------------------------------------------------------------------------- |
-| 1     | Complete | Temporarily authenticate users automatically.                               |
-| 2     | Complete | Move RTSP ingestion to a dedicated service, enabling Cloudflare deployment. |
-| 3     | Complete | Ensure the HLS stream and test endpoints are secure for production.         |
+| Phase | Status  | Goal                                                        |
+| ----- | ------- | ----------------------------------------------------------- |
+| 4     | Pending | Restore stream playback using Cloudflare Stream Signed URLs |
 
 ## Current Position
 
-**Milestone:** v1.0 MVP — SHIPPED 2026-03-19
-**Progress:** [██████████] 100% (4/4 plans, 3/3 phases)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-19 — Milestone v1.1 started
 
 ## Decisions
 
 - **02-02:** Use `$env/dynamic/private` for Cloudflare Workers edge runtime — env vars resolved at request time, not build time
 - **03-01:** Use `error(404)` not `error(403)` on test-access guard — 404 avoids leaking endpoint existence in production
 
+## Accumulated Context
+
+- SvelteKit app on Cloudflare Workers — env vars via `$env/dynamic/private`
+- Stream delivery via Cloudflare Stream; HLS manifest URL constructed server-side in `stream.remote.ts`
+- Page uses SvelteKit remote functions (`query()`) with `<svelte:boundary>` + `await` in template
+- VideoPlayer accepts `liveSrc: string` prop (vidstack-based)
+- CF Stream "Require Signed URLs" enabled in dashboard — plain HLS URL no longer works
+- Signed token = RS256 JWT, signed with CF-issued JWK key; replaces live input UID in manifest path
+- Token TTL: 1 hour (no refresh needed — 5-min playback limit is v2.0 scope)
+
 ## Last Session
 
-- **Stopped at:** Completed v1.0 milestone
+- **Stopped at:** Milestone v1.1 goals confirmed, requirements defined
 - **Updated:** 2026-03-19

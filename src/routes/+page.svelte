@@ -10,12 +10,18 @@
 
 	let phase = $state<'sales' | 'connecting' | 'connected' | 'telemetry'>('sales');
 	let streamStandby = $state(true);
+	let streamError = $state(false);
 
 	let sessionActive = $derived(phase !== 'sales');
 	let isConnecting = $derived(phase === 'connecting');
 
 	const onPlaybackStart = () => {
 		streamStandby = false;
+		streamError = false;
+	};
+
+	const onPlaybackError = () => {
+		streamError = true;
 	};
 
 	const handleBeginConnection = () => {
@@ -65,32 +71,35 @@
 					class="relative h-full w-full"
 					{sessionActive}
 					onPlaying={onPlaybackStart}
+					onError={onPlaybackError}
 				/>
 				<div
-					class="absolute inset-0 z-10 bg-light/30 backdrop-blur-2xl transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
-					class:opacity-0={sessionActive}
-					class:pointer-events-none={sessionActive}
+					class="absolute inset-0 z-10 bg-light/30 backdrop-blur-2xl transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] {sessionActive
+						? 'pointer-events-none opacity-0'
+						: ''}"
 				></div>
 			</div>
 			<div
-				class="pointer-events-none absolute inset-0 z-0 bg-linear-to-b from-light/0 to-light/30 transition-opacity duration-1000"
-				class:opacity-0={sessionActive}
+				class="pointer-events-none absolute inset-0 z-0 bg-linear-to-b from-light/0 to-light/30 transition-opacity duration-1000 {sessionActive
+					? 'opacity-0'
+					: ''}"
 			></div>
 			<div
-				class="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-gradient-to-b from-black/60 to-transparent opacity-0 transition-opacity duration-700 ease-out"
-				class:group-hover:opacity-100={sessionActive}
+				class="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-gradient-to-b from-black/60 to-transparent opacity-0 transition-opacity duration-700 ease-out {sessionActive
+					? 'group-hover:opacity-100'
+					: ''}"
 			></div>
 
 			<header
-				class="relative z-10 flex w-full items-end justify-between transition-opacity duration-700 ease-out"
-				class:opacity-0={sessionActive}
-				class:group-hover:opacity-100={sessionActive}
+				class="relative z-10 flex w-full items-end justify-between transition-opacity duration-700 ease-out {sessionActive
+					? 'opacity-0 group-hover:opacity-100'
+					: ''}"
 			>
-				<div class="text-primary transition-colors duration-700" class:text-light={sessionActive}>
+				<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
 					<span
-						class="mb-1 block text-2xs font-medium tracking-label text-secondary uppercase transition-colors duration-700"
-						class:text-light={sessionActive}
-						class:opacity-70={sessionActive}
+						class="mb-1 block text-2xs font-medium tracking-label uppercase transition-colors duration-700 {sessionActive
+							? 'text-light opacity-70'
+							: 'text-secondary'}"
 					>
 						Streaming From:
 					</span>
@@ -101,26 +110,27 @@
 							Trask River
 						</span>
 						<span
-							class="text-sm font-normal text-secondary transition-colors duration-700"
-							class:text-light={sessionActive}
-							class:opacity-90={sessionActive}
-							class:drop-shadow-md={sessionActive}
+							class="text-sm font-normal transition-colors duration-700 {sessionActive
+								? 'text-light opacity-90 drop-shadow-md'
+								: 'text-secondary'}"
 						>
 							Tillamook, OR
 						</span>
 					</div>
 				</div>
 				<div
-					class="flex items-center gap-2 text-2xs font-medium tracking-label text-primary uppercase transition-colors duration-700"
-					class:text-light={sessionActive}
-					class:drop-shadow-md={sessionActive}
+					class="flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-2xs font-medium tracking-label uppercase backdrop-blur-md transition-colors duration-700 {sessionActive
+						? 'border-white/10 bg-black/40 text-light drop-shadow-md'
+						: 'border-black/10 bg-black/5 text-primary'}"
 				>
 					<div
-						class="h-1.5 w-1.5 rounded-full shadow-sm {streamStandby
-							? 'bg-amber-600'
-							: 'animate-pulse bg-[#BC4B31]'}"
+						class="h-1.5 w-1.5 rounded-full shadow-sm {streamError
+							? 'bg-red-500'
+							: streamStandby
+								? 'bg-amber-500'
+								: 'animate-pulse bg-[#BC4B31]'}"
 					></div>
-					{streamStandby ? 'Standby' : 'Live'}
+					{streamError ? 'Error' : streamStandby ? 'Standby' : 'Live'}
 				</div>
 			</header>
 		</main>

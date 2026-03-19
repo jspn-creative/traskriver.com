@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import 'vidstack/styles/base.css';
+@import '@fontsource-variable/syne';
+@import '@fontsource-variable/dm-sans';
 
 @theme {
 	/* ─── Color ──────────────────────────────────────────────────── */
@@ -13,9 +15,9 @@
 	/* ─── Font Families ──────────────────────────────────────────── */
 	/* Tailwind v4: --font-{name} → font-{name} utility class        */
 	/* Display: Syne — geometric, distinctive; product name/headings */
-	--font-display: 'Syne', 'Syne-Fallback', system-ui, sans-serif;
+	--font-display: 'Syne Variable', 'Syne-Fallback', system-ui, sans-serif;
 	/* Body/UI: DM Sans — humanist, readable at small sizes          */
-	--font-body: 'DM Sans', 'DM-Sans-Fallback', -apple-system, BlinkMacSystemFont, sans-serif;
+	--font-body: 'DM Sans Variable', -apple-system, BlinkMacSystemFont, sans-serif;
 	/* Mono: system stack for telemetry data values                  */
 	--font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
 

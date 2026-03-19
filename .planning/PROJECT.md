@@ -8,6 +8,16 @@ A website with an "always on" livestream video feed (like a 24/7 nature camera) 
 
 Reliably deliver a continuous, high-quality livestream to authenticated users.
 
+## Current Milestone: v1.1 Signed URL Streaming
+
+**Goal:** Restore stream playback with Cloudflare Stream Signed URLs enabled, using server-side JWT signing and async page delivery.
+
+**Target features:**
+
+- Cloudflare Stream signing key provisioned and stored in env vars
+- Server-side JWT token generation via Web Crypto API (no per-request CF API call)
+- Page renders immediately; VideoPlayer awaits signed URL via nested `<svelte:boundary>`
+
 ## Requirements
 
 ### Validated
@@ -23,9 +33,9 @@ Reliably deliver a continuous, high-quality livestream to authenticated users.
 
 ### Active
 
-- [ ] Implement the final paywall logic (one-time purchase or subscription) based on client's decision.
-- [ ] Validate Stripe success session IDs to ensure they are single-use.
-- [ ] Implement Stripe webhooks for subscription lifecycle management (cancellations, failed payments, updates).
+- [ ] Generate Cloudflare Stream signing key and store in env vars (SIGN-01)
+- [ ] Generate signed HLS JWT server-side via Web Crypto API (SIGN-02, SIGN-03)
+- [ ] Restructure page to render immediately with VideoPlayer in nested async boundary (SIGN-04)
 
 ### Out of Scope
 
@@ -59,4 +69,4 @@ Reliably deliver a continuous, high-quality livestream to authenticated users.
 
 ---
 
-_Last updated: 2026-03-19 after v1.0 milestone_
+_Last updated: 2026-03-19 after v1.1 milestone start_
