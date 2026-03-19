@@ -46,6 +46,7 @@ Last activity: 2026-03-19 — Roadmap created, Phase 4 ready
 ### Pending Todos
 
 - **Triage viewer count fluctuation** (`ui`) — LiveViewerCount polls /views every 10s; console shows 0/1/2 fluctuating with no user action. Investigate duplicate instances, CF API noise, smoothing strategy. `.planning/todos/pending/2026-03-19-triage-viewer-count-fluctuation.md`
+- **Fix Safari HLS buffer stall errors** (`ui`) — Safari triggers repeated non-fatal `bufferStalledError` hls-error events; VideoPlayer treats all errors as fatal and shows error UI. Fix: gate `onError` on `e.detail.fatal === true`, consider HLS.js recovery. `.planning/todos/pending/2026-03-19-fix-safari-hls-buffer-stall-errors.md`
 
 ## Accumulated Context
 
