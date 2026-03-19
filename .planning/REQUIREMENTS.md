@@ -1,0 +1,52 @@
+# Requirements: River Stream
+
+**Defined:** 2026-03-19
+**Core Value:** Reliably deliver a continuous, high-quality livestream to authenticated users.
+
+## v1.1 Requirements
+
+### Signed URL Streaming
+
+- [ ] **SIGN-01**: Developer can generate a Cloudflare Stream signing key via CF API and store the key ID + JWK as env vars
+- [ ] **SIGN-02**: Server generates a signed JWT token using the JWK key via Web Crypto API (no CF API call per request)
+- [ ] **SIGN-03**: `getStreamInfo()` returns a signed HLS URL with the token replacing the live input UID in the manifest path
+- [ ] **SIGN-04**: Page shell renders immediately; VideoPlayer is wrapped in a nested `<svelte:boundary>` that awaits the signed URL asynchronously
+
+## v2 Requirements
+
+### Paywall
+
+- **PAY-01**: Implement final paywall logic based on client's chosen model (one-time purchase or subscription)
+- **PAY-02**: Validate Stripe success session IDs to ensure they are single-use
+- **PAY-03**: Implement Stripe webhooks for subscription lifecycle management (cancellations, failed payments, updates)
+
+### Session Limiting
+
+- **SESS-01**: Stop stream playback after 5 minutes, requiring user action to restart
+
+## Out of Scope
+
+| Feature                         | Reason                                                             |
+| ------------------------------- | ------------------------------------------------------------------ |
+| Token expiry / refresh handling | TTL set to 1 hour; session limited to 5 min by v2.0 SESS-01 anyway |
+| User database                   | Stateless auth sufficient until paywall model is chosen            |
+
+## Traceability
+
+| Requirement | Phase   | Status  |
+| ----------- | ------- | ------- |
+| SIGN-01     | Phase 4 | Pending |
+| SIGN-02     | Phase 4 | Pending |
+| SIGN-03     | Phase 4 | Pending |
+| SIGN-04     | Phase 4 | Pending |
+
+**Coverage:**
+
+- v1.1 requirements: 4 total
+- Mapped to phases: 4
+- Unmapped: 0 ✓
+
+---
+
+_Requirements defined: 2026-03-19_
+_Last updated: 2026-03-19 after initial definition_
