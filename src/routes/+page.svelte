@@ -103,62 +103,60 @@
 						: ''}"
 				></div>
 			</div>
-		</svelte:boundary>
 
-		<div
-			class="pointer-events-none absolute inset-0 z-0 bg-linear-to-b from-light/0 to-light/30 transition-opacity duration-1000 {sessionActive
-				? 'opacity-0'
-				: ''}"
-		></div>
-		<div
-			class="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-linear-to-b from-primary to-transparent opacity-0 transition-opacity duration-700 ease-out {sessionActive
-				? 'opacity-100 group-hover:opacity-0'
-				: ''}"
-		></div>
+			<div
+				class="pointer-events-none absolute inset-0 z-0 bg-linear-to-b from-light/0 to-light/30 transition-opacity duration-1000 {sessionActive
+					? 'opacity-0'
+					: ''}"
+			></div>
+			<div
+				class="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-linear-to-b from-primary to-transparent opacity-0 transition-opacity duration-700 ease-out {sessionActive
+					? 'opacity-100 group-hover:opacity-0'
+					: ''}"
+			></div>
 
-		<header
-			class="relative z-10 flex w-full items-end justify-between transition-opacity duration-700 ease-out {sessionActive
-				? 'opacity-100 group-hover:opacity-0'
-				: ''}"
-		>
-			<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
-				{#await getStreamInfo() then stream}
+			<header
+				class="relative z-10 flex w-full items-end justify-between transition-opacity duration-700 ease-out {sessionActive
+					? 'opacity-100 group-hover:opacity-0'
+					: ''}"
+			>
+				<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
 					<LiveViewerCount
 						customerCode={stream.customerCode}
 						token={stream.token}
 						{sessionActive}
 					/>
-				{/await}
-				<div class="flex items-baseline gap-4">
-					<span
-						class="font-display text-display tracking-display text-light drop-shadow-md transition-colors duration-700"
-					>
-						Trask River
-					</span>
-					<span
-						class="text-sm font-medium drop-shadow-md transition-colors duration-700 {sessionActive
-							? 'text-secondary'
-							: 'text-light/50'}"
-					>
-						Tillamook, OR
-					</span>
+					<div class="flex items-baseline gap-4">
+						<span
+							class="font-display text-display tracking-display text-light drop-shadow-md transition-colors duration-700"
+						>
+							Trask River
+						</span>
+						<span
+							class="text-sm font-medium drop-shadow-md transition-colors duration-700 {sessionActive
+								? 'text-secondary'
+								: 'text-light/50'}"
+						>
+							Tillamook, OR
+						</span>
+					</div>
 				</div>
-			</div>
-			<div
-				class="flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-2xs font-medium tracking-label uppercase backdrop-blur-md transition-colors duration-700 {sessionActive
-					? 'border-primary/10 bg-primary/40 text-light drop-shadow-md'
-					: 'border-secondary/10 bg-secondary/5 text-light/80'}"
-			>
 				<div
-					class="h-1.5 w-1.5 rounded-full shadow-sm {streamError
-						? 'bg-red-500'
-						: streamStandby
-							? 'bg-amber-500'
-							: 'animate-pulse bg-green-500'}"
-				></div>
-				{streamError ? 'Error' : streamStandby ? 'Standby' : 'Live'}
-			</div>
-		</header>
+					class="flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-2xs font-medium tracking-label uppercase backdrop-blur-md transition-colors duration-700 {sessionActive
+						? 'border-primary/10 bg-primary/40 text-light drop-shadow-md'
+						: 'border-secondary/10 bg-secondary/5 text-light/80'}"
+				>
+					<div
+						class="h-1.5 w-1.5 rounded-full shadow-sm {streamError
+							? 'bg-red-500'
+							: streamStandby
+								? 'bg-amber-500'
+								: 'animate-pulse bg-green-500'}"
+					></div>
+					{streamError ? 'Error' : streamStandby ? 'Standby' : 'Live'}
+				</div>
+			</header>
+		</svelte:boundary>
 	</main>
 
 	<aside
