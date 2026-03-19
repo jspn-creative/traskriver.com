@@ -45,6 +45,9 @@ const generateStreamToken = async (
 
 export const getStreamInfo = query(async () => {
 	const event = getRequestEvent();
+	console.log('[river-stream][stream.remote] getStreamInfo()', {
+		path: event.url.pathname
+	});
 	const hasAccess = await hasActiveSubscription(event.cookies.get('subscription'));
 
 	if (!hasAccess) {
@@ -67,7 +70,14 @@ export const getStreamInfo = query(async () => {
 	}
 
 	const token = await generateStreamToken(uid, signingKeyId, signingJwk);
+	console.log('[river-stream][stream.remote] token', {
+		customer,
+		uid,
+		tokenLength: token.length,
+		tokenPrefix: token.slice(0, 10)
+	});
 	const liveHlsUrl = `https://customer-${customer}.cloudflarestream.com/${token}/manifest/video.m3u8`;
 
+	console.log('[river-stream][stream.remote] liveHlsUrl built');
 	return { liveHlsUrl, customerCode: customer, inputId: uid, token } satisfies StreamInfo;
 });

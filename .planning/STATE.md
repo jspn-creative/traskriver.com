@@ -1,49 +1,43 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Signed URL Streaming
-status: planning
-stopped_at: Completed 04-03-PLAN.md
-last_updated: '2026-03-19T14:48:07.964Z'
-last_activity: 2026-03-19 — Roadmap created, Phase 4 ready
+milestone: v2.0
+milestone_name: Paywall
+status: idle
+last_updated: '2026-03-19T16:31:48.083Z'
+last_activity: 2026-03-19 — v1.1 milestone complete
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 7
+  completed_plans: 7
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-19)
+See: .planning/PROJECT.md (updated 2026-03-19 after v1.1 milestone)
 
 **Core value:** Reliably deliver a continuous, high-quality livestream to authenticated users.
-**Current focus:** v1.1 — Signed URL Streaming
+**Current focus:** Planning v2.0 — waiting on client to decide payment model
 
 ## Phase Progress
 
-| Phase | Status | Goal                                                                                        |
-| ----- | ------ | ------------------------------------------------------------------------------------------- |
-| 4     | Active | Restore stream playback with CF Signed URLs + server-side JWT signing + async page delivery |
+| Phase | Status   | Goal                                                                                        |
+| ----- | -------- | ------------------------------------------------------------------------------------------- |
+| 1     | Complete | Automated auth — skip paywall UI                                                            |
+| 2     | Complete | Serverless media streaming via Cloudflare Stream                                            |
+| 3     | Complete | Asset security and cleanup                                                                  |
+| 4     | Complete | Restore stream playback with CF Signed URLs + server-side JWT signing + async page delivery |
+| 5     | Planned  | Paywall — TBD once client decides on payment model                                          |
 
 ## Current Position
 
-Phase: 4 — Signed URL Streaming
-Plan: —
-Status: Ready for planning
-Last activity: 2026-03-19 — Roadmap created, Phase 4 ready
+Phase: — (between milestones)
+Status: v1.1 shipped. Waiting on client to decide paywall model before planning v2.0.
+Last activity: 2026-03-19 — v1.1 milestone complete
 
-## Decisions
-
-- **02-02:** Use `$env/dynamic/private` for Cloudflare Workers edge runtime — env vars resolved at request time, not build time
-- **03-01:** Use `error(404)` not `error(403)` on test-access guard — 404 avoids leaking endpoint existence in production
-- [Phase 04-01]: CF_STREAM_SIGNING_JWK stored as-is from API response (base64-encoded JWK string) — format required by crypto.subtle.importKey
-- [Phase 04-signed-url-streaming]: Token replaces live input UID in CF Stream manifest URL path; JWT claims: sub=liveInputUid, kid=keyId, exp=now+3600
-- [Phase 04-signed-url-streaming]: Nested svelte:boundary scoped to VideoPlayer absolute-inset div, removing full-page loading state
-
-### Pending Todos
+## Pending Todos
 
 - **Triage viewer count fluctuation** (`ui`) — LiveViewerCount polls /views every 10s; console shows 0/1/2 fluctuating with no user action. Investigate duplicate instances, CF API noise, smoothing strategy. `.planning/todos/pending/2026-03-19-triage-viewer-count-fluctuation.md`
 - **Fix Safari HLS buffer stall errors** (`ui`) — Safari triggers repeated non-fatal `bufferStalledError` hls-error events; VideoPlayer treats all errors as fatal and shows error UI. Fix: gate `onError` on `e.detail.fatal === true`, consider HLS.js recovery. `.planning/todos/pending/2026-03-19-fix-safari-hls-buffer-stall-errors.md`
@@ -52,13 +46,12 @@ Last activity: 2026-03-19 — Roadmap created, Phase 4 ready
 
 - SvelteKit app on Cloudflare Workers — env vars via `$env/dynamic/private`
 - Stream delivery via Cloudflare Stream; HLS manifest URL constructed server-side in `stream.remote.ts`
-- Page uses SvelteKit remote functions (`query()`) with `<svelte:boundary>` + `await` in template
-- VideoPlayer accepts `liveSrc: string` prop (vidstack-based)
-- CF Stream "Require Signed URLs" enabled in dashboard — plain HLS URL no longer works
-- Signed token = RS256 JWT, signed with CF-issued JWK key; replaces live input UID in manifest path
+- CF Stream "Require Signed URLs" enabled; server generates RS256 JWT via `crypto.subtle` per request — token replaces raw live input UID in manifest path
+- Page shell (header, sidebar) renders immediately; VideoPlayer isolated in nested `<svelte:boundary>` scoped to `absolute inset-0` container
+- Authentication is open (all visitors auto-authenticated) — paywall deferred to v2.0
 - Token TTL: 1 hour (no refresh needed — 5-min playback limit is v2.0 scope)
 
 ## Last Session
 
-- **Stopped at:** Completed 04-03-PLAN.md
+- **Stopped at:** v1.1 milestone complete
 - **Updated:** 2026-03-19

@@ -48,21 +48,70 @@ _A living document updated after each milestone. Lessons feed forward into futur
 
 ---
 
+## Milestone: v1.1 — Signed URL Streaming
+
+**Shipped:** 2026-03-19
+**Phases:** 1 | **Plans:** 3 | **Sessions:** 1
+
+### What Was Built
+
+- CF Stream signing key provisioning script (`scripts/setup-signing.ts`) — calls CF API, validates env vars early, outputs `.env`-ready `CF_STREAM_SIGNING_KEY_ID` + `CF_STREAM_SIGNING_JWK` to stdout
+- RS256 JWT generation in `stream.remote.ts` via Web Crypto API — `crypto.subtle.importKey('jwk')` + `RSASSA-PKCS1-v1_5`; token (not raw UID) replaces live input UID in CF Stream HLS manifest URL; zero outbound API calls per request
+- Restructured `+page.svelte` — removed full-page `<svelte:boundary>`; nested boundary scoped to VideoPlayer `absolute inset-0` container; `{#await getStreamInfo() then stream}` inline block defers only LiveViewerCount; header, sidebar, pass panel render immediately
+
+### What Worked
+
+- **CONTEXT.md captured all decision context upfront:** JWT claims format (`sub`/`kid`/`exp`), token placement in manifest URL, and base64-encoded JWK format were documented before any implementation — plans executed with zero design ambiguity
+- **3 plans completed in under 10 minutes total:** Yolo mode + detailed interface blocks meant execution was nearly instantaneous; no back-and-forth on implementation details
+- **Verification passed 10/10 on first attempt:** All VERIFICATION.md truths confirmed from static analysis; no unexpected gaps
+- **Nested boundary pattern was clean and reusable:** Scoping async loading to a container via `absolute inset-0` inside a `relative` parent generalizes well for future deferred components
+
+### What Was Inefficient
+
+- **`gsd-tools summary-extract` one_liner field still returns null:** Same issue as v1.0 — MILESTONES.md accomplishments section required manual authoring again. The tool is not reliably extracting structured fields from SUMMARY.md frontmatter
+- **`roadmap analyze` still returns empty phases:** Tool returned 0 phases/plans despite Phase 4 on disk. Still cannot be relied upon for state detection; disk-based checks (`ls`, `cat`) remain necessary
+- **LiveViewerCount calls `getStreamInfo()` twice:** The inline `{#await getStreamInfo() then stream}` in the header duplicates the call made inside the `<svelte:boundary>`. SvelteKit query caching may deduplicate this, but it was not confirmed during this milestone
+
+### Patterns Established
+
+- CF Stream signed URL format: `https://customer-{customerCode}.cloudflarestream.com/{jwtToken}/manifest/video.m3u8` — token replaces raw live input UID
+- RS256 JWT signing in Workers/edge: `crypto.subtle.importKey('jwk', jwkJson, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign'])` — JWK must be decoded from base64 via `atob()` + `JSON.parse()` before import
+- JWT claims for CF Stream: `{ sub: liveInputUid, kid: signingKeyId, exp: Math.floor(Date.now() / 1000) + 3600 }`
+- Nested boundary pattern for scoped async UI: wrap the async component in a `relative` container, make the boundary and its pending/error snippets use `absolute inset-0` positioning
+- Dual-await pattern: one `{@const x = await query()}` inside the boundary for the primary component; one `{#await query() then x}` inline block for secondary components that need the same data without holding the rest of the UI
+
+### Key Lessons
+
+1. **Capture implementation decisions in CONTEXT.md before planning, not during** — having CF signed URL format, JWT spec, and base64-JWK decoding pattern documented in context meant the plan writer had everything needed; executor had zero uncertainty
+2. **`gsd-tools` CLI is still unreliable for milestone operations** — `summary-extract` and `roadmap analyze` both returned empty/null results again; treat these as convenience tools and fall back to direct file reads for critical milestone operations
+3. **Confirm SvelteKit query deduplication behavior when the same query is called multiple times in a template** — `{#await getStreamInfo()}` appears twice in `+page.svelte`; whether SvelteKit deduplicates the underlying fetch should be verified before v2.0
+
+### Cost Observations
+
+- Model mix: 100% sonnet (claude-sonnet-4-6)
+- Sessions: 1 (all 3 plans in single session)
+- Notable: Smallest milestone so far (1 phase, 3 plans) but cleanest execution — good plan interfaces = near-zero execution overhead
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
-| Milestone | Sessions | Phases | Key Change                             |
-| --------- | -------- | ------ | -------------------------------------- |
-| v1.0      | 1        | 3      | First milestone — baseline established |
+| Milestone | Sessions | Phases | Key Change                                                      |
+| --------- | -------- | ------ | --------------------------------------------------------------- |
+| v1.0      | 1        | 3      | First milestone — baseline established                          |
+| v1.1      | 1        | 1      | CONTEXT.md pre-captures all design decisions; fastest execution |
 
 ### Cumulative Quality
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 | --------- | ----- | -------- | ------------------ |
 | v1.0      | 0     | 0%       | 0                  |
+| v1.1      | 0     | 0%       | 0                  |
 
 ### Top Lessons (Verified Across Milestones)
 
 1. Detailed plan interfaces blocks (exact current + target file state) eliminate executor codebase exploration
 2. Keep traceability tables current at plan completion — milestone close should find nothing to update
+3. `gsd-tools` CLI (`summary-extract`, `roadmap analyze`) is unreliable for disk-state verification — use direct file reads instead

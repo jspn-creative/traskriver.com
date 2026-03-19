@@ -16,24 +16,46 @@
 	let sessionActive = $derived(phase !== 'sales');
 	let isConnecting = $derived(phase === 'connecting');
 
+	const isBrowser = typeof window !== 'undefined';
+	const log = (...args: unknown[]) => {
+		if (!isBrowser) return;
+		console.log('[river-stream][page]', ...args);
+	};
+
 	const onPlaybackStart = () => {
+		log('onPlaybackStart');
 		streamStandby = false;
 		streamError = false;
 	};
 
 	const onPlaybackError = () => {
+		log('onPlaybackError');
 		streamError = true;
 	};
 
 	const handleBeginConnection = () => {
+		log('handleBeginConnection: phase=sales -> connecting');
 		phase = 'connecting';
 		setTimeout(() => {
+			log('phase: connecting -> connected');
 			phase = 'connected';
 			setTimeout(() => {
+				log('phase: connected -> telemetry');
 				phase = 'telemetry';
 			}, 1000);
 		}, 1200);
 	};
+
+	$effect(() => {
+		// "Whenever stuff changes" (Safari batching/debugging)
+		log('state', {
+			phase,
+			sessionActive,
+			isConnecting,
+			streamStandby,
+			streamError
+		});
+	});
 </script>
 
 <div class="flex h-screen overflow-hidden bg-light font-body text-primary">
@@ -53,6 +75,7 @@
 					</p>
 					<button
 						onclick={() => {
+							log('Retry clicked: getStreamInfo().refresh()');
 							void getStreamInfo().refresh();
 							reset();
 						}}
@@ -88,14 +111,14 @@
 				: ''}"
 		></div>
 		<div
-			class="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-gradient-to-b from-primary to-transparent opacity-0 transition-opacity duration-700 ease-out {sessionActive
-				? 'group-hover:opacity-100'
+			class="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-linear-to-b from-primary to-transparent opacity-0 transition-opacity duration-700 ease-out {sessionActive
+				? 'opacity-100 group-hover:opacity-0'
 				: ''}"
 		></div>
 
 		<header
 			class="relative z-10 flex w-full items-end justify-between transition-opacity duration-700 ease-out {sessionActive
-				? 'opacity-0 group-hover:opacity-100'
+				? 'opacity-100 group-hover:opacity-0'
 				: ''}"
 		>
 			<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
@@ -131,7 +154,7 @@
 						? 'bg-red-500'
 						: streamStandby
 							? 'bg-amber-500'
-							: 'animate-pulse bg-[#BC4B31]'}"
+							: 'animate-pulse bg-green-500'}"
 				></div>
 				{streamError ? 'Error' : streamStandby ? 'Standby' : 'Live'}
 			</div>
@@ -140,7 +163,7 @@
 
 	<aside
 		style="width: {phase === 'telemetry' ? '300px' : '420px'}"
-		class="z-20 flex flex-col overflow-x-hidden overflow-y-auto border-l border-sepia bg-light shadow-[-10px_0_40px_rgba(0,0,0,0.04)] transition-[width] duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+		class="z-20 flex flex-col overflow-x-hidden overflow-y-auto border-l border-sepia bg-light shadow-[-10px_0_40px_rgba(0,0,0,0.04)] transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]"
 	>
 		{#if phase === 'telemetry'}
 			<div

@@ -5,11 +5,9 @@
 		sessionActive: boolean;
 	}>();
 
-	let viewers = $state(0);
+	let viewers = $state<number | '--'>('--');
 
 	$effect(() => {
-		if (!sessionActive) return;
-
 		const fetchViews = async () => {
 			try {
 				const res = await fetch(
@@ -18,12 +16,13 @@
 				if (res.ok) {
 					const data = (await res.json()) as { liveViewers: number };
 					viewers = data.liveViewers;
+					console.log('viewers', data.liveViewers);
 				}
 			} catch {}
 		};
 
 		fetchViews();
-		const interval = setInterval(fetchViews, 10000);
+		const interval = setInterval(fetchViews, 5000);
 
 		return () => clearInterval(interval);
 	});
@@ -44,5 +43,5 @@
 			class="relative inline-flex size-1 rounded-full {sessionActive ? 'bg-light' : 'bg-primary'}"
 		></span>
 	</span>
-	{viewers} viewers
+	{viewers} viewer{viewers === 1 ? '' : 's'}
 </span>

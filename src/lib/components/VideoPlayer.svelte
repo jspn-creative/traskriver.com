@@ -18,6 +18,16 @@
 		onError?: () => void;
 	}>();
 
+	const isBrowser = typeof window !== 'undefined';
+	const log = (...args: unknown[]) => {
+		if (!isBrowser) return;
+		console.log('[river-stream][VideoPlayer]', ...args);
+	};
+	const logErr = (...args: unknown[]) => {
+		if (!isBrowser) return;
+		console.error('[river-stream][VideoPlayer]', ...args);
+	};
+
 	let container: HTMLDivElement | undefined = $state();
 	let player: any = $state();
 	let isFullscreen = $state(false);
@@ -26,6 +36,7 @@
 
 	$effect(() => {
 		// Initialize vidstack
+		log('defineCustomElements()');
 		void defineCustomElements();
 	});
 
@@ -36,24 +47,35 @@
 			// A 204 response (stream offline / not yet broadcasting) causes a
 			// manifestParsingError. Treat it as standby — not a fatal error.
 			const errorType = e?.detail?.type ?? e?.detail?.details ?? '';
+			const details = e?.detail?.details ?? '';
+			const code = e?.detail?.response?.code;
 			const isOffline =
-				errorType === 'manifestParsingError' ||
-				e?.detail?.response?.code === 204 ||
-				e?.detail?.details === 'manifestParsingError';
+				errorType === 'manifestParsingError' || code === 204 || details === 'manifestParsingError';
+
+			log('handleError(listener)', {
+				errorType,
+				details,
+				code,
+				isOffline
+			});
 			if (isOffline) return;
 
-			console.error('Stream error:', e);
+			logErr('Stream error:', e);
 			hasError = true;
 			isPlaying = false;
 			onError?.();
 		};
 
+		log('attach listeners', {
+			hasPlayer: !!player
+		});
 		player.addEventListener('error', handleError);
 		player.addEventListener('provider-error', handleError);
 		player.addEventListener('hls-error', handleError);
 		player.addEventListener('fatal-error', handleError);
 
 		return () => {
+			log('cleanup listeners');
 			player.removeEventListener('error', handleError);
 			player.removeEventListener('provider-error', handleError);
 			player.removeEventListener('hls-error', handleError);
@@ -73,6 +95,7 @@
 	const fsLabel = $derived(isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
 
 	const onLivePlaying = () => {
+		log('onplaying');
 		isPlaying = true;
 		hasError = false;
 		onPlaying?.();
@@ -82,6 +105,11 @@
 		// 204 / manifestParsingError = stream offline, not a fatal error
 		const details = e?.detail?.details ?? e?.detail?.type ?? '';
 		const code = e?.detail?.response?.code;
+		log('onerror(media-player event)', {
+			details,
+			code,
+			isOffline: details === 'manifestParsingError' || code === 204
+		});
 		if (details === 'manifestParsingError' || code === 204) return;
 
 		hasError = true;
@@ -90,10 +118,16 @@
 	};
 
 	const toggleFullscreen = () => {
+		log('toggleFullscreen');
 		if (!container) return;
 		if (document.fullscreenElement) void document.exitFullscreen();
 		else void container.requestFullscreen();
 	};
+
+	$effect(() => {
+		// Helps correlate "Safari batch of same error" with player state flips
+		log('state', { isFullscreen, isPlaying, hasError });
+	});
 </script>
 
 <div
@@ -128,7 +162,7 @@
 	/>
 
 	<div
-		class="absolute inset-x-0 bottom-0 z-20 flex items-center justify-end bg-gradient-to-t from-black/70 to-transparent px-6 py-6 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100"
+		class="absolute inset-x-0 bottom-0 z-20 flex items-center justify-end bg-linear-to-t from-black/70 to-transparent px-6 py-6 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100"
 	>
 		<button
 			onclick={toggleFullscreen}
