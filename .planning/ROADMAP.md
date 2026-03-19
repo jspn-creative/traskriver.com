@@ -21,7 +21,7 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 
 ### 🔄 v1.1 Signed URL Streaming (Active)
 
-- [ ] Phase 4: Signed URL Streaming — restore stream playback with CF Signed URLs + async page delivery (**3 plans**)
+- [x] Phase 4: Signed URL Streaming — restore stream playback with CF Signed URLs + async page delivery (**3 plans**) (completed 2026-03-19)
 
 ### 📋 v2.0 Paywall (Planned)
 
@@ -36,7 +36,7 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 
 **Requirements:** SIGN-01, SIGN-02, SIGN-03, SIGN-04
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 
@@ -59,7 +59,7 @@ Plans:
 | 1. Automated Auth             | v1.0      | 1/1            | Complete | 2026-03-18 |
 | 2. Serverless Media Streaming | v1.0      | 2/2            | Complete | 2026-03-18 |
 | 3. Asset Security & Cleanup   | v1.0      | 1/1            | Complete | 2026-03-19 |
-| 4. Signed URL Streaming       | 2/3 | In Progress|  | —          |
+| 4. Signed URL Streaming       | 3/3 | Complete   | 2026-03-19 | —          |
 
 ---
 

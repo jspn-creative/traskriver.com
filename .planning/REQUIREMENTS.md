@@ -10,7 +10,7 @@
 - [x] **SIGN-01**: Developer can generate a Cloudflare Stream signing key via CF API and store the key ID + JWK as env vars
 - [x] **SIGN-02**: Server generates a signed JWT token using the JWK key via Web Crypto API (no CF API call per request)
 - [x] **SIGN-03**: `getStreamInfo()` returns a signed HLS URL with the token replacing the live input UID in the manifest path
-- [ ] **SIGN-04**: Page shell renders immediately; VideoPlayer is wrapped in a nested `<svelte:boundary>` that awaits the signed URL asynchronously
+- [x] **SIGN-04**: Page shell renders immediately; VideoPlayer is wrapped in a nested `<svelte:boundary>` that awaits the signed URL asynchronously
 
 ## v2 Requirements
 
@@ -38,7 +38,7 @@
 | SIGN-01     | Phase 4 | Complete |
 | SIGN-02     | Phase 4 | Complete |
 | SIGN-03     | Phase 4 | Complete |
-| SIGN-04     | Phase 4 | Pending |
+| SIGN-04     | Phase 4 | Complete |
 
 **Coverage:**
 
