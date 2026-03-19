@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { defineCustomElements } from 'vidstack/elements';
+	import defaultPoster from '$lib/assets/default.jpg';
 
 	let {
 		liveSrc,
-		poster,
+		poster = defaultPoster,
 		class: className,
 		sessionActive = false,
 		onPlaying
@@ -18,6 +19,7 @@
 	let container: HTMLDivElement | undefined = $state();
 	let isFullscreen = $state(false);
 	let isPlaying = $state(false);
+	let hasError = $state(false);
 
 	$effect(() => {
 		// Initialize vidstack
@@ -37,7 +39,14 @@
 
 	const onLivePlaying = () => {
 		isPlaying = true;
+		hasError = false;
 		onPlaying?.();
+	};
+
+	const onLiveError = (e: any) => {
+		// When a 401 or other error occurs, show the error state
+		hasError = true;
+		isPlaying = false;
 	};
 
 	const toggleFullscreen = () => {
@@ -60,21 +69,34 @@
 		muted
 		playsinline
 		stream-type="live"
-		class="absolute inset-0 h-full w-full"
+		class="absolute inset-0 z-0 h-full w-full"
 		onplaying={onLivePlaying}
+		onerror={onLiveError}
 	>
 		<media-outlet></media-outlet>
 	</media-player>
+
+	<!-- Explicit poster fallback to ensure it stays visible on error -->
+	<img
+		src={poster}
+		alt="Stream Poster"
+		class="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover transition-opacity duration-500 {isPlaying &&
+		!hasError
+			? 'opacity-0'
+			: 'opacity-100'}"
+	/>
 
 	<div
 		class="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between bg-gradient-to-t from-black/70 to-transparent px-6 py-6 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100"
 	>
 		<span
-			class="rounded-sm px-2 py-1 text-2xs font-semibold tracking-label text-white shadow-sm {!isPlaying
-				? 'bg-amber-600/90'
-				: 'bg-[#BC4B31]/90'}"
+			class="rounded-sm px-2 py-1 text-2xs font-semibold tracking-label text-white shadow-sm {hasError
+				? 'bg-red-600/90'
+				: !isPlaying
+					? 'bg-amber-600/90'
+					: 'bg-[#BC4B31]/90'}"
 		>
-			{!isPlaying ? 'STANDBY' : 'LIVE'}
+			{hasError ? 'ERROR' : !isPlaying ? 'STANDBY' : 'LIVE'}
 		</span>
 
 		<button

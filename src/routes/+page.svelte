@@ -136,20 +136,6 @@
 					class="flex min-w-[300px] flex-1 flex-col"
 				>
 					<LocalWeather />
-					<div
-						class="mt-auto flex shrink-0 items-center justify-center gap-2 rounded-sm bg-emerald-700/90 px-4 py-3 text-xs font-medium tracking-ui text-white shadow-inner"
-					>
-						<svg
-							class="h-4 w-4 shrink-0"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							stroke-width="2.5"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-						</svg>
-						<span>Connection Established</span>
-					</div>
 				</div>
 			{:else}
 				<div

@@ -42,10 +42,10 @@
 
 <div
 	in:fly={{ y: 16, duration: 700, delay: 200, easing: cubicOut }}
-	class="flex flex-col px-8 py-10"
+	class="flex flex-col px-12 py-16"
 >
 	<div class="mb-8">
-		<h2 class="mb-2 text-xs font-medium tracking-label text-secondary uppercase">
+		<h2 class="mb-2 text-2xs font-medium tracking-label text-secondary uppercase">
 			Local Telemetry
 		</h2>
 		<p class="font-display text-2xl tracking-tight text-primary">Tillamook, OR</p>
@@ -99,7 +99,7 @@
 			<div class="mt-auto">
 				<div class="flex items-center gap-2">
 					<div
-						class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-600 shadow-sm shadow-emerald-600/40"
+						class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-700 shadow-sm shadow-emerald-700/40"
 					></div>
 					<span class="text-xs font-medium text-secondary">Sensors Active</span>
 				</div>

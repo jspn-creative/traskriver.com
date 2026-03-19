@@ -50,8 +50,8 @@
 
 	<ul class="mb-12 flex list-none flex-col">
 		{#each specs as [label, value] (label)}
-			<li class="flex items-baseline justify-between border-b border-sepia py-3 text-sm first:pt-0">
-				<span class="text-secondary">{label}</span>
+			<li class="flex items-baseline justify-between border-b border-sepia py-3 first:pt-0">
+				<span class="text-2xs font-medium tracking-label text-secondary uppercase">{label}</span>
 				<span class="font-medium text-primary tabular-nums">{value}</span>
 			</li>
 		{/each}
