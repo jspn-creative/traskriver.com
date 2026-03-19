@@ -24,16 +24,16 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 
 ## Phase Progress
 
-| Phase | Status  | Goal                                                        |
-| ----- | ------- | ----------------------------------------------------------- |
-| 4     | Pending | Restore stream playback using Cloudflare Stream Signed URLs |
+| Phase | Status | Goal                                                                                        |
+| ----- | ------ | ------------------------------------------------------------------------------------------- |
+| 4     | Active | Restore stream playback with CF Signed URLs + server-side JWT signing + async page delivery |
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 4 — Signed URL Streaming
 Plan: —
-Status: Defining requirements
-Last activity: 2026-03-19 — Milestone v1.1 started
+Status: Ready for planning
+Last activity: 2026-03-19 — Roadmap created, Phase 4 ready
 
 ## Decisions
 

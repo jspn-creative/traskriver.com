@@ -46,6 +46,15 @@
 - Mapped to phases: 4
 - Unmapped: 0 ✓
 
+### Phase 4 — Signed URL Streaming
+
+| Requirement | Description                                                                          |
+| ----------- | ------------------------------------------------------------------------------------ |
+| SIGN-01     | Provision CF Stream signing key, store key ID + JWK in env vars                      |
+| SIGN-02     | Server generates RS256 JWT via Web Crypto API (no CF API call)                       |
+| SIGN-03     | `getStreamInfo()` returns signed HLS URL (token in manifest path)                    |
+| SIGN-04     | Page shell renders immediately; VideoPlayer awaits URL in nested `<svelte:boundary>` |
+
 ---
 
 _Requirements defined: 2026-03-19_

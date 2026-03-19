@@ -3,7 +3,8 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-3 (shipped 2026-03-19)
-- 📋 **v2.0 Paywall** — Phases 4+ (planned)
+- 🔄 **v1.1 Signed URL Streaming** — Phase 4 (active)
+- 📋 **v2.0 Paywall** — Phases 5+ (planned)
 
 ## Phases
 
@@ -18,9 +19,30 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 
 </details>
 
+### 🔄 v1.1 Signed URL Streaming (Active)
+
+- [ ] Phase 4: Signed URL Streaming — restore stream playback with CF Signed URLs + async page delivery
+
 ### 📋 v2.0 Paywall (Planned)
 
-- [ ] Phase 4: TBD — implement final paywall logic once client decides on payment model
+- [ ] Phase 5: TBD — implement final paywall logic once client decides on payment model
+
+## Phase Details
+
+### Phase 4: Signed URL Streaming
+
+**Milestone:** v1.1
+**Goal:** Restore stream playback by provisioning a Cloudflare Stream signing key, generating signed JWTs server-side, and delivering the page shell immediately while the player awaits the signed URL.
+
+**Requirements:** SIGN-01, SIGN-02, SIGN-03, SIGN-04
+
+**Success criteria:**
+
+1. Stream plays successfully with "Require Signed URLs" enabled in CF dashboard
+2. Signed HLS URL contains a JWT token (not the raw live input UID) in the manifest path
+3. Token is generated server-side via Web Crypto API with no outbound CF API call per request
+4. Page shell (header, sidebar, pass panel) renders immediately on load — no full-page "Preparing stream…" block
+5. VideoPlayer shows its own pending state while the signed URL resolves, then begins playback
 
 ## Progress
 
@@ -29,8 +51,8 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 | 1. Automated Auth             | v1.0      | 1/1            | Complete | 2026-03-18 |
 | 2. Serverless Media Streaming | v1.0      | 2/2            | Complete | 2026-03-18 |
 | 3. Asset Security & Cleanup   | v1.0      | 1/1            | Complete | 2026-03-19 |
-| 4. Paywall Implementation     | v2.0      | 0/?            | Planned  | —          |
+| 4. Signed URL Streaming       | v1.1      | 0/?            | Active   | —          |
 
 ---
 
-_Roadmap updated: 2026-03-19 after v1.0 milestone_
+_Roadmap updated: 2026-03-19 after v1.1 milestone start_
