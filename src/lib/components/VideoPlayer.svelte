@@ -49,6 +49,7 @@
 			const errorType = e?.detail?.type ?? e?.detail?.details ?? '';
 			const details = e?.detail?.details ?? '';
 			const code = e?.detail?.response?.code;
+			const isFatal = e?.detail?.fatal !== false; // HLS.js sets fatal:false for recoverable errors
 			const isOffline =
 				errorType === 'manifestParsingError' || code === 204 || details === 'manifestParsingError';
 
@@ -56,9 +57,17 @@
 				errorType,
 				details,
 				code,
-				isOffline
+				isOffline,
+				isFatal
 			});
 			if (isOffline) return;
+
+			// Non-fatal HLS errors (e.g. bufferStalledError in Safari) are recoverable —
+			// log them but don't surface the error UI or call onError.
+			if (!isFatal) {
+				log('non-fatal hls error, ignoring', { details });
+				return;
+			}
 
 			logErr('Stream error:', e);
 			hasError = true;
@@ -105,12 +114,21 @@
 		// 204 / manifestParsingError = stream offline, not a fatal error
 		const details = e?.detail?.details ?? e?.detail?.type ?? '';
 		const code = e?.detail?.response?.code;
+		const isFatal = e?.detail?.fatal !== false; // HLS.js sets fatal:false for recoverable errors
 		log('onerror(media-player event)', {
 			details,
 			code,
+			isFatal,
 			isOffline: details === 'manifestParsingError' || code === 204
 		});
 		if (details === 'manifestParsingError' || code === 204) return;
+
+		// Non-fatal HLS errors (e.g. bufferStalledError in Safari) are recoverable —
+		// log them but don't surface the error UI or call onError.
+		if (!isFatal) {
+			log('non-fatal hls error, ignoring', { details });
+			return;
+		}
 
 		hasError = true;
 		isPlaying = false;

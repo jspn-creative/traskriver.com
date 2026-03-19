@@ -39,7 +39,7 @@ Last activity: 2026-03-19 — v1.1 milestone complete
 
 ## Pending Todos
 
-- **Fix Safari HLS buffer stall errors** (`ui`) — Safari triggers repeated non-fatal `bufferStalledError` hls-error events; VideoPlayer treats all errors as fatal and shows error UI. Fix: gate `onError` on `e.detail.fatal === true`, consider HLS.js recovery. `.planning/todos/pending/2026-03-19-fix-safari-hls-buffer-stall-errors.md`
+_None_
 
 ## Accumulated Context
 
