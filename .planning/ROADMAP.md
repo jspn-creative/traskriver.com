@@ -21,7 +21,7 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 
 ### 🔄 v1.1 Signed URL Streaming (Active)
 
-- [ ] Phase 4: Signed URL Streaming — restore stream playback with CF Signed URLs + async page delivery
+- [ ] Phase 4: Signed URL Streaming — restore stream playback with CF Signed URLs + async page delivery (**3 plans**)
 
 ### 📋 v2.0 Paywall (Planned)
 
@@ -35,6 +35,14 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 **Goal:** Restore stream playback by provisioning a Cloudflare Stream signing key, generating signed JWTs server-side, and delivering the page shell immediately while the player awaits the signed URL.
 
 **Requirements:** SIGN-01, SIGN-02, SIGN-03, SIGN-04
+
+**Plans:** 3 plans
+
+Plans:
+
+- [ ] 04-01-PLAN.md — Signing key provisioning script + env var documentation
+- [ ] 04-02-PLAN.md — RS256 JWT generation + signed URL construction in stream.remote.ts
+- [ ] 04-03-PLAN.md — Page shell restructure: nested VideoPlayer boundary, immediate sidebar/header render
 
 **Success criteria:**
 
@@ -51,7 +59,7 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 | 1. Automated Auth             | v1.0      | 1/1            | Complete | 2026-03-18 |
 | 2. Serverless Media Streaming | v1.0      | 2/2            | Complete | 2026-03-18 |
 | 3. Asset Security & Cleanup   | v1.0      | 1/1            | Complete | 2026-03-19 |
-| 4. Signed URL Streaming       | v1.1      | 0/?            | Active   | —          |
+| 4. Signed URL Streaming       | v1.1      | 0/3            | Active   | —          |
 
 ---
 
