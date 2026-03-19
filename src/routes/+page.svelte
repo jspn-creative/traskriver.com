@@ -13,7 +13,7 @@
 	let phase = $state<'sales' | 'connecting' | 'connected' | 'telemetry'>('sales');
 	let streamStandby = $state(true);
 	let streamError = $state(false);
-	let drawerOpen = $state(false);
+	let drawerOpen = $state(true);
 
 	let headerVisible = $state(true);
 	let hideTimer: ReturnType<typeof setTimeout>;
@@ -76,7 +76,7 @@
 	});
 </script>
 
-<div class="flex h-screen flex-col overflow-hidden bg-light font-body text-primary md:flex-row">
+<div class="flex h-dvh flex-col overflow-hidden bg-light font-body text-primary md:flex-row">
 	<main
 		class="group relative flex flex-1 flex-col justify-between p-4 md:p-10"
 		ontouchstart={sessionActive ? resetHideTimer : undefined}
@@ -242,9 +242,10 @@
 	<!-- Mobile bottom drawer — only rendered on mobile -->
 	<div class="md:hidden">
 		<Drawer bind:open={drawerOpen}>
-			<DrawerContent class="max-h-[85vh] overflow-y-auto border-sepia bg-light">
+			<DrawerContent class="max-h-[70%] border-sepia bg-light *:overflow-auto">
 				{#if phase === 'telemetry'}
 					<LocalWeather />
+					<TelemetryFooter />
 				{:else}
 					<PassDetailsPanel
 						{sessionActive}
@@ -253,7 +254,6 @@
 						onBeginConnection={handleBeginConnection}
 					/>
 				{/if}
-				<TelemetryFooter />
 			</DrawerContent>
 		</Drawer>
 	</div>

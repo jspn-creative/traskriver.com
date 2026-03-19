@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Drawer as DrawerPrimitive } from "vaul-svelte";
+	import { Drawer as DrawerPrimitive } from 'vaul-svelte';
 
 	let {
-		shouldScaleBackground = true,
-		open = $bindable(false),
+		shouldScaleBackground = false,
+		open = $bindable(true),
 		activeSnapPoint = $bindable(null),
 		...restProps
 	}: DrawerPrimitive.RootProps = $props();
