@@ -102,7 +102,7 @@
 				{#await getStreamInfo() then stream}
 					<LiveViewerCount
 						customerCode={stream.customerCode}
-						inputId={stream.inputId}
+						token={stream.token}
 						{sessionActive}
 					/>
 				{/await}

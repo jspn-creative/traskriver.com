@@ -33,6 +33,15 @@
 		if (!player) return;
 
 		const handleError = (e: any) => {
+			// A 204 response (stream offline / not yet broadcasting) causes a
+			// manifestParsingError. Treat it as standby — not a fatal error.
+			const errorType = e?.detail?.type ?? e?.detail?.details ?? '';
+			const isOffline =
+				errorType === 'manifestParsingError' ||
+				e?.detail?.response?.code === 204 ||
+				e?.detail?.details === 'manifestParsingError';
+			if (isOffline) return;
+
 			console.error('Stream error:', e);
 			hasError = true;
 			isPlaying = false;
@@ -70,7 +79,11 @@
 	};
 
 	const onLiveError = (e: any) => {
-		// When a 401 or other error occurs, show the error state
+		// 204 / manifestParsingError = stream offline, not a fatal error
+		const details = e?.detail?.details ?? e?.detail?.type ?? '';
+		const code = e?.detail?.response?.code;
+		if (details === 'manifestParsingError' || code === 204) return;
+
 		hasError = true;
 		isPlaying = false;
 		onError?.();

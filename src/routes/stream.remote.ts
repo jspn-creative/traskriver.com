@@ -6,6 +6,7 @@ export type StreamInfo = {
 	liveHlsUrl: string;
 	customerCode: string;
 	inputId: string;
+	token: string;
 };
 
 const encoder = new TextEncoder();
@@ -68,5 +69,5 @@ export const getStreamInfo = query(async () => {
 	const token = await generateStreamToken(uid, signingKeyId, signingJwk);
 	const liveHlsUrl = `https://customer-${customer}.cloudflarestream.com/${token}/manifest/video.m3u8`;
 
-	return { liveHlsUrl, customerCode: customer, inputId: uid } satisfies StreamInfo;
+	return { liveHlsUrl, customerCode: customer, inputId: uid, token } satisfies StreamInfo;
 });
