@@ -161,11 +161,11 @@
 					: ''}"
 			>
 				<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
-					<LiveViewerCount
+					<!-- <LiveViewerCount
 						customerCode={stream.customerCode}
 						token={stream.token}
 						{sessionActive}
-					/>
+					/> -->
 					<div class="flex items-baseline gap-4">
 						<span
 							class="font-display text-display tracking-display text-light drop-shadow-md transition-colors duration-700"
