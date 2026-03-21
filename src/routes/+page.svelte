@@ -14,6 +14,18 @@
 	let streamStandby = $state(true);
 	let streamError = $state(false);
 	let drawerOpen = $state(true);
+	let drawerDirection = $state<'bottom' | 'right'>('bottom');
+
+	$effect(() => {
+		if (!isBrowser) return;
+		const mediaQuery = window.matchMedia('(min-width: 768px)');
+		const updateDirection = (e: MediaQueryListEvent | MediaQueryList) => {
+			drawerDirection = e.matches ? 'right' : 'bottom';
+		};
+		updateDirection(mediaQuery);
+		mediaQuery.addEventListener('change', updateDirection);
+		return () => mediaQuery.removeEventListener('change', updateDirection);
+	});
 
 	let headerVisible = $state(true);
 	let hideTimer: ReturnType<typeof setTimeout>;
@@ -33,6 +45,8 @@
 
 	let sessionActive = $derived(phase !== 'sales');
 	let isConnecting = $derived(phase === 'connecting');
+
+	let sidebarWidth = $derived(phase === 'telemetry' ? '300px' : '420px');
 
 	const isBrowser = typeof window !== 'undefined';
 	const log = (...args: unknown[]) => {
@@ -135,7 +149,7 @@
 				class="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-linear-to-b from-primary to-transparent opacity-0 transition-opacity duration-700 ease-out {sessionActive
 					? headerVisible
 						? 'opacity-100'
-						: 'opacity-0'
+						: 'opacity-100 lg:opacity-0'
 					: ''}"
 			></div>
 
@@ -143,7 +157,7 @@
 				class="relative z-10 flex w-full items-end justify-between transition-opacity duration-700 ease-out {sessionActive
 					? headerVisible
 						? 'opacity-100'
-						: 'pointer-events-none opacity-0'
+						: 'pointer-events-auto opacity-100 lg:pointer-events-none lg:opacity-0'
 					: ''}"
 			>
 				<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
@@ -207,54 +221,47 @@
 		</svelte:boundary>
 	</main>
 
-	<!-- Desktop sidebar — hidden on mobile -->
+	<!-- Sidebar/Drawer Container -->
 	<aside
-		class="z-20 hidden flex-col overflow-x-hidden overflow-y-auto border-l border-sepia bg-light shadow-[-10px_0_40px_rgba(0,0,0,0.04)] transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex {phase ===
-		'telemetry'
-			? 'md:w-[300px]'
-			: 'md:w-[420px]'}"
+		style="width: {drawerDirection === 'right' ? sidebarWidth : '0px'}"
+		class="z-20 flex flex-col overflow-x-hidden overflow-y-auto border-sepia bg-light shadow-[-10px_0_40px_rgba(0,0,0,0.04)] transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)] {drawerDirection ===
+		'right'
+			? 'border-l'
+			: ''}"
 	>
-		{#if phase === 'telemetry'}
-			<div
-				out:fade={{ duration: 200, easing: cubicOut }}
-				in:fade={{ duration: 400, delay: 100, easing: cubicOut }}
-				class="flex min-w-0 flex-1 flex-col"
+		<Drawer bind:open={drawerOpen} direction={drawerDirection} modal={drawerDirection === 'bottom'}>
+			<DrawerContent
+				style={drawerDirection === 'right'
+					? `width: ${sidebarWidth}; min-width: ${sidebarWidth}`
+					: ''}
+				class="border-sepia bg-light *:overflow-auto {drawerDirection === 'right'
+					? 'top-0 right-0 mt-0 h-full rounded-none transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]'
+					: 'max-h-[85vh]'}"
 			>
-				<LocalWeather />
-			</div>
-		{:else}
-			<div
-				out:fade={{ duration: 250, easing: cubicOut }}
-				in:fade={{ duration: 300, easing: cubicOut }}
-				class="flex min-w-0 flex-1 flex-col"
-			>
-				<PassDetailsPanel
-					{sessionActive}
-					{isConnecting}
-					{streamStandby}
-					onBeginConnection={handleBeginConnection}
-				/>
-			</div>
-		{/if}
-		<TelemetryFooter />
-	</aside>
-
-	<!-- Mobile bottom drawer — only rendered on mobile -->
-	<div class="md:hidden">
-		<Drawer bind:open={drawerOpen}>
-			<DrawerContent class="max-h-[70%] border-sepia bg-light *:overflow-auto">
 				{#if phase === 'telemetry'}
-					<LocalWeather />
-					<TelemetryFooter />
+					<div
+						out:fade={{ duration: 200, easing: cubicOut }}
+						in:fade={{ duration: 400, delay: 100, easing: cubicOut }}
+						class="flex min-w-0 flex-1 flex-col"
+					>
+						<LocalWeather />
+					</div>
 				{:else}
-					<PassDetailsPanel
-						{sessionActive}
-						{isConnecting}
-						{streamStandby}
-						onBeginConnection={handleBeginConnection}
-					/>
+					<div
+						out:fade={{ duration: 250, easing: cubicOut }}
+						in:fade={{ duration: 300, easing: cubicOut }}
+						class="flex min-w-0 flex-1 flex-col"
+					>
+						<PassDetailsPanel
+							{sessionActive}
+							{isConnecting}
+							{streamStandby}
+							onBeginConnection={handleBeginConnection}
+						/>
+					</div>
 				{/if}
+				<TelemetryFooter />
 			</DrawerContent>
 		</Drawer>
-	</div>
+	</aside>
 </div>
