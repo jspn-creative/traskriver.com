@@ -43,6 +43,30 @@
 	$effect(() => {
 		if (!player) return;
 
+		const onProviderChange = (e: any) => {
+			const provider = e.detail;
+			if (provider?.type === 'hls') {
+				log('Configuring HLS provider');
+				provider.config = {
+					...provider.config,
+					// Increase timeouts to be more resilient to slow network/stream
+					fragLoadingTimeOut: 20000,
+					manifestLoadingTimeOut: 20000,
+					levelLoadingTimeOut: 20000,
+					// Live stream specific configs
+					liveSyncDurationCount: 3,
+					liveMaxLatencyDurationCount: 10
+				};
+			}
+		};
+
+		player.addEventListener('provider-change', onProviderChange);
+		return () => player.removeEventListener('provider-change', onProviderChange);
+	});
+
+	$effect(() => {
+		if (!player) return;
+
 		const handleError = (e: any) => {
 			// A 204 response (stream offline / not yet broadcasting) causes a
 			// manifestParsingError. Treat it as standby — not a fatal error.
@@ -66,6 +90,14 @@
 			// log them but don't surface the error UI or call onError.
 			if (!isFatal) {
 				log('non-fatal hls error, ignoring', { details });
+
+				// Nudge the player if it stalls due to a fragment timeout
+				if (details === 'fragLoadTimeOut' && sessionActive && player && !isPlaying) {
+					log('Attempting to recover from fragLoadTimeOut');
+					try {
+						player.play()?.catch(() => {});
+					} catch (e) {}
+				}
 				return;
 			}
 
@@ -127,6 +159,12 @@
 		// log them but don't surface the error UI or call onError.
 		if (!isFatal) {
 			log('non-fatal hls error, ignoring', { details });
+			if (details === 'fragLoadTimeOut' && sessionActive && player && !isPlaying) {
+				log('Attempting to recover from fragLoadTimeOut');
+				try {
+					player.play()?.catch(() => {});
+				} catch (e) {}
+			}
 			return;
 		}
 
@@ -145,6 +183,20 @@
 	$effect(() => {
 		// Helps correlate "Safari batch of same error" with player state flips
 		log('state', { isFullscreen, isPlaying, hasError });
+	});
+
+	$effect(() => {
+		if (sessionActive && player && !isPlaying) {
+			log('sessionActive is true, attempting to play');
+			try {
+				const promise = player.play();
+				if (promise !== undefined) {
+					promise.catch((e: any) => logErr('play error', e));
+				}
+			} catch (e) {
+				logErr('play exception', e);
+			}
+		}
 	});
 </script>
 
