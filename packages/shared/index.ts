@@ -17,6 +17,16 @@ export interface RelayStatusPayload {
 	timestamp: number;
 }
 
+/** Response from GET /api/relay/status — consumed by web app for UI state */
+export interface RelayStatusResponse {
+	state: RelayState | null;
+	timestamp: number | null;
+	stale: boolean;
+}
+
+export const RELAY_STATUS_TTL_SECONDS = 120;
+export const RELAY_STATUS_STALE_THRESHOLD_MS = RELAY_STATUS_TTL_SECONDS * 1000;
+
 /** Configuration shape for relay service */
 export interface RelayConfig {
 	streamUrl: string;
