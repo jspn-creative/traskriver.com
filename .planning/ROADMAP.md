@@ -45,7 +45,7 @@ Full archive: `.planning/milestones/v2.0-ROADMAP.md`
 
 - [x] **Phase 05: Monorepo Restructure** — Move SvelteKit to `/packages/web`, create `/packages/relay` and `packages/shared`, configure Bun workspaces (completed 2026-04-08)
 - [x] **Phase 06: Demand API** — Worker endpoints for stream demand registration and relay polling, KV-backed state (completed 2026-04-08)
-- [ ] **Phase 07: Relay Service** — TypeScript polling loop with ffmpeg state machine, crash recovery, safety policies
+- [x] **Phase 07: Relay Service** — TypeScript polling loop with ffmpeg state machine, crash recovery, safety policies (completed 2026-04-08)
 - [ ] **Phase 08: Stream UX** — Demand-aware UI states: starting, live, ended, unavailable
 - [ ] **Phase 09: Relay Deployment** — Pi provisioning, systemd service, Tailscale access, deploy pipeline
 
@@ -109,8 +109,8 @@ Plans:
 
 Plans:
 
-- [ ] 07-01-PLAN.md — State machine, demand poller, status reporter, structured logger (RLAY-01, RLAY-02, RLAY-06)
-- [ ] 07-02-PLAN.md — ffmpeg process manager, main loop wiring, crash recovery, safety policies (RLAY-01 through RLAY-06)
+- [x] 07-01-PLAN.md — State machine, demand poller, status reporter, structured logger (RLAY-01, RLAY-02, RLAY-06)
+- [x] 07-02-PLAN.md — ffmpeg process manager, main loop wiring, crash recovery, safety policies (RLAY-01 through RLAY-06)
 
 ### Phase 08: Stream UX
 
@@ -153,11 +153,11 @@ Plans:
 | 03. Asset Security & Cleanup   | v2.0      | 1/1            | Complete     | 2026-03-19 |
 | 04. Signed URL Streaming       | v2.0      | 3/3            | Complete     | 2026-03-19 |
 | 05. Monorepo Restructure       | v3.0      | 3/3            | Complete     | 2026-04-08 |
-| 06. Demand API                 | 3/3 | Complete    | 2026-04-08 | —          |
-| 07. Relay Service              | 1/2 | In Progress|  | —          |
+| 06. Demand API                 | v3.0      | 3/3            | Complete     | 2026-04-08 |
+| 07. Relay Service              | v3.0      | 2/2            | Complete     | 2026-04-08 |
 | 08. Stream UX                  | v3.0      | 0/?            | Not started  | —          |
 | 09. Relay Deployment           | v3.0      | 0/?            | Not started  | —          |
 
 ---
 
-_Roadmap updated: 2026-04-08 — Phase 05 complete (monorepo + Turbo)_
+_Roadmap updated: 2026-04-08 — Phase 07 relay service complete (07-02)_

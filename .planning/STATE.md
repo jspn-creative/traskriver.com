@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
 status: unknown
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-04-08T02:19:05.540Z"
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-04-08T02:25:48.439Z"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -19,22 +19,22 @@ progress:
 See: .planning/PROJECT.md
 
 **Core value:** Reliably deliver a continuous, high-quality livestream to authenticated users.
-**Current focus:** Phase 07 — relay-service
+**Current focus:** Phase 08 — stream-ux
 
 ## Phase Progress
 
 | Phase                    | Status      | Goal                                                               |
 | ------------------------ | ----------- | ------------------------------------------------------------------ |
 | 05. Monorepo Restructure | Complete    | Devs work on web + relay in single repo with shared types          |
-| 06. Demand API           | Not started | Worker endpoints for demand registration and relay polling         |
-| 07. Relay Service        | In progress | TypeScript polling loop + ffmpeg state machine with crash recovery |
+| 06. Demand API           | Complete    | Worker endpoints for demand registration and relay polling         |
+| 07. Relay Service        | Complete    | TypeScript polling loop + ffmpeg state machine with crash recovery |
 | 08. Stream UX            | Not started | Demand-aware UI states: starting, live, ended, unavailable         |
 | 09. Relay Deployment     | Not started | Pi provisioning, systemd, Tailscale, deploy pipeline               |
 
 ## Current Position
 
-Phase: 07 (relay-service) — EXECUTING
-Plan: 2 of 2
+Phase: 08 (stream-ux) — NOT STARTED
+Plan: — (see ROADMAP; plans TBD)
 
 ## Pending Todos
 
@@ -75,8 +75,10 @@ _None_
 | Bun.spawn + exited promise for ffmpeg          | No Node.js child_process; native Bun subprocess management   |
 | SIGTERM + 10s SIGKILL fallback for ffmpeg stop | Ensures ffmpeg never becomes zombie process                  |
 | 15s cooldown before restart after ffmpeg crash | Prevents tight crash loops                                   |
+| starting→stopping allowed for demand expiry  | Matches main-loop stop path while ffmpeg still in starting   |
+| `.env.example` un-ignored in relay package     | `.env.*` ignore would block versioned env template           |
 
 ## Last Session
 
-- **Stopped at:** Completed 07-01-PLAN.md
+- **Stopped at:** Completed 07-02-PLAN.md
 - **Updated:** 2026-04-08

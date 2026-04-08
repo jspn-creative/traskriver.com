@@ -24,9 +24,9 @@ Requirements for on-demand streaming milestone. Each maps to roadmap phases.
 
 - [x] **RLAY-01**: TypeScript polling loop using `setTimeout` chaining polls `/api/stream/demand` every ~10 seconds, with 8s request timeout and consecutive failure tracking
 - [x] **RLAY-02**: State machine manages ffmpeg lifecycle: `idle → starting → live → stopping → cooldown → idle` with transition logging
-- [ ] **RLAY-03**: Relay spawns ffmpeg to pull RTSP from IP camera and push RTMPS to Cloudflare Stream when demand is active; sends SIGTERM (with 10s SIGKILL fallback) when demand expires
-- [ ] **RLAY-04**: Relay stops streaming after 5 minutes of no new demand requests (demand TTL expired) — timeout logic lives entirely in the Worker/KV, relay just obeys `shouldStream`
-- [ ] **RLAY-05**: Relay recovers from ffmpeg crashes (unexpected exit during `starting` or `live` state) by transitioning through cooldown and restarting if demand still exists
+- [x] **RLAY-03**: Relay spawns ffmpeg to pull RTSP from IP camera and push RTMPS to Cloudflare Stream when demand is active; sends SIGTERM (with 10s SIGKILL fallback) when demand expires
+- [x] **RLAY-04**: Relay stops streaming after 5 minutes of no new demand requests (demand TTL expired) — timeout logic lives entirely in the Worker/KV, relay just obeys `shouldStream`
+- [x] **RLAY-05**: Relay recovers from ffmpeg crashes (unexpected exit during `starting` or `live` state) by transitioning through cooldown and restarting if demand still exists
 - [x] **RLAY-06**: Relay stops streaming after N consecutive poll failures (~5 min) as a safety policy to avoid indefinite streaming during network partitions
 
 ### Stream UX
@@ -91,9 +91,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEMA-03     | Phase 06 | Pending |
 | RLAY-01     | Phase 07 | Complete |
 | RLAY-02     | Phase 07 | Complete |
-| RLAY-03     | Phase 07 | Pending |
-| RLAY-04     | Phase 07 | Pending |
-| RLAY-05     | Phase 07 | Pending |
+| RLAY-03     | Phase 07 | Complete |
+| RLAY-04     | Phase 07 | Complete |
+| RLAY-05     | Phase 07 | Complete |
 | RLAY-06     | Phase 07 | Complete |
 | STRX-01     | Phase 08 | Pending |
 | STRX-02     | Phase 08 | Pending |
