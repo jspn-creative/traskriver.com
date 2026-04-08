@@ -161,7 +161,7 @@ Plans:
 | 06. Demand API                 | v3.0      | 3/3            | Complete     | 2026-04-08 |
 | 07. Relay Service              | v3.0      | Complete    | 2026-04-08 | 2026-04-08 |
 | 08. Stream UX                  | v3.0      | 0/?            | Not started  | —          |
-| 09. Relay Deployment           | v3.0      | 0/?            | Not started  | —          |
+| 09. Relay Deployment           | 1/2 | In Progress|  | —          |
 
 ---
 

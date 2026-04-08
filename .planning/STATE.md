@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
-status: Ready to execute
-stopped_at: Phase 09 context gathered
-last_updated: "2026-04-08T03:03:23.050Z"
+status: unknown
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-04-08T09:05:06.603Z"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 10
-  completed_plans: 8
-  percent: 80
+  completed_plans: 9
 ---
 
 # Project State
@@ -20,7 +19,7 @@ progress:
 See: .planning/PROJECT.md
 
 **Core value:** Reliably deliver a continuous, high-quality livestream to authenticated users.
-**Current focus:** Phase 08 — stream-ux
+**Current focus:** Phase 09 — relay-deployment
 
 ## Phase Progress
 
@@ -30,12 +29,12 @@ See: .planning/PROJECT.md
 | 06. Demand API           | Complete    | Worker endpoints for demand registration and relay polling         |
 | 07. Relay Service        | Complete    | TypeScript polling loop + ffmpeg state machine with crash recovery |
 | 08. Stream UX            | Not started | Demand-aware UI states: starting, live, ended, unavailable         |
-| 09. Relay Deployment     | Not started | Pi provisioning, systemd, Tailscale, deploy pipeline               |
+| 09. Relay Deployment     | In progress | Pi provisioning, systemd, Tailscale, deploy pipeline               |
 
 ## Current Position
 
-Phase: 08 (stream-ux) — NOT STARTED
-Plan: — (see ROADMAP; plans TBD)
+Phase: 09 (relay-deployment) — EXECUTING
+Plan: 2 of 2
 
 ## Pending Todos
 
@@ -78,8 +77,10 @@ _None_
 | 15s cooldown before restart after ffmpeg crash | Prevents tight crash loops                                   |
 | starting→stopping allowed for demand expiry  | Matches main-loop stop path while ffmpeg still in starting   |
 | `.env.example` un-ignored in relay package     | `.env.*` ignore would block versioned env template           |
+| systemd restart guard 10/300 + 15m reset timer | Prevents permanent start-limit lockout while avoiding tight restart loops |
+| Bun at `/usr/local/bin/bun` in setup            | Keeps service ExecStart stable across root/user environments |
 
 ## Last Session
 
-- **Stopped at:** Phase 09 context gathered
+- **Stopped at:** Completed 09-01-PLAN.md
 - **Updated:** 2026-04-08
