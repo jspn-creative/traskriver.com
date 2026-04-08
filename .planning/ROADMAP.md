@@ -138,7 +138,12 @@ Plans:
 4. Operator can SSH into the relay via Tailscale from anywhere, and can roll back to a previous version via `git checkout` + service restart
 5. Pushing to `main` triggers deployment to the relay over Tailscale SSH via the idempotent Bun config script
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] 09-01-PLAN.md — Pi provisioning (setup.sh), systemd service/timer, SD hardening, .env management (DEPL-01 through DEPL-05, DEPL-07)
+- [ ] 09-02-PLAN.md — Idempotent configure.ts deploy script, GitHub Actions pipeline, relay README with rollback docs (DEPL-06, DEPL-08, DEPL-09)
 
 ## Progress
 
