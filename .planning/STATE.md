@@ -87,7 +87,13 @@ _None_
 | Starting timeout excludes stale-relay windows | Prevents false timeout errors while relay heartbeat is offline |
 | Unavailable CTA remains clickable | Users can retry stream start while relay is offline (`buttonDisabled` excludes `unavailable`) |
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260408-cz3 | Fix PassDetailsPanel UX: spinner persists after demand reverts to idle state, and button color stays secondary after first click when it should be primary | 2026-04-08 | a02dfcf | [260408-cz3-fix-passdetailspanel-ux-spinner-persists](./quick/260408-cz3-fix-passdetailspanel-ux-spinner-persists/) |
+
 ## Last Session
 
-- **Stopped at:** Completed 08-03-PLAN.md
+- **Stopped at:** Completed quick task 260408-cz3: Fix PassDetailsPanel UX spinner + button color
 - **Updated:** 2026-04-08
