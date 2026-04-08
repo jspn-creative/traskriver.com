@@ -1,20 +1,18 @@
 <script lang="ts">
 	let {
-		sessionActive,
-		isConnecting,
-		streamStandby,
-		onBeginConnection,
-		demandRegistered = true,
+		phase,
+		onStartStream,
+		demandRegistered = false,
 		demandLoading = false,
-		demandError = null
+		demandError = null,
+		relayStale = false
 	} = $props<{
-		sessionActive: boolean;
-		isConnecting?: boolean;
-		streamStandby: boolean;
-		onBeginConnection: () => void;
+		phase: 'idle' | 'starting' | 'live' | 'viewing' | 'ended' | 'ended_confirming' | 'unavailable' | 'error';
+		onStartStream: () => void;
 		demandRegistered?: boolean;
 		demandLoading?: boolean;
 		demandError?: string | null;
+		relayStale?: boolean;
 	}>();
 
 	const specs = [
@@ -25,16 +23,24 @@
 		['Max Bitrate', '4096 Kbps']
 	] as const;
 
+	let sessionActive = $derived(phase !== 'idle' && phase !== 'ended' && phase !== 'error');
+	let isStarting = $derived(phase === 'starting' || phase === 'unavailable');
+	let buttonDisabled = $derived(sessionActive || demandLoading);
+
 	const ctaLabel = $derived(
 		demandLoading
 			? 'Starting stream…'
-			: isConnecting
-				? 'Establishing Link...'
-				: sessionActive
-					? 'Connection Established'
-					: !demandRegistered
-						? 'Start stream'
-						: 'View Now (for Free!)'
+			: phase === 'starting'
+				? 'Starting stream…'
+				: phase === 'unavailable'
+					? 'Try starting stream'
+					: phase === 'live' || phase === 'viewing'
+						? 'Stream active'
+						: phase === 'ended' || phase === 'ended_confirming'
+							? 'Stream ended'
+							: phase === 'error'
+								? 'Stream error'
+								: 'Start stream'
 	);
 </script>
 
@@ -73,28 +79,26 @@
 	</ul>
 
 	<div class="mt-auto flex flex-col gap-3">
-		{#if streamStandby && isConnecting}
+		{#if isStarting && demandRegistered}
 			<p class="animate-pulse text-center text-2xs text-secondary">
-				Live feed connecting — please wait.
+				{relayStale ? 'Relay appears offline — stream may take longer.' : 'Live feed connecting — please wait.'}
 			</p>
 		{/if}
 
 		<button
-			onclick={onBeginConnection}
-			disabled={sessionActive || isConnecting || demandLoading}
-			class="relative w-full overflow-hidden rounded-sm py-[18px] text-xs font-medium tracking-ui text-light transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-light focus-visible:outline-none {sessionActive ||
-			isConnecting ||
-			demandLoading
+			onclick={onStartStream}
+			disabled={buttonDisabled}
+			class="relative w-full overflow-hidden rounded-sm py-[18px] text-xs font-medium tracking-ui text-light transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-light focus-visible:outline-none {buttonDisabled
 				? 'cursor-not-allowed shadow-inner'
-				: 'cursor-pointer bg-primary hover:bg-primary/90 active:scale-[0.98]'} {isConnecting ||
+				: 'cursor-pointer bg-primary hover:bg-primary/90 active:scale-[0.98]'} {isStarting ||
 			demandLoading
 				? 'bg-secondary/90'
-				: sessionActive
+				: phase === 'live' || phase === 'viewing'
 					? 'bg-emerald-700/80'
 					: 'bg-primary'}"
 		>
 			<div class="relative flex items-center justify-center gap-2">
-				{#if isConnecting || demandLoading}
+				{#if isStarting || demandLoading}
 					<svg
 						class="h-4 w-4 animate-spin text-white/70"
 						xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +113,7 @@
 							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 						></path>
 					</svg>
-				{:else if sessionActive}
+				{:else if phase === 'live' || phase === 'viewing'}
 					<svg
 						class="h-4 w-4 text-white"
 						fill="none"
