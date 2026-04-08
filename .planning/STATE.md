@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
-status: unknown
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-08T15:27:32.702Z"
+status: executing
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-08T15:37:17.469Z"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -28,13 +28,13 @@ See: .planning/PROJECT.md
 | 05. Monorepo Restructure | Complete    | Devs work on web + relay in single repo with shared types          |
 | 06. Demand API           | Complete    | Worker endpoints for demand registration and relay polling         |
 | 07. Relay Service        | Complete    | TypeScript polling loop + ffmpeg state machine with crash recovery |
-| 08. Stream UX            | Not started | Demand-aware UI states: starting, live, ended, unavailable         |
+| 08. Stream UX            | In progress | Demand-aware UI states: starting, live, ended, unavailable         |
 | 09. Relay Deployment     | Complete    | Pi provisioning, systemd, Tailscale, deploy pipeline               |
 
 ## Current Position
 
 Phase: 08 (stream-ux) — EXECUTING
-Plan: 1 of 2
+Plan: 2 of 2
 
 ## Pending Todos
 
@@ -81,8 +81,10 @@ _None_
 | Bun at `/usr/local/bin/bun` in setup            | Keeps service ExecStart stable across root/user environments |
 | ff-only pull + diff-based unit sync in configure.ts | Makes deploy script idempotent and safe to re-run after code/config changes |
 | relay deploy CI path-filtered to relay/shared only | Avoids unnecessary Pi deploys from unrelated web-only commits |
+| Public GET /api/relay/status | Web app can poll relay status without relay bearer token |
+| Shared relay-status TTL/stale constants | API and frontend use one source of truth for stale detection |
 
 ## Last Session
 
-- **Stopped at:** Phase 8 context gathered
+- **Stopped at:** Completed 08-01-PLAN.md
 - **Updated:** 2026-04-08

@@ -127,7 +127,7 @@ Plans:
 
 Plans:
 
-- [ ] 08-01-PLAN.md — GET /api/relay/status endpoint + RelayStatusResponse shared type (STRX-01, STRX-03)
+- [x] 08-01-PLAN.md — GET /api/relay/status endpoint + RelayStatusResponse shared type (STRX-01, STRX-03)
 - [ ] 08-02-PLAN.md — Page state machine overhaul: relay polling, starting/live/ended/unavailable UI states, restart flow (STRX-01, STRX-02, STRX-03)
 
 ### Phase 09: Relay Deployment
@@ -165,9 +165,9 @@ Plans:
 | 05. Monorepo Restructure       | v3.0      | 3/3            | Complete     | 2026-04-08 |
 | 06. Demand API                 | v3.0      | 3/3            | Complete     | 2026-04-08 |
 | 07. Relay Service              | v3.0      | Complete    | 2026-04-08 | 2026-04-08 |
-| 08. Stream UX                  | v3.0      | 0/2            | Planned      | —          |
-| 09. Relay Deployment           | 2/2 | Complete   | 2026-04-08 | —          |
+| 08. Stream UX                  | v3.0      | 1/2            | In Progress  | —          |
+| 09. Relay Deployment           | v3.0      | 2/2            | Complete     | 2026-04-08 |
 
 ---
 
-_Roadmap updated: 2026-04-08 — Phase 08 stream UX planned (2 plans)_
+_Roadmap updated: 2026-04-08 — Phase 08 plan 01 completed (1/2)_
