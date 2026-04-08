@@ -39,5 +39,7 @@ packages/*/.svelte-kit/
 packages/*/dist/
 packages/*/.env
 packages/*/.env.*
+packages/*/.dev.vars
 packages/*/*.local
 !packages/*/.env.example
+!packages/*/.dev.vars.example

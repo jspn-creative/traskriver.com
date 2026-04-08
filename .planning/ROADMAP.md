@@ -44,7 +44,7 @@ Full archive: `.planning/milestones/v2.0-ROADMAP.md`
 ### 📋 v3.0 On-Demand Streaming (In Progress)
 
 - [x] **Phase 05: Monorepo Restructure** — Move SvelteKit to `/packages/web`, create `/packages/relay` and `packages/shared`, configure Bun workspaces (completed 2026-04-08)
-- [ ] **Phase 06: Demand API** — Worker endpoints for stream demand registration and relay polling, KV-backed state
+- [x] **Phase 06: Demand API** — Worker endpoints for stream demand registration and relay polling, KV-backed state (completed 2026-04-08)
 - [ ] **Phase 07: Relay Service** — TypeScript polling loop with ffmpeg state machine, crash recovery, safety policies
 - [ ] **Phase 08: Stream UX** — Demand-aware UI states: starting, live, ended, unavailable
 - [ ] **Phase 09: Relay Deployment** — Pi provisioning, systemd service, Tailscale access, deploy pipeline
@@ -153,7 +153,7 @@ Plans:
 | 03. Asset Security & Cleanup   | v2.0      | 1/1            | Complete     | 2026-03-19 |
 | 04. Signed URL Streaming       | v2.0      | 3/3            | Complete     | 2026-03-19 |
 | 05. Monorepo Restructure       | v3.0      | 3/3            | Complete     | 2026-04-08 |
-| 06. Demand API                 | v3.0      | 0/3            | Not started  | —          |
+| 06. Demand API                 | 3/3 | Complete    | 2026-04-08 | —          |
 | 07. Relay Service              | v3.0      | 0/2            | Not started  | —          |
 | 08. Stream UX                  | v3.0      | 0/?            | Not started  | —          |
 | 09. Relay Deployment           | v3.0      | 0/?            | Not started  | —          |

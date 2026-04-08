@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
-status: in_progress
-stopped_at: null
-last_updated: "2026-04-08T01:15:00.000Z"
-last_activity: 2026-04-08 — Phase 05 executed (monorepo + Turbo)
+status: unknown
+stopped_at: Phase 05 complete; ready for Phase 06 planning/execution
+last_updated: "2026-04-08T01:39:51.450Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 3
+  completed_plans: 6
 ---
 
 # Project State
@@ -20,7 +19,7 @@ progress:
 See: .planning/PROJECT.md
 
 **Core value:** Reliably deliver a continuous, high-quality livestream to authenticated users.
-**Current focus:** Phase 06 — Demand API (next)
+**Current focus:** Phase 06 — demand-api
 
 ## Phase Progress
 
@@ -34,13 +33,8 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 06 — Demand API (planned next)
-Plan: 0/3 (not started)
-Status: Phase 05 complete — `packages/web`, `packages/relay`, `packages/shared`, Bun workspaces, Turbo for build/check
-
-```
-[████░░░░░░] 20%
-```
+Phase: 06 (demand-api) — EXECUTING
+Plan: 1 of 3
 
 ## Pending Todos
 

@@ -1,6 +1,7 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "stream",
+	"account_id": "e1c1047c245641f3c40cb70ea0d8f7c6",
 	"compatibility_date": "2026-03-17",
 	"compatibility_flags": ["nodejs_als"],
 	"main": ".svelte-kit/cloudflare/_worker.js",
@@ -16,5 +17,12 @@
 			"invocation_logs": false,
 			"persist": false
 		}
-	}
+	},
+	"kv_namespaces": [
+		{
+			"binding": "RIVER_KV",
+			"id": "5136b9c45e1f4c30942dbca49afe70ca",
+			"preview_id": "6ec0f39ccb0d4a47b42e3b84a32cf6a4"
+		}
+	]
 }

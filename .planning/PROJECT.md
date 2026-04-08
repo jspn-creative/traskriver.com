@@ -27,6 +27,7 @@ Monorepo: SvelteKit in `packages/web`, relay skeleton in `packages/relay`, share
 - ✓ Generate Cloudflare Stream signing key and store in env vars (SIGN-01) — v1.1
 - ✓ Generate signed HLS JWT server-side via Web Crypto API (SIGN-02, SIGN-03) — v1.1
 - ✓ Restructure page to render immediately with VideoPlayer in nested async boundary (SIGN-04) — v1.1
+- ✓ Demand API: KV `RIVER_KV`, POST/GET `/api/stream/demand`, POST `/api/relay/status`, button-gated stream start (DEMA-01–03) — Phase 06
 
 ### Active
 
@@ -47,7 +48,8 @@ Monorepo: SvelteKit in `packages/web`, relay skeleton in `packages/relay`, share
 - RTSP stream is ingested via `scripts/push-stream.ts` at repo root (legacy; relay service in `packages/relay` for v3.0).
 - HLS stream URL is constructed server-side in `packages/web/src/routes/stream.remote.ts`; signed JWT token (RS256 via Web Crypto) replaces raw live input UID in the manifest path.
 - CF Stream "Require Signed URLs" is enabled — plain HLS URLs return 401. Server must sign every request.
-- Page shell renders immediately; VideoPlayer and LiveViewerCount are deferred via nested `<svelte:boundary>` and inline `{#await}` respectively.
+- Stream starts only after user registers demand (POST `/api/stream/demand`); `getStreamInfo` runs inside `<svelte:boundary>` after that. Relay polls GET demand and POSTs status (Phase 06).
+- Page shell renders immediately; header/sidebar render without waiting for signed URL; video area is poster until demand.
 - Authentication is currently open (all visitors auto-authenticated) — paywall logic is deferred until client decides on model.
 - Tech stack: SvelteKit, Cloudflare Workers, Tailwind CSS v4, Bun, Turbo, Vidstack, Cloudflare Stream.
 
@@ -78,4 +80,4 @@ Monorepo: SvelteKit in `packages/web`, relay skeleton in `packages/relay`, share
 
 ---
 
-_Last updated: 2026-04-08 after Phase 05 monorepo + Turbo_
+_Last updated: 2026-04-08 after Phase 06 demand API_

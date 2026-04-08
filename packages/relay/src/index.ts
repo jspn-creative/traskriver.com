@@ -1,10 +1,11 @@
-import type { DemandResponse, RelayConfig, RelayState } from '@river-stream/shared';
+import type { RelayConfig, RelayInternalState } from '@river-stream/shared';
 
 // TODO: Load from .env in Phase 09
 const config: RelayConfig = {
 	streamUrl: process.env.STREAM_URL ?? '',
 	rtspUrl: process.env.RTSP_URL ?? '',
 	demandApiUrl: process.env.DEMAND_API_URL ?? 'http://localhost:5173/api/stream/demand',
+	statusApiUrl: process.env.STATUS_API_URL ?? 'http://localhost:5173/api/relay/status',
 	bearerToken: process.env.RELAY_BEARER_TOKEN ?? '',
 	pollIntervalMs: 10000,
 	requestTimeoutMs: 8000,
@@ -13,7 +14,7 @@ const config: RelayConfig = {
 
 let ffmpegProcess: ReturnType<typeof Bun.spawn> | null = null;
 let consecutiveFailures = 0;
-let currentState: RelayState = 'idle';
+let currentState: RelayInternalState = 'idle';
 
 async function pollDemand(): Promise<void> {
 	// TODO: Implement in Phase 07

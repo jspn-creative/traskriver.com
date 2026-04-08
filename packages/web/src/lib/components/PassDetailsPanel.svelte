@@ -1,9 +1,20 @@
 <script lang="ts">
-	let { sessionActive, isConnecting, streamStandby, onBeginConnection } = $props<{
+	let {
+		sessionActive,
+		isConnecting,
+		streamStandby,
+		onBeginConnection,
+		demandRegistered = true,
+		demandLoading = false,
+		demandError = null
+	} = $props<{
 		sessionActive: boolean;
 		isConnecting?: boolean;
 		streamStandby: boolean;
 		onBeginConnection: () => void;
+		demandRegistered?: boolean;
+		demandLoading?: boolean;
+		demandError?: string | null;
 	}>();
 
 	const specs = [
@@ -15,11 +26,15 @@
 	] as const;
 
 	const ctaLabel = $derived(
-		isConnecting
-			? 'Establishing Link...'
-			: sessionActive
-				? 'Connection Established'
-				: 'View Now (for Free!)'
+		demandLoading
+			? 'Starting stream…'
+			: isConnecting
+				? 'Establishing Link...'
+				: sessionActive
+					? 'Connection Established'
+					: !demandRegistered
+						? 'Start stream'
+						: 'View Now (for Free!)'
 	);
 </script>
 
@@ -66,18 +81,20 @@
 
 		<button
 			onclick={onBeginConnection}
-			disabled={sessionActive || isConnecting}
+			disabled={sessionActive || isConnecting || demandLoading}
 			class="relative w-full overflow-hidden rounded-sm py-[18px] text-xs font-medium tracking-ui text-light transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-light focus-visible:outline-none {sessionActive ||
-			isConnecting
+			isConnecting ||
+			demandLoading
 				? 'cursor-not-allowed shadow-inner'
-				: 'cursor-pointer bg-primary hover:bg-primary/90 active:scale-[0.98]'} {isConnecting
+				: 'cursor-pointer bg-primary hover:bg-primary/90 active:scale-[0.98]'} {isConnecting ||
+			demandLoading
 				? 'bg-secondary/90'
 				: sessionActive
 					? 'bg-emerald-700/80'
 					: 'bg-primary'}"
 		>
 			<div class="relative flex items-center justify-center gap-2">
-				{#if isConnecting}
+				{#if isConnecting || demandLoading}
 					<svg
 						class="h-4 w-4 animate-spin text-white/70"
 						xmlns="http://www.w3.org/2000/svg"
@@ -106,5 +123,8 @@
 				<span>{ctaLabel}</span>
 			</div>
 		</button>
+		{#if demandError}
+			<p class="text-center text-2xs text-red-600" role="alert">{demandError}</p>
+		{/if}
 	</div>
 </div>
