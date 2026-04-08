@@ -1,9 +1,54 @@
 import { error, json } from '@sveltejs/kit';
 
-import type { RelayStatusPayload } from '@river-stream/shared';
+import {
+	RELAY_STATUS_STALE_THRESHOLD_MS,
+	RELAY_STATUS_TTL_SECONDS,
+	type RelayStatusPayload,
+	type RelayStatusResponse
+} from '@river-stream/shared';
 
 const RELAY_STATUS_KEY = 'relay-status';
-const STATUS_TTL_SECONDS = 120;
+
+const emptyRelayStatus = {
+	state: null,
+	timestamp: null,
+	stale: true
+} satisfies RelayStatusResponse;
+
+const isRelayState = (state: string): state is Exclude<RelayStatusResponse['state'], null> =>
+	state === 'idle' || state === 'starting' || state === 'live' || state === 'stopped';
+
+export const GET = async ({ platform }) => {
+	const kv = platform?.env?.RIVER_KV;
+	if (!kv) throw error(503, 'Service unavailable');
+
+	const raw = await kv.get(RELAY_STATUS_KEY);
+	if (!raw) return json(emptyRelayStatus);
+
+	let payload: RelayStatusPayload;
+	try {
+		payload = JSON.parse(raw);
+	} catch {
+		return json(emptyRelayStatus);
+	}
+
+	if (
+		typeof payload.timestamp !== 'number' ||
+		!Number.isFinite(payload.timestamp) ||
+		typeof payload.state !== 'string' ||
+		!isRelayState(payload.state)
+	) {
+		return json(emptyRelayStatus);
+	}
+
+	const stale = Date.now() - payload.timestamp > RELAY_STATUS_STALE_THRESHOLD_MS;
+
+	return json({
+		state: payload.state,
+		timestamp: payload.timestamp,
+		stale
+	} satisfies RelayStatusResponse);
+};
 
 export const POST = async ({ request, platform }) => {
 	const kv = platform?.env?.RIVER_KV;
@@ -30,7 +75,7 @@ export const POST = async ({ request, platform }) => {
 	}
 
 	await kv.put(RELAY_STATUS_KEY, JSON.stringify(payload), {
-		expirationTtl: STATUS_TTL_SECONDS
+		expirationTtl: RELAY_STATUS_TTL_SECONDS
 	});
 
 	return json({ ok: true });
