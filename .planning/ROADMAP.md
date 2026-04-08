@@ -123,7 +123,12 @@ Plans:
 2. Page shows "Stream ended — click to restart" when stream stops, and clicking it registers new demand and returns to "Starting stream..."
 3. Page shows "Stream unavailable" when relay-status timestamp is stale (relay offline) — distinct from the "starting" state
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] 08-01-PLAN.md — GET /api/relay/status endpoint + RelayStatusResponse shared type (STRX-01, STRX-03)
+- [ ] 08-02-PLAN.md — Page state machine overhaul: relay polling, starting/live/ended/unavailable UI states, restart flow (STRX-01, STRX-02, STRX-03)
 
 ### Phase 09: Relay Deployment
 
@@ -160,9 +165,9 @@ Plans:
 | 05. Monorepo Restructure       | v3.0      | 3/3            | Complete     | 2026-04-08 |
 | 06. Demand API                 | v3.0      | 3/3            | Complete     | 2026-04-08 |
 | 07. Relay Service              | v3.0      | Complete    | 2026-04-08 | 2026-04-08 |
-| 08. Stream UX                  | v3.0      | 0/?            | Not started  | —          |
+| 08. Stream UX                  | v3.0      | 0/2            | Planned      | —          |
 | 09. Relay Deployment           | 2/2 | Complete   | 2026-04-08 | —          |
 
 ---
 
-_Roadmap updated: 2026-04-08 — Phase 07 relay service complete (07-02)_
+_Roadmap updated: 2026-04-08 — Phase 08 stream UX planned (2 plans)_
