@@ -33,14 +33,12 @@ npx get-shit-done-cc@latest
 Initialize new project through unified flow.
 
 One command takes you from idea to ready-for-planning:
-
 - Deep questioning to understand what you're building
 - Optional domain research (spawns 4 parallel researcher agents)
 - Requirements definition with v1/v2/out-of-scope scoping
 - Roadmap creation with phase breakdown and success criteria
 
 Creates all `.planning/` artifacts:
-
 - `PROJECT.md` — vision and requirements
 - `config.json` — workflow mode (interactive/yolo)
 - `research/` — domain research (if selected)
@@ -85,10 +83,10 @@ Comprehensive ecosystem research for niche/complex domains.
 Usage: `/gsd-research-phase 3`
 
 **`/gsd-list-phase-assumptions <number>`**
-See what Claude is planning to do before it starts.
+See what the agent is planning to do before it starts.
 
-- Shows Claude's intended approach for a phase
-- Lets you course-correct if Claude misunderstood your vision
+- Shows the agent's intended approach for a phase
+- Lets you course-correct if the agent misunderstood your vision
 - No files created - conversational output only
 
 Usage: `/gsd-list-phase-assumptions 3`
@@ -109,14 +107,16 @@ Result: Creates `.planning/phases/01-foundation/01-01-PLAN.md`
 ### Execution
 
 **`/gsd-execute-phase <phase-number>`**
-Execute all plans in a phase.
+Execute all plans in a phase, or run a specific wave.
 
 - Groups plans by wave (from frontmatter), executes waves sequentially
 - Plans within each wave run in parallel via Task tool
+- Optional `--wave N` flag executes only Wave `N` and stops unless the phase is now fully complete
 - Verifies phase goal after all plans complete
 - Updates REQUIREMENTS.md, ROADMAP.md, STATE.md
 
 Usage: `/gsd-execute-phase 5`
+Usage: `/gsd-execute-phase 5 --wave 2`
 
 ### Smart Router
 
@@ -134,26 +134,41 @@ Usage: `/gsd-do I want to start a new milestone`
 
 ### Quick Mode
 
-**`/gsd-quick [--full] [--discuss] [--research]`**
+**`/gsd-quick [--full] [--validate] [--discuss] [--research]`**
 Execute small, ad-hoc tasks with GSD guarantees but skip optional agents.
 
 Quick mode uses the same system with a shorter path:
-
 - Spawns planner + executor (skips researcher, checker, verifier by default)
 - Quick tasks live in `.planning/quick/` separate from planned phases
 - Updates STATE.md tracking (not ROADMAP.md)
 
 Flags enable additional quality steps:
-
+- `--full` — Complete quality pipeline: discussion + research + plan-checking + verification
+- `--validate` — Plan-checking (max 2 iterations) and post-execution verification only
 - `--discuss` — Lightweight discussion to surface gray areas before planning
 - `--research` — Focused research agent investigates approaches before planning
-- `--full` — Adds plan-checking (max 2 iterations) and post-execution verification
 
-Flags are composable: `--discuss --research --full` gives the complete quality pipeline for a single task.
+Granular flags are composable: `--discuss --research --validate` gives the same as `--full`.
 
 Usage: `/gsd-quick`
-Usage: `/gsd-quick --research --full`
+Usage: `/gsd-quick --full`
+Usage: `/gsd-quick --research --validate`
 Result: Creates `.planning/quick/NNN-slug/PLAN.md`, `.planning/quick/NNN-slug/SUMMARY.md`
+
+---
+
+**`/gsd-fast [description]`**
+Execute a trivial task inline — no subagents, no planning files, no overhead.
+
+For tasks too small to justify planning: typo fixes, config changes, forgotten commits, simple additions. Runs in the current context, makes the change, commits, and logs to STATE.md.
+
+- No PLAN.md or SUMMARY.md created
+- No subagent spawned (runs inline)
+- ≤ 3 file edits — redirects to `/gsd-quick` if task is non-trivial
+- Atomic commit with conventional message
+
+Usage: `/gsd-fast "fix the typo in README"`
+Usage: `/gsd-fast "add .env to gitignore"`
 
 ### Roadmap Management
 
@@ -196,10 +211,12 @@ Start a new milestone through unified flow.
 - Optional domain research (spawns 4 parallel researcher agents)
 - Requirements definition with scoping
 - Roadmap creation with phase breakdown
+- Optional `--reset-phase-numbers` flag restarts numbering at Phase 1 and archives old phase dirs first for safety
 
 Mirrors `/gsd-new-project` flow for brownfield projects (existing PROJECT.md).
 
 Usage: `/gsd-new-milestone "v2.0 Features"`
+Usage: `/gsd-new-milestone --reset-phase-numbers "v2.0 Features"`
 
 **`/gsd-complete-milestone <version>`**
 Archive completed milestone and prepare for next version.
@@ -311,6 +328,66 @@ Validate built features through conversational UAT.
 - Ready for re-execution if issues found
 
 Usage: `/gsd-verify-work 3`
+
+### Ship Work
+
+**`/gsd-ship [phase]`**
+Create a PR from completed phase work with an auto-generated body.
+
+- Pushes branch to remote
+- Creates PR with summary from SUMMARY.md, VERIFICATION.md, REQUIREMENTS.md
+- Optionally requests code review
+- Updates STATE.md with shipping status
+
+Prerequisites: Phase verified, `gh` CLI installed and authenticated.
+
+Usage: `/gsd-ship 4` or `/gsd-ship 4 --draft`
+
+---
+
+**`/gsd-review --phase N [--gemini] [--claude] [--codex] [--coderabbit] [--all]`**
+Cross-AI peer review — invoke external AI CLIs to independently review phase plans.
+
+- Detects available CLIs (gemini, claude, codex, coderabbit)
+- Each CLI reviews plans independently with the same structured prompt
+- CodeRabbit reviews the current git diff (not a prompt) — may take up to 5 minutes
+- Produces REVIEWS.md with per-reviewer feedback and consensus summary
+- Feed reviews back into planning: `/gsd-plan-phase N --reviews`
+
+Usage: `/gsd-review --phase 3 --all`
+
+---
+
+**`/gsd-pr-branch [target]`**
+Create a clean branch for pull requests by filtering out .planning/ commits.
+
+- Classifies commits: code-only (include), planning-only (exclude), mixed (include sans .planning/)
+- Cherry-picks code commits onto a clean branch
+- Reviewers see only code changes, no GSD artifacts
+
+Usage: `/gsd-pr-branch` or `/gsd-pr-branch main`
+
+---
+
+**`/gsd-plant-seed [idea]`**
+Capture a forward-looking idea with trigger conditions for automatic surfacing.
+
+- Seeds preserve WHY, WHEN to surface, and breadcrumbs to related code
+- Auto-surfaces during `/gsd-new-milestone` when trigger conditions match
+- Better than deferred items — triggers are checked, not forgotten
+
+Usage: `/gsd-plant-seed "add real-time notifications when we build the events system"`
+
+---
+
+**`/gsd-audit-uat`**
+Cross-phase audit of all outstanding UAT and verification items.
+- Scans every phase for pending, skipped, blocked, and human_needed items
+- Cross-references against codebase to detect stale documentation
+- Produces prioritized human test plan grouped by testability
+- Use before starting a new milestone to clear verification debt
+
+Usage: `/gsd-audit-uat`
 
 ### Milestone Auditing
 
@@ -449,29 +526,25 @@ Change anytime by editing `.planning/config.json`
 Configure how planning artifacts are managed in `.planning/config.json`:
 
 **`planning.commit_docs`** (default: `true`)
-
 - `true`: Planning artifacts committed to git (standard workflow)
 - `false`: Planning artifacts kept local-only, not committed
 
 When `commit_docs: false`:
-
 - Add `.planning/` to your `.gitignore`
 - Useful for OSS contributions, client projects, or keeping planning private
 - All planning files still work normally, just not tracked in git
 
 **`planning.search_gitignored`** (default: `false`)
-
 - `true`: Add `--no-ignore` to broad ripgrep searches
 - Only needed when `.planning/` is gitignored and you want project-wide searches to include it
 
 Example config:
-
 ```json
 {
-	"planning": {
-		"commit_docs": false,
-		"search_gitignored": true
-	}
+  "planning": {
+    "commit_docs": false,
+    "search_gitignored": true
+  }
 }
 ```
 
@@ -533,4 +606,4 @@ Example config:
 - Read `.planning/STATE.md` for current context
 - Check `.planning/ROADMAP.md` for phase status
 - Run `/gsd-progress` to check where you're up to
-  </reference>
+</reference>

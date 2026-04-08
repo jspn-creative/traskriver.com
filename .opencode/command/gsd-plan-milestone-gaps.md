@@ -8,7 +8,6 @@ tools:
   grep: true
   question: true
 ---
-
 <objective>
 Create all phases necessary to close gaps identified by `/gsd-audit-milestone`.
 

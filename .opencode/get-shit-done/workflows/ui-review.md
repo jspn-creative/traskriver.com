@@ -6,6 +6,11 @@ Retroactive 6-pillar visual audit of implemented frontend code. Standalone comma
 @/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/references/ui-brand.md
 </required_reading>
 
+<available_agent_types>
+Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
+- gsd-ui-auditor — Audits UI against design requirements
+</available_agent_types>
+
 <process>
 
 ## 0. Initialize
@@ -13,6 +18,7 @@ Retroactive 6-pillar visual audit of implemented frontend code. Standalone comma
 ```bash
 INIT=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHASE_ARG}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
+AGENT_SKILLS_UI_REVIEWER=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-ui-reviewer 2>/dev/null)
 ```
 
 Parse: `phase_dir`, `phase_number`, `phase_name`, `phase_slug`, `padded_phase`, `commit_docs`.
@@ -22,7 +28,6 @@ UI_AUDITOR_MODEL=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-
 ```
 
 Display banner:
-
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► UI AUDIT — PHASE {N}: {name}
@@ -40,7 +45,6 @@ UI_REVIEW_FILE=$(ls "${PHASE_DIR}"/*-UI-REVIEW.md 2>/dev/null | head -1)
 **If `SUMMARY_FILES` empty:** Exit — "Phase {N} not executed. Run /gsd-execute-phase {N} first."
 
 **If `UI_REVIEW_FILE` non-empty:** Use question:
-
 - header: "Existing UI Review"
 - question: "UI-REVIEW.md already exists for Phase {N}."
 - options:
@@ -53,7 +57,6 @@ If "Re-audit": continue.
 ## 2. Gather Context Paths
 
 Build file list for auditor:
-
 - All SUMMARY.md files in phase dir
 - All PLAN.md files in phase dir
 - UI-SPEC.md (if exists — audit baseline)
@@ -77,12 +80,13 @@ Conduct 6-pillar visual audit of Phase {phase_number}: {phase_name}
 </objective>
 
 <files_to_read>
-
 - {summary_paths} (Execution summaries)
 - {plan_paths} (Execution plans — what was intended)
 - {ui_spec_path} (UI Design Contract — audit baseline, if exists)
 - {context_path} (User decisions, if exists)
-  </files_to_read>
+</files_to_read>
+
+${AGENT_SKILLS_UI_REVIEWER}
 
 <config>
 phase_dir: {phase_dir}
@@ -134,13 +138,36 @@ Full review: {path to UI-REVIEW.md}
 
 ## ▶ Next
 
+`/clear` then one of:
+
 - `/gsd-verify-work {N}` — UAT testing
 - `/gsd-plan-phase {N+1}` — plan next phase
 
-<sub>/clear first → fresh context window</sub>
+- `/gsd-verify-work {N}` — UAT testing
+- `/gsd-plan-phase {N+1}` — plan next phase
 
 ───────────────────────────────────────────────────────────────
 ```
+
+## Automated UI Verification (when Playwright-MCP is available)
+
+If `mcp__playwright__*` tools are accessible in this session:
+
+1. Navigate to each UI component described in the phase's UI-SPEC.md using
+   `mcp__playwright__navigate` (or equivalent Playwright-MCP tool).
+2. Take a screenshot of each component using `mcp__playwright__screenshot`.
+3. Compare against the spec's visual requirements — dimensions, color palette,
+   layout, spacing scale, and typography.
+4. Report any dimension, color, or layout discrepancies automatically as
+   additional findings within the relevant pillar section of UI-REVIEW.md.
+5. Flag items that require human judgment (brand feel, content tone) as
+   `needs_human_review: true` in the findings — these are surfaced to the user
+   separately after the automated pass completes.
+
+If Playwright-MCP is not available in this session, this section is skipped
+entirely. The audit falls back to the standard code-only review described above.
+No configuration change is required — the availability of `mcp__playwright__*`
+tools is detected at runtime.
 
 ## 5. Commit (if configured)
 
@@ -151,7 +178,6 @@ node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-t
 </process>
 
 <success_criteria>
-
 - [ ] Phase validated
 - [ ] SUMMARY.md files found (execution completed)
 - [ ] Existing review handled (re-audit/view)
@@ -159,4 +185,4 @@ node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-t
 - [ ] UI-REVIEW.md created in phase directory
 - [ ] Score summary displayed to user
 - [ ] Next steps presented
-      </success_criteria>
+</success_criteria>

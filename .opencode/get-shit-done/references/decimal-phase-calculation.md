@@ -10,37 +10,33 @@ node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-t
 ```
 
 Output:
-
 ```json
 {
-	"found": true,
-	"base_phase": "06",
-	"next": "06.1",
-	"existing": []
+  "found": true,
+  "base_phase": "06",
+  "next": "06.1",
+  "existing": []
 }
 ```
 
 With existing decimals:
-
 ```json
 {
-	"found": true,
-	"base_phase": "06",
-	"next": "06.3",
-	"existing": ["06.1", "06.2"]
+  "found": true,
+  "base_phase": "06",
+  "next": "06.3",
+  "existing": ["06.1", "06.2"]
 }
 ```
 
 ## Extract Values
 
 ```bash
-DECIMAL_INFO=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" phase next-decimal "${AFTER_PHASE}")
-DECIMAL_PHASE=$(printf '%s\n' "$DECIMAL_INFO" | jq -r '.next')
-BASE_PHASE=$(printf '%s\n' "$DECIMAL_INFO" | jq -r '.base_phase')
+DECIMAL_PHASE=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" phase next-decimal "${AFTER_PHASE}" --pick next)
+BASE_PHASE=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" phase next-decimal "${AFTER_PHASE}" --pick base_phase)
 ```
 
 Or with --raw flag:
-
 ```bash
 DECIMAL_PHASE=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" phase next-decimal "${AFTER_PHASE}" --raw)
 # Returns just: 06.1
@@ -48,12 +44,12 @@ DECIMAL_PHASE=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shi
 
 ## Examples
 
-| Existing Phases      | Next Phase |
-| -------------------- | ---------- |
-| 06 only              | 06.1       |
-| 06, 06.1             | 06.2       |
-| 06, 06.1, 06.2       | 06.3       |
-| 06, 06.1, 06.3 (gap) | 06.4       |
+| Existing Phases | Next Phase |
+|-----------------|------------|
+| 06 only | 06.1 |
+| 06, 06.1 | 06.2 |
+| 06, 06.1, 06.2 | 06.3 |
+| 06, 06.1, 06.3 (gap) | 06.4 |
 
 ## Directory Naming
 

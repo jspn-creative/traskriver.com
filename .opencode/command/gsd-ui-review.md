@@ -1,6 +1,6 @@
 ---
 description: Retroactive 6-pillar visual audit of implemented frontend code
-argument-hint: '[phase]'
+argument-hint: "[phase]"
 tools:
   read: true
   write: true
@@ -10,7 +10,6 @@ tools:
   task: true
   question: true
 ---
-
 <objective>
 Conduct a retroactive 6-pillar visual audit. Produces UI-REVIEW.md with
 graded assessment (1-4 per pillar). Works on any project.

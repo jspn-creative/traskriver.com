@@ -5,7 +5,6 @@ Parse and normalize phase arguments for commands that operate on phases.
 ## Extraction
 
 From `$ARGUMENTS`:
-
 - Extract phase number (first numeric argument)
 - Extract flags (prefixed with `--`)
 - Remaining text is description (for insert/add commands)
@@ -19,7 +18,6 @@ PHASE_INFO=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-d
 ```
 
 Returns JSON with:
-
 - `found`: true/false
 - `directory`: Full path to phase directory
 - `phase_number`: Normalized number (e.g., "06", "06.1")
@@ -47,8 +45,8 @@ fi
 Use `roadmap get-phase` to validate phase exists:
 
 ```bash
-PHASE_CHECK=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" roadmap get-phase "${PHASE}")
-if [ "$(printf '%s\n' "$PHASE_CHECK" | jq -r '.found')" = "false" ]; then
+PHASE_CHECK=$(node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" roadmap get-phase "${PHASE}" --pick found)
+if [ "$PHASE_CHECK" = "false" ]; then
   echo "ERROR: Phase ${PHASE} not found in roadmap"
   exit 1
 fi

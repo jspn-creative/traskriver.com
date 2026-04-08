@@ -19,7 +19,6 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 Extract from init JSON: `todo_count`, `todos`, `pending_dir`.
 
 If `todo_count` is 0:
-
 ```
 No pending todos.
 
@@ -95,17 +94,15 @@ If `files` field has entries, read and briefly summarize each.
 Check for roadmap (can use init progress or directly check file existence):
 
 If `.planning/ROADMAP.md` exists:
-
 1. Check if todo's area matches an upcoming phase
 2. Check if todo's files overlap with a phase's scope
 3. Note any match for action options
-   </step>
+</step>
 
 <step name="offer_actions">
 **If todo maps to a roadmap phase:**
 
 Use question:
-
 - header: "Action"
 - question: "This todo relates to Phase [N]: [name]. What would you like to do?"
 - options:
@@ -117,7 +114,6 @@ Use question:
 **If no roadmap match:**
 
 Use question:
-
 - header: "Action"
 - question: "What would you like to do with this todo?"
 - options:
@@ -125,12 +121,12 @@ Use question:
   - "Create a phase" — /gsd-add-phase with this scope
   - "Brainstorm approach" — think through before deciding
   - "Put it back" — return to list
-    </step>
+</step>
 
 <step name="execute_action">
 **Work on it now:**
 ```bash
-mv ".planning/todos/pending/[filename]" ".planning/todos/done/"
+mv ".planning/todos/pending/[filename]" ".planning/todos/completed/"
 ```
 Update STATE.md todo count. Present problem/solution context. Begin work or ask how to proceed.
 
@@ -159,7 +155,7 @@ If todo was moved to done/, commit the change:
 
 ```bash
 git rm --cached .planning/todos/pending/[filename] 2>/dev/null || true
-node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: start work on todo - [title]" --files .planning/todos/done/[filename] .planning/STATE.md
+node "/Users/jspn/Documents/Sites/river-stream/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: start work on todo - [title]" --files .planning/todos/completed/[filename] .planning/STATE.md
 ```
 
 Tool respects `commit_docs` config and gitignore automatically.
@@ -170,7 +166,6 @@ Confirm: "Committed: docs: start work on todo - [title]"
 </process>
 
 <success_criteria>
-
 - [ ] All pending todos listed with title, area, age
 - [ ] Area filter applied if specified
 - [ ] Selected todo's full context loaded
@@ -179,4 +174,4 @@ Confirm: "Committed: docs: start work on todo - [title]"
 - [ ] Selected action executed
 - [ ] STATE.md updated if todo count changed
 - [ ] Changes committed to git (if todo moved to done/)
-      </success_criteria>
+</success_criteria>
