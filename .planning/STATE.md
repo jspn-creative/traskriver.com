@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
-status: Ready to execute
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-04-08T16:04:09.679Z"
+status: unknown
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-04-08T16:07:28.390Z"
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 12
-  percent: 92
+  completed_plans: 13
 ---
 
 # Project State
@@ -35,7 +34,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 08 (stream-ux) — COMPLETE
-Plan: 2 of 2 (completed)
+Plan: 3 of 3
 
 ## Pending Todos
 
@@ -86,8 +85,9 @@ _None_
 | Shared relay-status TTL/stale constants | API and frontend use one source of truth for stale detection |
 | Stream UX state driven by relay status + player events | Replaces fake timers with accurate lifecycle states (`starting/live/ended/unavailable`) |
 | Starting timeout excludes stale-relay windows | Prevents false timeout errors while relay heartbeat is offline |
+| Unavailable CTA remains clickable | Users can retry stream start while relay is offline (`buttonDisabled` excludes `unavailable`) |
 
 ## Last Session
 
-- **Stopped at:** Completed 08-02-PLAN.md
+- **Stopped at:** Completed 08-03-PLAN.md
 - **Updated:** 2026-04-08
