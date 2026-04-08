@@ -123,12 +123,13 @@ Plans:
 2. Page shows "Stream ended — click to restart" when stream stops, and clicking it registers new demand and returns to "Starting stream..."
 3. Page shows "Stream unavailable" when relay-status timestamp is stale (relay offline) — distinct from the "starting" state
 
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 
 - [x] 08-01-PLAN.md — GET /api/relay/status endpoint + RelayStatusResponse shared type (STRX-01, STRX-03)
 - [x] 08-02-PLAN.md — Page state machine overhaul: relay polling, starting/live/ended/unavailable UI states, restart flow (STRX-01, STRX-02, STRX-03)
+- [ ] 08-03-PLAN.md — Gap closure: fix unavailable-state CTA button disabled logic (STRX-03)
 
 ### Phase 09: Relay Deployment
 
