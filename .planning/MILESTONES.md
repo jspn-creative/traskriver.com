@@ -1,5 +1,14 @@
 # Milestones
 
+## v2.0 Paywall (Shipped: 2026-03-20)
+
+**Phases completed:** 4 phases, 7 plans, 0 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
 ## v1.1 Signed URL Streaming (Shipped: 2026-03-19)
 
 **Phases completed:** 1 phase, 3 plans, 4 tasks
