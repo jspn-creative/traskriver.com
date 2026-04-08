@@ -10,7 +10,7 @@ Reliably deliver a continuous, high-quality livestream to authenticated users.
 
 ## Current Milestone: v3.0 On-Demand Streaming
 
-Monorepo: SvelteKit in `packages/web`, relay skeleton in `packages/relay`, shared types in `packages/shared`. Root `bun dev` runs web + relay; `turbo` orchestrates `build` / `check`.
+Monorepo: SvelteKit in `packages/web`, relay service in `packages/relay`, shared types in `packages/shared`. Root `bun dev` runs web + relay; `turbo` orchestrates `build` / `check`. Phase 07 complete - relay now polls demand, runs ffmpeg, posts relay status, and exposes optional `/health`.
 
 ## Requirements
 
@@ -28,6 +28,7 @@ Monorepo: SvelteKit in `packages/web`, relay skeleton in `packages/relay`, share
 - ✓ Generate signed HLS JWT server-side via Web Crypto API (SIGN-02, SIGN-03) — v1.1
 - ✓ Restructure page to render immediately with VideoPlayer in nested async boundary (SIGN-04) — v1.1
 - ✓ Demand API: KV `RIVER_KV`, POST/GET `/api/stream/demand`, POST `/api/relay/status`, button-gated stream start (DEMA-01–03) — Phase 06
+- ✓ Relay runtime: FSM + demand poller + status reporter + ffmpeg manager + health endpoint (RLAY-01-06) — Phase 07
 
 ### Active
 
@@ -80,4 +81,4 @@ Monorepo: SvelteKit in `packages/web`, relay skeleton in `packages/relay`, share
 
 ---
 
-_Last updated: 2026-04-08 after Phase 06 demand API_
+_Last updated: 2026-04-08 after Phase 07 relay service_
