@@ -32,7 +32,7 @@ Requirements for on-demand streaming milestone. Each maps to roadmap phases.
 ### Stream UX
 
 - [x] **STRX-01**: Web app reads `relay-status` KV key and shows "Starting stream..." when relay state is `starting` or when demand is fresh but relay is `idle`
-- [ ] **STRX-02**: Web app detects stream end (HLS manifest failure, relay status changes to `idle`/`stopping`) and shows "Stream ended — click to restart" prompt that registers a new demand
+- [x] **STRX-02**: Web app detects stream end (HLS manifest failure, relay status changes to `idle`/`stopping`) and shows "Stream ended — click to restart" prompt that registers a new demand
 - [x] **STRX-03**: Web app shows distinct "Stream unavailable" state when relay-status indicates offline (stale status timestamp) vs "Starting stream..." when relay is responsive but stream isn't live yet
 
 ### Relay Deployment
@@ -96,7 +96,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RLAY-05     | Phase 07 | Complete |
 | RLAY-06     | Phase 07 | Complete |
 | STRX-01     | Phase 08 | Complete |
-| STRX-02     | Phase 08 | Pending |
+| STRX-02     | Phase 08 | Complete |
 | STRX-03     | Phase 08 | Complete |
 | DEPL-01     | Phase 09 | Complete |
 | DEPL-02     | Phase 09 | Complete |

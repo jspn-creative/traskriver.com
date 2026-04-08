@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
 status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-08T15:37:17.469Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-04-08T15:40:12.401Z"
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -28,13 +28,13 @@ See: .planning/PROJECT.md
 | 05. Monorepo Restructure | Complete    | Devs work on web + relay in single repo with shared types          |
 | 06. Demand API           | Complete    | Worker endpoints for demand registration and relay polling         |
 | 07. Relay Service        | Complete    | TypeScript polling loop + ffmpeg state machine with crash recovery |
-| 08. Stream UX            | In progress | Demand-aware UI states: starting, live, ended, unavailable         |
+| 08. Stream UX            | Complete    | Demand-aware UI states: starting, live, ended, unavailable         |
 | 09. Relay Deployment     | Complete    | Pi provisioning, systemd, Tailscale, deploy pipeline               |
 
 ## Current Position
 
-Phase: 08 (stream-ux) — EXECUTING
-Plan: 2 of 2
+Phase: 08 (stream-ux) — COMPLETE
+Plan: 2 of 2 (completed)
 
 ## Pending Todos
 
@@ -83,8 +83,10 @@ _None_
 | relay deploy CI path-filtered to relay/shared only | Avoids unnecessary Pi deploys from unrelated web-only commits |
 | Public GET /api/relay/status | Web app can poll relay status without relay bearer token |
 | Shared relay-status TTL/stale constants | API and frontend use one source of truth for stale detection |
+| Stream UX state driven by relay status + player events | Replaces fake timers with accurate lifecycle states (`starting/live/ended/unavailable`) |
+| Starting timeout excludes stale-relay windows | Prevents false timeout errors while relay heartbeat is offline |
 
 ## Last Session
 
-- **Stopped at:** Completed 08-01-PLAN.md
+- **Stopped at:** Completed 08-02-PLAN.md
 - **Updated:** 2026-04-08

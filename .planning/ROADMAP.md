@@ -46,7 +46,7 @@ Full archive: `.planning/milestones/v2.0-ROADMAP.md`
 - [x] **Phase 05: Monorepo Restructure** — Move SvelteKit to `/packages/web`, create `/packages/relay` and `packages/shared`, configure Bun workspaces (completed 2026-04-08)
 - [x] **Phase 06: Demand API** — Worker endpoints for stream demand registration and relay polling, KV-backed state (completed 2026-04-08)
 - [x] **Phase 07: Relay Service** — TypeScript polling loop with ffmpeg state machine, crash recovery, safety policies (completed 2026-04-08)
-- [ ] **Phase 08: Stream UX** — Demand-aware UI states: starting, live, ended, unavailable
+- [x] **Phase 08: Stream UX** — Demand-aware UI states: starting, live, ended, unavailable (completed 2026-04-08)
 - [x] **Phase 09: Relay Deployment** — Pi provisioning, systemd service, Tailscale access, deploy pipeline (completed 2026-04-08)
 
 ## Phase Details
@@ -128,7 +128,7 @@ Plans:
 Plans:
 
 - [x] 08-01-PLAN.md — GET /api/relay/status endpoint + RelayStatusResponse shared type (STRX-01, STRX-03)
-- [ ] 08-02-PLAN.md — Page state machine overhaul: relay polling, starting/live/ended/unavailable UI states, restart flow (STRX-01, STRX-02, STRX-03)
+- [x] 08-02-PLAN.md — Page state machine overhaul: relay polling, starting/live/ended/unavailable UI states, restart flow (STRX-01, STRX-02, STRX-03)
 
 ### Phase 09: Relay Deployment
 
@@ -164,10 +164,10 @@ Plans:
 | 04. Signed URL Streaming       | v2.0      | 3/3            | Complete     | 2026-03-19 |
 | 05. Monorepo Restructure       | v3.0      | 3/3            | Complete     | 2026-04-08 |
 | 06. Demand API                 | v3.0      | 3/3            | Complete     | 2026-04-08 |
-| 07. Relay Service              | v3.0      | Complete    | 2026-04-08 | 2026-04-08 |
-| 08. Stream UX                  | v3.0      | 1/2            | In Progress  | —          |
+| 07. Relay Service              | v3.0      | 2/2            | Complete     | 2026-04-08 |
+| 08. Stream UX                  | v3.0      | 2/2            | Complete     | 2026-04-08 |
 | 09. Relay Deployment           | v3.0      | 2/2            | Complete     | 2026-04-08 |
 
 ---
 
-_Roadmap updated: 2026-04-08 — Phase 08 plan 01 completed (1/2)_
+_Roadmap updated: 2026-04-08 — Phase 08 plan 02 completed (2/2)_
