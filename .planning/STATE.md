@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
 status: unknown
-stopped_at: Phase 05 complete; ready for Phase 06 planning/execution
-last_updated: "2026-04-08T01:39:51.450Z"
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-04-08T02:19:05.540Z"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -19,7 +19,7 @@ progress:
 See: .planning/PROJECT.md
 
 **Core value:** Reliably deliver a continuous, high-quality livestream to authenticated users.
-**Current focus:** Phase 06 — demand-api
+**Current focus:** Phase 07 — relay-service
 
 ## Phase Progress
 
@@ -27,14 +27,14 @@ See: .planning/PROJECT.md
 | ------------------------ | ----------- | ------------------------------------------------------------------ |
 | 05. Monorepo Restructure | Complete    | Devs work on web + relay in single repo with shared types          |
 | 06. Demand API           | Not started | Worker endpoints for demand registration and relay polling         |
-| 07. Relay Service        | Not started | TypeScript polling loop + ffmpeg state machine with crash recovery |
+| 07. Relay Service        | In progress | TypeScript polling loop + ffmpeg state machine with crash recovery |
 | 08. Stream UX            | Not started | Demand-aware UI states: starting, live, ended, unavailable         |
 | 09. Relay Deployment     | Not started | Pi provisioning, systemd, Tailscale, deploy pipeline               |
 
 ## Current Position
 
-Phase: 06 (demand-api) — EXECUTING
-Plan: 1 of 3
+Phase: 07 (relay-service) — EXECUTING
+Plan: 2 of 2
 
 ## Pending Todos
 
@@ -78,5 +78,5 @@ _None_
 
 ## Last Session
 
-- **Stopped at:** Phase 05 complete; ready for Phase 06 planning/execution
+- **Stopped at:** Completed 07-01-PLAN.md
 - **Updated:** 2026-04-08
