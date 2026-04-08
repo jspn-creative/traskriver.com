@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
 status: unknown
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-04-08T09:05:06.603Z"
+stopped_at: Completed 09-02-PLAN.md
+last_updated: "2026-04-08T09:08:48.499Z"
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md
 | 06. Demand API           | Complete    | Worker endpoints for demand registration and relay polling         |
 | 07. Relay Service        | Complete    | TypeScript polling loop + ffmpeg state machine with crash recovery |
 | 08. Stream UX            | Not started | Demand-aware UI states: starting, live, ended, unavailable         |
-| 09. Relay Deployment     | In progress | Pi provisioning, systemd, Tailscale, deploy pipeline               |
+| 09. Relay Deployment     | Complete    | Pi provisioning, systemd, Tailscale, deploy pipeline               |
 
 ## Current Position
 
-Phase: 09 (relay-deployment) — EXECUTING
-Plan: 2 of 2
+Phase: 09 (relay-deployment) — COMPLETE
+Plan: 2 of 2 (completed)
 
 ## Pending Todos
 
@@ -79,8 +79,10 @@ _None_
 | `.env.example` un-ignored in relay package     | `.env.*` ignore would block versioned env template           |
 | systemd restart guard 10/300 + 15m reset timer | Prevents permanent start-limit lockout while avoiding tight restart loops |
 | Bun at `/usr/local/bin/bun` in setup            | Keeps service ExecStart stable across root/user environments |
+| ff-only pull + diff-based unit sync in configure.ts | Makes deploy script idempotent and safe to re-run after code/config changes |
+| relay deploy CI path-filtered to relay/shared only | Avoids unnecessary Pi deploys from unrelated web-only commits |
 
 ## Last Session
 
-- **Stopped at:** Completed 09-01-PLAN.md
+- **Stopped at:** Completed 09-02-PLAN.md
 - **Updated:** 2026-04-08

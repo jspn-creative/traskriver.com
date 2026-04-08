@@ -47,7 +47,7 @@ Full archive: `.planning/milestones/v2.0-ROADMAP.md`
 - [x] **Phase 06: Demand API** — Worker endpoints for stream demand registration and relay polling, KV-backed state (completed 2026-04-08)
 - [x] **Phase 07: Relay Service** — TypeScript polling loop with ffmpeg state machine, crash recovery, safety policies (completed 2026-04-08)
 - [ ] **Phase 08: Stream UX** — Demand-aware UI states: starting, live, ended, unavailable
-- [ ] **Phase 09: Relay Deployment** — Pi provisioning, systemd service, Tailscale access, deploy pipeline
+- [x] **Phase 09: Relay Deployment** — Pi provisioning, systemd service, Tailscale access, deploy pipeline (completed 2026-04-08)
 
 ## Phase Details
 
@@ -161,7 +161,7 @@ Plans:
 | 06. Demand API                 | v3.0      | 3/3            | Complete     | 2026-04-08 |
 | 07. Relay Service              | v3.0      | Complete    | 2026-04-08 | 2026-04-08 |
 | 08. Stream UX                  | v3.0      | 0/?            | Not started  | —          |
-| 09. Relay Deployment           | 1/2 | In Progress|  | —          |
+| 09. Relay Deployment           | 2/2 | Complete   | 2026-04-08 | —          |
 
 ---
 

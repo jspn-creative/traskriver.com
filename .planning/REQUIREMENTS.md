@@ -42,10 +42,10 @@ Requirements for on-demand streaming milestone. Each maps to roadmap phases.
 - [x] **DEPL-03**: systemd timer resets relay failure counter every 15 minutes so relay always eventually recovers after transient failures
 - [x] **DEPL-04**: `.env` file placed on FAT32 boot partition during image flash, moved to `/opt/river-relay/.env` with `chmod 600` on first boot, boot copy deleted
 - [x] **DEPL-05**: Tailscale configured as exit node on the relay device for remote network access
-- [ ] **DEPL-06**: Idempotent Bun config script (`packages/relay/scripts/configure.ts`) handles app-level setup: installs dependencies, syncs relay code from git, updates systemd service, restarts service — safe to re-run after `.env` or code changes
+- [x] **DEPL-06**: Idempotent Bun config script (`packages/relay/scripts/configure.ts`) handles app-level setup: installs dependencies, syncs relay code from git, updates systemd service, restarts service — safe to re-run after `.env` or code changes
 - [x] **DEPL-07**: Relay config stored as infra-as-code in the repo (`packages/relay/config/`) including network block definitions; Bun config script reads and applies config
-- [ ] **DEPL-08**: GitHub webhook triggers deploy to relay via Tailscale — pushes to `main` invoke the Bun config script on the Pi over SSH
-- [ ] **DEPL-09**: Rollback capability via Tailscale SSH — operator can SSH into relay and revert to previous version quickly (e.g., `git checkout` + service restart)
+- [x] **DEPL-08**: GitHub webhook triggers deploy to relay via Tailscale — pushes to `main` invoke the Bun config script on the Pi over SSH
+- [x] **DEPL-09**: Rollback capability via Tailscale SSH — operator can SSH into relay and revert to previous version quickly (e.g., `git checkout` + service restart)
 
 ## Future Requirements
 
@@ -103,10 +103,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEPL-03     | Phase 09 | Complete |
 | DEPL-04     | Phase 09 | Complete |
 | DEPL-05     | Phase 09 | Complete |
-| DEPL-06     | Phase 09 | Pending |
+| DEPL-06     | Phase 09 | Complete |
 | DEPL-07     | Phase 09 | Complete |
-| DEPL-08     | Phase 09 | Pending |
-| DEPL-09     | Phase 09 | Pending |
+| DEPL-08     | Phase 09 | Complete |
+| DEPL-09     | Phase 09 | Complete |
 
 **Coverage:**
 
