@@ -25,7 +25,7 @@
 
 	let sessionActive = $derived(phase !== 'idle' && phase !== 'ended' && phase !== 'error');
 	let isStarting = $derived(phase === 'starting' || phase === 'unavailable');
-	let buttonDisabled = $derived(sessionActive || demandLoading);
+	let buttonDisabled = $derived((sessionActive && phase !== 'unavailable') || demandLoading);
 
 	const ctaLabel = $derived(
 		demandLoading
