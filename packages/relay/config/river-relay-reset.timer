@@ -1,0 +1,10 @@
+[Unit]
+Description=Reset River Relay failure counter every 15 minutes
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=15min
+Unit=river-relay-reset.service
+
+[Install]
+WantedBy=timers.target

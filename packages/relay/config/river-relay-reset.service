@@ -1,0 +1,6 @@
+[Unit]
+Description=Reset River Relay systemd failure counter
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl reset-failed river-relay.service
