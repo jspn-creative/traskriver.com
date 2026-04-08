@@ -10,7 +10,7 @@ export interface TransitionEvent {
 
 const validTransitions = new Map<RelayInternalState, Set<RelayInternalState>>([
 	['idle', new Set(['starting'])],
-	['starting', new Set(['live', 'cooldown'])],
+	['starting', new Set(['live', 'cooldown', 'stopping'])],
 	['live', new Set(['stopping'])],
 	['stopping', new Set(['cooldown', 'idle'])],
 	['cooldown', new Set(['idle'])]
