@@ -10,9 +10,10 @@
 		"packages/shared"
 	],
 	"scripts": {
-		"dev": "concurrently -n web,relay -c blue,magenta \"bun run --cwd packages/web dev\" \"bun run --cwd packages/relay dev:local\"",
+		"dev": "bun run --cwd packages/web dev",
 		"dev:web": "bun run --cwd packages/web dev",
 		"dev:relay": "bun run --cwd packages/relay dev:local",
+		"dev:all": "concurrently -n web,relay -c blue,magenta \"bun run --cwd packages/web dev\" \"bun run --cwd packages/relay dev:local\"",
 		"build": "turbo run build",
 		"build:relay": "bun run --cwd packages/relay build",
 		"deploy": "bun run --cwd packages/web deploy",
