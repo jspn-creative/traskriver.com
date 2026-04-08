@@ -29,6 +29,7 @@
 	let drawerDirection = $state<'bottom' | 'right'>('bottom');
 	const POLL_INTERVAL_MS = 3_000;
 	const STARTING_TIMEOUT_MS = 60_000;
+	const MIN_STARTING_MS = 6_000;
 	const isBrowser = typeof window !== 'undefined';
 
 	$effect(() => {
@@ -108,7 +109,8 @@
 				}
 
 				if (phase === 'starting' || phase === 'unavailable') {
-					phase = 'unavailable';
+					const elapsed = startingTimestamp ? Date.now() - startingTimestamp : Infinity;
+					if (elapsed >= MIN_STARTING_MS) phase = 'unavailable';
 					if (!startingUnavailableSince) startingUnavailableSince = Date.now();
 				}
 				return;
