@@ -2,10 +2,9 @@
 set -euo pipefail
 
 # One-time provisioning script for fresh Pi OS Lite.
-# TODO: set to your actual repository URL before first use.
 RELAY_DIR="/opt/river-relay"
 RELAY_USER="relay"
-REPO_URL="https://github.com/your-user/river-stream.git"
+REPO_URL="git@github.com:jspn-creative/river-stream.git"
 
 # --- Preflight ---
 if [[ $EUID -ne 0 ]]; then
@@ -45,7 +44,7 @@ echo "Updating package lists..."
 apt-get update -qq
 
 echo "Installing ffmpeg and prerequisites..."
-apt-get install -y -qq ffmpeg curl git
+apt-get install -y -qq ffmpeg curl git ethtool
 
 # --- 3) Bun ---
 if ! command -v bun &>/dev/null; then
@@ -60,6 +59,18 @@ echo "Bun: $(bun --version)"
 if ! command -v tailscale &>/dev/null; then
 	echo "Installing Tailscale..."
 	curl -fsSL https://tailscale.com/install.sh | sh
+fi
+
+echo "Enabling IP forwarding for Tailscale exit node..."
+cat > /etc/sysctl.d/99-tailscale.conf <<'SYSCTL'
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.forwarding = 1
+SYSCTL
+sysctl -p /etc/sysctl.d/99-tailscale.conf
+
+# Fix UDP GRO forwarding on wlan0 (suppress Tailscale throughput warning)
+if command -v ethtool &>/dev/null && ip link show wlan0 &>/dev/null; then
+	ethtool -K wlan0 rx-udp-gro-forwarding on rx-gro-list off 2>/dev/null || true
 fi
 
 echo "Authenticating Tailscale and enabling exit node..."
@@ -131,6 +142,16 @@ systemctl enable river-relay-reset.timer
 
 # --- 10) Install app dependencies ---
 echo "Installing relay dependencies..."
+# The root package.json references packages/web which isn't cloned.
+# Write a minimal workspace root so bun resolves @river-stream/shared.
+cat > "$RELAY_DIR/package.json" <<'ROOTPKG'
+{
+  "name": "river-stream",
+  "private": true,
+  "workspaces": ["packages/relay", "packages/shared"]
+}
+ROOTPKG
+chown "$RELAY_USER:$RELAY_USER" "$RELAY_DIR/package.json"
 cd "$RELAY_DIR"
 sudo -u "$RELAY_USER" bun install
 
