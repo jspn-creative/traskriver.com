@@ -27,3 +27,17 @@ vite.config.ts.timestamp-*
 # Stream assets (generated, never commit)
 /static/stream/*
 !/static/stream/.gitkeep
+packages/web/static/stream/*
+!packages/web/static/stream/.gitkeep
+
+# Bun / monorepo
+.bun/
+.turbo/
+
+packages/*/node_modules/
+packages/*/.svelte-kit/
+packages/*/dist/
+packages/*/.env
+packages/*/.env.*
+packages/*/*.local
+!packages/*/.env.example

@@ -11,7 +11,7 @@
 				const res = await fetch(
 					'https://api.open-meteo.com/v1/forecast?latitude=45.4562&longitude=-123.844&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FLos_Angeles'
 				);
-				const data = await res.json();
+				const data = (await res.json()) as { current: unknown };
 				weather = data.current;
 			} catch (e) {
 				// silently fall through to error state

@@ -3,44 +3,43 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: On-Demand Streaming
 status: in_progress
-stopped_at: Planning recovery and phase status correction
-last_updated: "2026-04-07T23:24:00.000Z"
-last_activity: 2026-04-07 — Reset Phase 05/06/07 to planned (not started)
+stopped_at: null
+last_updated: "2026-04-08T01:15:00.000Z"
+last_activity: 2026-04-08 — Phase 05 executed (monorepo + Turbo)
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 8
-  completed_plans: 0
+  completed_plans: 3
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-19 after v3.0 milestone started)
+See: .planning/PROJECT.md
 
 **Core value:** Reliably deliver a continuous, high-quality livestream to authenticated users.
-**Current focus:** v3.0 On-Demand Streaming — demand-driven relay streaming with monorepo restructure
+**Current focus:** Phase 06 — Demand API (next)
 
 ## Phase Progress
 
-| Phase                    | Status       | Goal                                                               |
-| ------------------------ | ------------ | ------------------------------------------------------------------ |
-| 05. Monorepo Restructure | Not started  | Devs work on web + relay in single repo with shared types          |
-| 06. Demand API           | Not started  | Worker endpoints for demand registration and relay polling         |
-| 07. Relay Service        | Not started  | TypeScript polling loop + ffmpeg state machine with crash recovery |
-| 08. Stream UX            | Not started  | Demand-aware UI states: starting, live, ended, unavailable         |
-| 09. Relay Deployment     | Not started  | Pi provisioning, systemd, Tailscale, deploy pipeline               |
+| Phase                    | Status      | Goal                                                               |
+| ------------------------ | ----------- | ------------------------------------------------------------------ |
+| 05. Monorepo Restructure | Complete    | Devs work on web + relay in single repo with shared types          |
+| 06. Demand API           | Not started | Worker endpoints for demand registration and relay polling         |
+| 07. Relay Service        | Not started | TypeScript polling loop + ffmpeg state machine with crash recovery |
+| 08. Stream UX            | Not started | Demand-aware UI states: starting, live, ended, unavailable         |
+| 09. Relay Deployment     | Not started | Pi provisioning, systemd, Tailscale, deploy pipeline               |
 
 ## Current Position
 
-Phase: 05 — Monorepo Restructure (Planned)
-Plan: 00/03 (not started)
-Status: v3.0 planning artifacts recovered; implementation has not started
-Last activity: 2026-04-07 — Reset Phase 05/06/07 to planned state
+Phase: 06 — Demand API (planned next)
+Plan: 0/3 (not started)
+Status: Phase 05 complete — `packages/web`, `packages/relay`, `packages/shared`, Bun workspaces, Turbo for build/check
 
 ```
-[░░░░░░░░░░] 0%
+[████░░░░░░] 20%
 ```
 
 ## Pending Todos
@@ -49,14 +48,11 @@ _None_
 
 ## Accumulated Context
 
-- SvelteKit app on Cloudflare Workers — env vars via `$env/dynamic/private`
-- Stream delivery via Cloudflare Stream; HLS manifest URL signed per request via RS256 JWT (Web Crypto)
-- CF Stream "Require Signed URLs" enabled — plain URLs return 401
-- Page shell renders immediately; VideoPlayer isolated in nested `<svelte:boundary>` scoped to `absolute inset-0`
-- Authentication is open (all visitors auto-authenticated) — paywall enforcement deferred
-- Monorepo research: Bun workspaces only (no Turborepo) — 2 packages don't justify Turbo overhead
+- SvelteKit in `packages/web` on Cloudflare Workers — env via `$env/dynamic/private`
+- Stream delivery via Cloudflare Stream; HLS signed per request (RS256 JWT)
+- Root `bun dev`: concurrently runs web Vite + relay stub; `bun run build` / `bun check` use **Turbo** across packages
+- Monorepo: Bun workspaces + Turbo (orchestration/caching); legacy `scripts/push-stream.ts` still at repo root
 - Polling research: setTimeout chaining, single `stream-demand` KV key, read-before-write with 30s threshold
-- Deployment research: Pi OS Lite + bash setup script + Tailscale + volatile journald
 - Relay state machine: `idle → starting → live → stopping → cooldown → idle`
 
 ### Key Decisions (v3.0)
@@ -87,5 +83,6 @@ _None_
 | 15s cooldown before restart after ffmpeg crash | Prevents tight crash loops                                   |
 
 ## Last Session
-- **Stopped at:** Planning recovery and phase status correction
-- **Updated:** 2026-04-07
+
+- **Stopped at:** Phase 05 complete; ready for Phase 06 planning/execution
+- **Updated:** 2026-04-08

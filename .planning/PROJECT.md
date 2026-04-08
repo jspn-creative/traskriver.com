@@ -8,17 +8,17 @@ A website with an "always on" livestream video feed (like a 24/7 nature camera) 
 
 Reliably deliver a continuous, high-quality livestream to authenticated users.
 
-## Current Milestone: Planning v2.0 Paywall
+## Current Milestone: v3.0 On-Demand Streaming
 
-v1.1 shipped. Next milestone depends on client choosing a payment model.
+Monorepo: SvelteKit in `packages/web`, relay skeleton in `packages/relay`, shared types in `packages/shared`. Root `bun dev` runs web + relay; `turbo` orchestrates `build` / `check`.
 
 ## Requirements
 
 ### Validated
 
-- ✓ Play HLS video stream using Vidstack (`src/lib/components/VideoPlayer.svelte`) — existing
-- ✓ Basic stateless cookie-based authentication via HMAC SHA-256 (`src/lib/server/subscription.ts`) — existing
-- ✓ Stripe Checkout integration for purchasing access (`src/routes/api/stripe/checkout/+server.ts`) — existing
+- ✓ Play HLS video stream using Vidstack (`packages/web/src/lib/components/VideoPlayer.svelte`) — existing
+- ✓ Basic stateless cookie-based authentication via HMAC SHA-256 (`packages/web/src/lib/server/subscription.ts`) — existing
+- ✓ Stripe Checkout integration for purchasing access (`packages/web/src/routes/api/stripe/checkout/+server.ts`) — existing
 - ✓ Authenticate users automatically (skip the paywall step) — v1.0
 - ✓ Move RTSP ingestion to Cloudflare Stream via RTMPS push script (`scripts/push-stream.ts`) — v1.0
 - ✓ Deliver HLS stream URL server-side from Cloudflare Stream via `$env/dynamic/private` — v1.0
@@ -43,13 +43,13 @@ v1.1 shipped. Next milestone depends on client choosing a payment model.
 
 ## Context
 
-- The codebase is a SvelteKit app deployed to Cloudflare Workers.
-- RTSP stream is ingested via `scripts/push-stream.ts` (ffmpeg → RTMPS → Cloudflare Stream).
-- HLS stream URL is constructed server-side in `src/routes/stream.remote.ts`; signed JWT token (RS256 via Web Crypto) replaces raw live input UID in the manifest path.
+- The codebase is a Bun monorepo: SvelteKit app in `packages/web` deployed to Cloudflare Workers.
+- RTSP stream is ingested via `scripts/push-stream.ts` at repo root (legacy; relay service in `packages/relay` for v3.0).
+- HLS stream URL is constructed server-side in `packages/web/src/routes/stream.remote.ts`; signed JWT token (RS256 via Web Crypto) replaces raw live input UID in the manifest path.
 - CF Stream "Require Signed URLs" is enabled — plain HLS URLs return 401. Server must sign every request.
 - Page shell renders immediately; VideoPlayer and LiveViewerCount are deferred via nested `<svelte:boundary>` and inline `{#await}` respectively.
 - Authentication is currently open (all visitors auto-authenticated) — paywall logic is deferred until client decides on model.
-- ~1,172 LOC TypeScript + Svelte (src/ + scripts/). Tech stack: SvelteKit, Cloudflare Workers, Tailwind CSS v4, Bun, Vidstack, Cloudflare Stream.
+- Tech stack: SvelteKit, Cloudflare Workers, Tailwind CSS v4, Bun, Turbo, Vidstack, Cloudflare Stream.
 
 ### Known Issues (Pending Todos)
 
@@ -78,4 +78,4 @@ v1.1 shipped. Next milestone depends on client choosing a payment model.
 
 ---
 
-_Last updated: 2026-03-19 after v1.1 milestone_
+_Last updated: 2026-04-08 after Phase 05 monorepo + Turbo_

@@ -1,0 +1,16 @@
+{
+	"name": "@river-stream/shared",
+	"version": "0.0.1",
+	"type": "module",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"exports": {
+		".": "./index.ts"
+	},
+	"scripts": {
+		"check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	}
+}

@@ -43,7 +43,7 @@ Full archive: `.planning/milestones/v2.0-ROADMAP.md`
 
 ### 📋 v3.0 On-Demand Streaming (In Progress)
 
-- [ ] **Phase 05: Monorepo Restructure** — Move SvelteKit to `/packages/web`, create `/packages/relay` and `packages/shared`, configure Bun workspaces
+- [x] **Phase 05: Monorepo Restructure** — Move SvelteKit to `/packages/web`, create `/packages/relay` and `packages/shared`, configure Bun workspaces (completed 2026-04-08)
 - [ ] **Phase 06: Demand API** — Worker endpoints for stream demand registration and relay polling, KV-backed state
 - [ ] **Phase 07: Relay Service** — TypeScript polling loop with ffmpeg state machine, crash recovery, safety policies
 - [ ] **Phase 08: Stream UX** — Demand-aware UI states: starting, live, ended, unavailable
@@ -68,9 +68,9 @@ Full archive: `.planning/milestones/v2.0-ROADMAP.md`
 
 Plans:
 
-- [ ] 05-01-PLAN.md — Move SvelteKit to /packages/web, configure wrangler paths
-- [ ] 05-02-PLAN.md — Create packages/shared (types) and packages/relay (service)
-- [ ] 05-03-PLAN.md — Configure Bun workspaces at root, wire dev scripts, verify
+- [x] 05-01-PLAN.md — Move SvelteKit to /packages/web, configure wrangler paths
+- [x] 05-02-PLAN.md — Create packages/shared (types) and packages/relay (service)
+- [x] 05-03-PLAN.md — Configure Bun workspaces at root, wire dev scripts, verify
 
 ### Phase 06: Demand API
 
@@ -152,7 +152,7 @@ Plans:
 | 02. Serverless Media Streaming | v2.0      | 2/2            | Complete     | 2026-03-18 |
 | 03. Asset Security & Cleanup   | v2.0      | 1/1            | Complete     | 2026-03-19 |
 | 04. Signed URL Streaming       | v2.0      | 3/3            | Complete     | 2026-03-19 |
-| 05. Monorepo Restructure       | v3.0      | 0/3            | Not started  | —          |
+| 05. Monorepo Restructure       | v3.0      | 3/3            | Complete     | 2026-04-08 |
 | 06. Demand API                 | v3.0      | 0/3            | Not started  | —          |
 | 07. Relay Service              | v3.0      | 0/2            | Not started  | —          |
 | 08. Stream UX                  | v3.0      | 0/?            | Not started  | —          |
@@ -160,4 +160,4 @@ Plans:
 
 ---
 
-_Roadmap updated: 2026-04-07 after planning recovery (v3.0 phases reset to planned state)_
+_Roadmap updated: 2026-04-08 — Phase 05 complete (monorepo + Turbo)_
