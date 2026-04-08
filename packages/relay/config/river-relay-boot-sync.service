@@ -1,0 +1,15 @@
+[Unit]
+Description=Sync relay boot partition config files
+DefaultDependencies=no
+After=local-fs.target
+Before=network-pre.target network-online.target river-relay.service
+Wants=network-pre.target
+ConditionPathExists=/opt/river-relay
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env bash /usr/local/bin/river-relay-boot-sync.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

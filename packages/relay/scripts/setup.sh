@@ -82,13 +82,11 @@ if [[ ! -d "$RELAY_DIR/.git" ]]; then
 fi
 chown -R "$RELAY_USER:$RELAY_USER" "$RELAY_DIR"
 
-# --- 7) Move .env off boot partition ---
-echo "Moving .env to $RELAY_DIR/.env..."
+# --- 7) Seed .env into relay directory ---
+echo "Seeding .env to $RELAY_DIR/.env..."
 cp "$ENV_SRC" "$RELAY_DIR/.env"
 chmod 600 "$RELAY_DIR/.env"
 chown "$RELAY_USER:$RELAY_USER" "$RELAY_DIR/.env"
-rm -f "$ENV_SRC"
-echo "Boot partition .env deleted"
 
 # --- 8) SD card hardening ---
 echo "Hardening SD card..."
@@ -120,11 +118,14 @@ fi
 echo "tmpfs and noatime configured (effective after reboot)"
 
 # --- 9) Install systemd units ---
-echo "Installing systemd service and timer..."
+echo "Installing systemd units..."
 cp "$RELAY_DIR/packages/relay/config/river-relay.service" /etc/systemd/system/
 cp "$RELAY_DIR/packages/relay/config/river-relay-reset.service" /etc/systemd/system/
 cp "$RELAY_DIR/packages/relay/config/river-relay-reset.timer" /etc/systemd/system/
+cp "$RELAY_DIR/packages/relay/config/river-relay-boot-sync.service" /etc/systemd/system/
+install -m 755 "$RELAY_DIR/packages/relay/scripts/boot-sync.sh" /usr/local/bin/river-relay-boot-sync.sh
 systemctl daemon-reload
+systemctl enable river-relay-boot-sync.service
 systemctl enable river-relay.service
 systemctl enable river-relay-reset.timer
 
@@ -135,6 +136,7 @@ sudo -u "$RELAY_USER" bun install
 
 # --- 11) Start services ---
 echo "Starting relay service..."
+systemctl start river-relay-boot-sync.service
 systemctl start river-relay-reset.timer
 systemctl start river-relay.service
 

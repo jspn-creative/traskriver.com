@@ -17,9 +17,10 @@ TypeScript relay service that polls for viewer demand and streams RTSP to Cloudf
 ## Initial Setup
 
 1. Flash Pi OS Lite to SD card.
-2. Copy `.env` to the boot partition (FAT32):
+2. Copy config files to the boot partition (FAT32):
    - `cp .env /Volumes/bootfs/.env` (macOS)
    - `cp .env /media/$USER/bootfs/.env` (Linux)
+   - optional Wi-Fi config: `cp wpa_supplicant.conf /Volumes/bootfs/wpa_supplicant.conf`
 3. Fill values from `.env.example`:
    - `STREAM_URL`
    - `RTSP_URL`
@@ -30,12 +31,17 @@ TypeScript relay service that polls for viewer demand and streams RTSP to Cloudf
 4. Boot Pi, SSH in, run setup:
    - `sudo bash /boot/firmware/setup.sh`
    - or clone repo and run `sudo bash /tmp/river-stream/packages/relay/scripts/setup.sh`
+5. `setup.sh` seeds `/opt/river-relay/.env` but keeps `/boot/.env` in place.
+6. On every boot, `river-relay-boot-sync.service` reapplies:
+   - `/boot/.env` (or `/boot/firmware/.env`) -> `/opt/river-relay/.env`
+   - `/boot/wpa_supplicant.conf` (or `/boot/firmware/wpa_supplicant.conf`) -> `/etc/wpa_supplicant/wpa_supplicant.conf`
 
 ## Deployment
 
 Automatic deploy: push to `main` with changes in `packages/relay/` or `packages/shared/`.
 
 GitHub Actions flow:
+
 1. Connect runner to Tailscale (`tailscale/github-action@v3`)
 2. SSH to relay host over Tailnet
 3. Run `bun run packages/relay/scripts/configure.ts`
@@ -82,11 +88,11 @@ systemctl stop river-relay
 
 ## GitHub Actions Secrets
 
-| Secret | Description | Source |
-| --- | --- | --- |
-| `TS_OAUTH_CLIENT_ID` | Tailscale OAuth client ID | [Tailscale OAuth](https://login.tailscale.com/admin/settings/oauth) |
-| `TS_OAUTH_SECRET` | Tailscale OAuth client secret | [Tailscale OAuth](https://login.tailscale.com/admin/settings/oauth) |
-| `RELAY_TAILSCALE_HOSTNAME` | Pi MagicDNS hostname | `tailscale status` on Pi |
+| Secret                     | Description                   | Source                                                              |
+| -------------------------- | ----------------------------- | ------------------------------------------------------------------- |
+| `TS_OAUTH_CLIENT_ID`       | Tailscale OAuth client ID     | [Tailscale OAuth](https://login.tailscale.com/admin/settings/oauth) |
+| `TS_OAUTH_SECRET`          | Tailscale OAuth client secret | [Tailscale OAuth](https://login.tailscale.com/admin/settings/oauth) |
+| `RELAY_TAILSCALE_HOSTNAME` | Pi MagicDNS hostname          | `tailscale status` on Pi                                            |
 
 ## Tailscale ACL Example (`tag:ci`)
 
@@ -112,9 +118,11 @@ packages/relay/
 |- config/
 |  |- river-relay.service
 |  |- river-relay-reset.timer
-|  \- river-relay-reset.service
+|  |- river-relay-reset.service
+|  \- river-relay-boot-sync.service
 |- scripts/
 |  |- setup.sh
+|  |- boot-sync.sh
 |  \- configure.ts
 |- src/
 |  |- index.ts
