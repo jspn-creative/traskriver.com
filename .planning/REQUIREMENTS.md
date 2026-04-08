@@ -37,13 +37,13 @@ Requirements for on-demand streaming milestone. Each maps to roadmap phases.
 
 ### Relay Deployment
 
-- [x] **DEPL-01**: Bash setup script (`packages/relay/scripts/setup.sh`) runs once on fresh Pi OS Lite: installs Bun, ffmpeg, Tailscale (with auth key), creates `relay` user, disables swap, configures volatile journald, tmpfs mounts, noatime, unattended-upgrades
+- [x] **DEPL-01**: Bash setup script (`packages/relay/scripts/setup.sh`) runs once on fresh Pi OS Lite: installs Bun, ffmpeg, Tailscale (with auth key), creates `relay` user, disables swap, configures volatile journald, tmpfs mounts, noatime
 - [x] **DEPL-02**: systemd service file (`river-relay.service`) with `Type=simple`, `Restart=always`, `RestartSec=5`, rate-limited restarts (10/5min), security hardening (`NoNewPrivileges`, `ProtectSystem=strict`), `EnvironmentFile` for secrets
 - [x] **DEPL-03**: systemd timer resets relay failure counter every 15 minutes so relay always eventually recovers after transient failures
 - [x] **DEPL-04**: `.env` file placed on FAT32 boot partition during image flash, moved to `/opt/river-relay/.env` with `chmod 600` on first boot, boot copy deleted
 - [x] **DEPL-05**: Tailscale configured as exit node on the relay device for remote network access
 - [x] **DEPL-06**: Idempotent Bun config script (`packages/relay/scripts/configure.ts`) handles app-level setup: installs dependencies, syncs relay code from git, updates systemd service, restarts service — safe to re-run after `.env` or code changes
-- [x] **DEPL-07**: Relay config stored as infra-as-code in the repo (`packages/relay/config/`) including network block definitions; Bun config script reads and applies config
+- [x] **DEPL-07**: Relay config stored as infra-as-code in the repo (`packages/relay/config/`) — systemd service, timer, and reset units versioned in git; Bun config script reads and applies them
 - [x] **DEPL-08**: GitHub webhook triggers deploy to relay via Tailscale — pushes to `main` invoke the Bun config script on the Pi over SSH
 - [x] **DEPL-09**: Rollback capability via Tailscale SSH — operator can SSH into relay and revert to previous version quickly (e.g., `git checkout` + service restart)
 
