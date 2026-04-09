@@ -7,7 +7,15 @@
 		demandError = null,
 		relayStale = false
 	} = $props<{
-		phase: 'idle' | 'starting' | 'live' | 'viewing' | 'ended' | 'ended_confirming' | 'unavailable' | 'error';
+		phase:
+			| 'idle'
+			| 'starting'
+			| 'live'
+			| 'viewing'
+			| 'ended'
+			| 'ended_confirming'
+			| 'unavailable'
+			| 'error';
 		onStartStream: () => void;
 		demandRegistered?: boolean;
 		demandLoading?: boolean;
@@ -50,11 +58,14 @@
 			Limited Quantity Available:
 		</div>
 		<h1 class="mb-6 flex items-baseline font-display text-primary">
-			<span
-				class="text-6xl leading-[0.85] font-medium tracking-tight underline decoration-secondary/50 decoration-from-font [text-decoration-skip-ink:none]"
-				>24</span
-			>
-			<span class="ml-2 text-3xl font-bold tracking-tight">Hour Day Pass</span>
+			<span class="flex items-start">
+				<span
+					class="text-6xl leading-[0.85] font-medium tracking-tight underline decoration-secondary/50 decoration-from-font [text-decoration-skip-ink:none]"
+					>24</span
+				>
+				<span class="text-2xl leading-12 font-bold lining-nums">/7</span>
+			</span>
+			<span class="ml-2 text-3xl font-bold tracking-tight">Video Access</span>
 		</h1>
 		<p class="mb-10 text-sm leading-relaxed text-secondary">
 			Immersive, uninterrupted access to our fixed-position river array. Video-only visual telemetry
@@ -64,7 +75,7 @@
 
 	<div class="mb-10 flex items-baseline gap-2">
 		<span class="font-display text-6xl leading-none font-medium tracking-tight text-primary">
-			<span class="mt-2 mr-1 font-display text-xl text-secondary">$</span>79
+			<span class="mt-2 mr-1 font-display text-xl text-secondary">$</span>0
 		</span>
 		<span class="text-xs font-bold tracking-label text-secondary uppercase">USD</span>
 	</div>
@@ -81,7 +92,9 @@
 	<div class="mt-auto flex flex-col gap-3">
 		{#if isStarting && demandRegistered}
 			<p class="animate-pulse text-center text-2xs text-secondary">
-				{relayStale ? 'Relay appears offline — stream may take longer.' : 'Live feed connecting — please wait.'}
+				{relayStale
+					? 'Relay appears offline — stream may take longer.'
+					: 'Live feed connecting — please wait.'}
 			</p>
 		{/if}
 

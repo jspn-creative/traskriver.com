@@ -1,29 +1,42 @@
 ---
-status: awaiting_human_verify
-updated: 2026-04-09T00:00:00Z
+status: investigating
 trigger: "Stream stuck at 'Starting' despite relay being live — phase never transitions from starting to live/viewing"
 created: 2026-04-08T00:00:00Z
-updated: 2026-04-08T00:00:00Z
+updated: 2026-04-09T02:00:00Z
 ---
 
 ## Current Focus
 
-hypothesis: player.play() on a vidstack <media-player> after a fatal 204 manifestParsingError is a no-op because HLS.js has stopped loading. The retry loop polls play() but vidstack correctly rejects with "media is not ready". Fix: use {#key playerKey} on <media-player> to remount the element on each retry cycle, which creates a fresh HLS.js instance that will attempt to load the manifest again.
-test: Implement {#key playerKey} remount strategy — increment playerKey on each retry tick instead of calling player.play()
-expecting: Fresh HLS.js instance on each cycle will eventually get a valid manifest when CF Stream becomes ready, fire can-play, and autoplay will handle the rest
-next_action: Implement fix in VideoPlayer.svelte
+hypothesis: CF Stream returns 204 indefinitely because the live input UID encoded in the JWT (`sub` claim, from `CF_STREAM_LIVE_INPUT_UID`) does not match the live input that ffmpeg is actively streaming to. The relay's `STREAM_URL` contains the RTMPS **streaming key** for the live input; the HLS URL uses the live input **UID**. If these two env vars were populated from different live inputs (or one is wrong), ffmpeg pushes to input A while the HLS URL points at input B, which has no active broadcast → CF Stream returns 204 forever.
+test: Add `liveSrc` logging in VideoPlayer.svelte so the full signed HLS URL appears in the browser console. User can then (1) decode the JWT `sub` to see the UID, (2) curl the manifest to confirm 204, and (3) compare the UID against the live input in the Cloudflare dashboard.
+expecting: The logged URL will reveal whether the customer code and UID are plausibly correct, or will expose an obviously wrong value (wrong length, placeholder text, mismatched UUID format).
+next_action: Add liveSrc diagnostic log to VideoPlayer.svelte; provide user with curl + JWT decode instructions to verify the URL
 
 ## Symptoms
 
 expected: Click "Start Stream" → status shows "Starting" → relay goes live → status shows "Live" (phase=live) → video plays → status shows "Live" with green dot (phase=viewing)
 actual: Click "Start Stream" → status shows "Starting" → stays at "Starting" forever. Video never plays. Relay IS live (`curl` confirms `{"state":"live","stale":false}`)
-errors: "manifestParsingError, code: 204" (earlier — may still occur if CF Stream HLS endpoint returns 204 despite broadcast); "$.get(player).play is not a function" (patched with typeof guard, but guard may prevent playback)
+errors: "manifestParsingError, code: 204" (every remount cycle, forever — isOffline: true, isFatal: true)
 reproduction: 1. Go to https://stream.jspn.workers.dev 2. Click start stream button 3. Observe status stuck at "Starting" 4. Relay confirmed live via curl
 started: After JWT signing was added; relay heartbeat was recently added; worker was redeployed
 
 ## Eliminated
 
-(none yet)
+- hypothesis: player.play() retry loop would recover playback after 204 manifestParsingError
+  evidence: vidstack rejects play() with "media is not ready - wait for can-play event" when HLS.js has stopped loading; can-play never fires after a fatal 204 error
+  timestamp: 2026-04-09T00:00:00Z
+
+- hypothesis: {#key playerKey} TypeErrors on cleanup preventing clean remounts
+  evidence: Checkpoint 2 confirms "TypeErrors are gone — remount loop is clean." The fixes (capture el = player, remove explicit player = undefined) resolved the TypeError. Loop now cycles cleanly but 204 persists.
+  timestamp: 2026-04-09T02:00:00Z
+
+- hypothesis: Phase stuck at `starting` (never reaches `live`)
+  evidence: Checkpoint 2 console shows `{phase: 'live', sessionActive: true, streamStandby: true}` — phase transitions correctly. The "Starting" display is the badge text; it now says "Connecting" for live phase (already fixed in badge).
+  timestamp: 2026-04-09T02:00:00Z
+
+- hypothesis: Relay heartbeat exhausting KV free tier (earlier root cause)
+  evidence: Fixed — heartbeat rate-limited to 60s minimum. Not relevant to current 204 issue.
+  timestamp: 2026-04-09T02:00:00Z
 
 ## Evidence
 
@@ -77,14 +90,34 @@ started: After JWT signing was added; relay heartbeat was recently added; worker
   found: A `reporter.report(state)` call was placed unconditionally on every tick (every `pollIntervalMs`, default 10s). Each call POSTs to the Worker, which does a `kv.put()`. Rate: 6 writes/min × 60 × 24 = 8,640 KV puts/day. Cloudflare Workers KV free tier limit is 1,000 puts/day. The relay exhausts the daily limit in ~2.8 hours of running.
   implication: CRITICAL — this is the cause of the 429 errors. The heartbeat was added to prevent the 120s KV TTL from expiring during stable states, but fires far too frequently.
 
+- timestamp: 2026-04-09T01:00:00Z
+  checked: Checkpoint human-verify response — browser console with live relay test
+  found: (1) manifestParsingError code 204 fires as expected. (2) "remounting player (retry)" fires. (3) TypeError: null is not an object (evaluating removeEventListener) — repeating every cycle. (4) phase=starting → phase=live transitions correctly. (5) Remounting continues after phase=live. (6) TypeError in cleanup too. Root: both $effect cleanups read the reactive `player` signal (already null after {#key} destroys the element) rather than a captured element reference. Compounded by explicit `player = undefined` being set before `playerKey += 1` in the retry interval, triggering the cleanup immediately with player already null on every cycle.
+  implication: The TypeErrors interrupt Svelte's reconciliation on every remount cycle, preventing the new element from mounting cleanly and firing autoplay. All three bugs must be fixed simultaneously: capture `el = player` in both effects, remove explicit `player = undefined`, fix broken indentation in both error handlers.
+
 - timestamp: 2026-04-08T00:08:00Z
   checked: The `manifestParsingError` / 204 error handling in VideoPlayer
   found: Both `handleError` (line 70-108) and `onLiveError` (line 145-174) check for manifestParsingError/204 and silently return without calling `onError()`. This means if CF Stream returns 204, the error is swallowed and the player stays in a non-playing state. The `sessionActive` effect (line 188-200) would retry `player.play()` whenever `sessionActive` changes (it's reactive on `sessionActive`, `player`, and `isPlaying`). BUT — `sessionActive` doesn't change between `starting` and `live` (both are true). And `player` reference doesn't change. And `isPlaying` stays false. So the effect runs ONCE and doesn't re-run.
   implication: CRITICAL — After the initial `player.play()` fails with 204/manifestParsingError, there is NO retry mechanism. The `$effect` at line 188 only re-runs when its reactive dependencies change, and none of them change after the initial call. The video player is stuck in a dead state.
 
+- timestamp: 2026-04-09T02:00:00Z
+  checked: Checkpoint 2 response — TypeErrors gone, 204 persists indefinitely
+  found: (1) Remount loop is clean (no TypeErrors). (2) Phase correctly transitions starting→live. (3) Every remount immediately gets 204 manifestParsingError. (4) Relay has been live "several minutes" — CF Stream still 204. (5) `isOffline: true` every cycle. Relay confirms live (`STATE: starting → live`, `status reported: live`) — but relay liveness is determined purely by ffmpeg process still running, NOT by CF Stream confirming RTMP ingest.
+  implication: CF Stream is not ingesting the RTMP stream from the relay, OR the HLS URL encodes a different live input UID than the one ffmpeg is streaming to. The relay is "live" in its own state machine because ffmpeg stayed up for liveConfirmMs (4s) — this does NOT confirm CF Stream is receiving/processing the stream.
+
+- timestamp: 2026-04-09T02:01:00Z
+  checked: stream.remote.ts — HLS URL construction and JWT format
+  found: URL: `https://customer-${CF_STREAM_CUSTOMER_CODE}.cloudflarestream.com/${token}/manifest/video.m3u8`. Token `sub` = `CF_STREAM_LIVE_INPUT_UID`. Token `kid` appears in BOTH header AND payload (non-standard but CF Stream docs show kid in payload too). No liveSrc logging exists — the URL is opaque from browser console. stream.copy.remote.ts exists as a debugging copy with logging (exposes customer, uid, token) but is NOT imported by +page.svelte.
+  implication: We cannot verify the URL correctness from browser console alone. We need to expose liveSrc in the browser so it can be curl-tested and the UID can be cross-checked against the CF Stream live input receiving ffmpeg's stream.
+
+- timestamp: 2026-04-09T02:02:00Z
+  checked: relay/src/index.ts — how relay state machine transitions to 'live'
+  found: After `ffmpeg.start()` succeeds, relay waits `liveConfirmMs` (4 seconds default) checking `ffmpeg.isRunning()` in a 200ms poll. If ffmpeg is still running after 4s → transitions to 'live'. This is purely a process-liveness check. It does NOT verify that CF Stream is receiving the RTMP stream, that the RTMPS key is valid, or that CF Stream is ingesting successfully.
+  implication: Relay 'live' state ≠ CF Stream ingesting. ffmpeg could be running but rejected by CF Stream (wrong key, network issue) and the relay would still report 'live'. ffmpeg doesn't immediately exit on RTMPS auth failure — it keeps trying to reconnect, giving the appearance of "running."
+
 ## Resolution
 
-root_cause: **Three-layer problem:** (1) After a fatal 204/manifestParsingError HLS.js stops all loading permanently — it cannot be recovered by calling player.play(). The prior fix (retry loop calling player.play()) was rejected by vidstack with "media is not ready - wait for can-play event" because can-play never fires when HLS.js is stopped. (2) Original root cause still stands: one-shot $effect for player.play() meant no retry at all. (3) Relay heartbeat exhausting KV free tier. Final root cause for playback: calling player.play() after a fatal HLS error is the wrong API; HLS.js needs its instance destroyed and recreated, which in Svelte is done by remounting the <media-player> element.
-fix: (1) Replaced retry-play loop with remount loop in VideoPlayer.svelte: added `playerKey` reactive state, wrapped `<media-player>` in `{#key playerKey}`, and the retry interval now sets `player = undefined; playerKey += 1` each cycle instead of calling `player.play()`. Incrementing playerKey destroys the stopped HLS.js instance and mounts a fresh one. The `autoplay` attribute on the fresh element handles play() once the manifest loads. (2) Status badge: "Connecting" for `phase === 'live'`, "Starting" only for `phase === 'starting'`. (3) Relay heartbeat rate-limited to 60s minimum interval.
-verification: svelte-check passes with 0 errors and 0 warnings. Awaiting human verification with live relay.
+root_cause: UNKNOWN — CF Stream returning 204 indefinitely. Three candidate causes ranked by probability: (1) Mismatch between the live input key in relay STREAM_URL (what ffmpeg pushes to) and the live input UID in CF_STREAM_LIVE_INPUT_UID (what the HLS JWT encodes) — ffmpeg pushes to input A, browser requests HLS for input B; (2) JWT token is structurally valid but CF_STREAM_LIVE_INPUT_UID or CF_STREAM_CUSTOMER_CODE env vars hold wrong values (wrong account, wrong UID); (3) CF Stream rejects the RTMPS stream silently (wrong key, wrong format) and ffmpeg keeps reconnecting but CF Stream never ingests.
+fix: Expose liveSrc in browser console via diagnostic log in VideoPlayer.svelte; provide instructions to curl the manifest URL and decode the JWT sub claim to verify against CF Stream dashboard.
+verification: pending
 files_changed: [packages/web/src/lib/components/VideoPlayer.svelte, packages/web/src/routes/+page.svelte, packages/relay/src/index.ts]

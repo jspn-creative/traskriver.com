@@ -47,6 +47,10 @@
 
 	$effect(() => {
 		if (!player) return;
+		// Capture the element reference now. By the time the cleanup runs,
+		// {#key playerKey} will have set `player` to null via bind:this, so
+		// reading `player` directly in cleanup would throw a null-pointer error.
+		const el = player;
 
 		const onProviderChange = (e: any) => {
 			const provider = e.detail;
@@ -65,12 +69,16 @@
 			}
 		};
 
-		player.addEventListener('provider-change', onProviderChange);
-		return () => player.removeEventListener('provider-change', onProviderChange);
+		el.addEventListener('provider-change', onProviderChange);
+		return () => el.removeEventListener('provider-change', onProviderChange);
 	});
 
 	$effect(() => {
 		if (!player) return;
+		// Capture the element reference now. By the time the cleanup runs,
+		// {#key playerKey} will have set `player` to null via bind:this, so
+		// reading `player` directly in cleanup would throw a null-pointer error.
+		const el = player;
 
 		const handleError = (e: any) => {
 			// A 204 response (stream offline / not yet broadcasting) causes a
@@ -96,36 +104,36 @@
 			if (!isFatal) {
 				log('non-fatal hls error, ignoring', { details });
 
-			// Nudge the player if it stalls due to a fragment timeout
-			if (details === 'fragLoadTimeOut' && sessionActive && player && typeof player.play === 'function' && !isPlaying) {
-				log('Attempting to recover from fragLoadTimeOut');
-				try {
-					player.play()?.catch(() => {});
-				} catch (e) {}
+				// Nudge the player if it stalls due to a fragment timeout
+				if (details === 'fragLoadTimeOut' && sessionActive && el && typeof (el as any).play === 'function' && !isPlaying) {
+					log('Attempting to recover from fragLoadTimeOut');
+					try {
+						(el as any).play()?.catch(() => {});
+					} catch (_e) {}
+				}
+				return;
 			}
-			return;
-		}
 
-		logErr('Stream error:', e);
+			logErr('Stream error:', e);
 			hasError = true;
 			isPlaying = false;
 			onError?.();
 		};
 
 		log('attach listeners', {
-			hasPlayer: !!player
+			hasPlayer: !!el
 		});
-		player.addEventListener('error', handleError);
-		player.addEventListener('provider-error', handleError);
-		player.addEventListener('hls-error', handleError);
-		player.addEventListener('fatal-error', handleError);
+		el.addEventListener('error', handleError);
+		el.addEventListener('provider-error', handleError);
+		el.addEventListener('hls-error', handleError);
+		el.addEventListener('fatal-error', handleError);
 
 		return () => {
 			log('cleanup listeners');
-			player.removeEventListener('error', handleError);
-			player.removeEventListener('provider-error', handleError);
-			player.removeEventListener('hls-error', handleError);
-			player.removeEventListener('fatal-error', handleError);
+			el.removeEventListener('error', handleError);
+			el.removeEventListener('provider-error', handleError);
+			el.removeEventListener('hls-error', handleError);
+			el.removeEventListener('fatal-error', handleError);
 		};
 	});
 
@@ -164,12 +172,14 @@
 		// log them but don't surface the error UI or call onError.
 		if (!isFatal) {
 			log('non-fatal hls error, ignoring', { details });
-		if (details === 'fragLoadTimeOut' && sessionActive && player && typeof player.play === 'function' && !isPlaying) {
-			log('Attempting to recover from fragLoadTimeOut');
-			try {
-				player.play()?.catch(() => {});
-			} catch (e) {}
-		}
+
+			// Nudge the player if it stalls due to a fragment timeout
+			if (details === 'fragLoadTimeOut' && sessionActive && player && typeof player.play === 'function' && !isPlaying) {
+				log('Attempting to recover from fragLoadTimeOut');
+				try {
+					player.play()?.catch(() => {});
+				} catch (_e) {}
+			}
 			return;
 		}
 
@@ -188,6 +198,12 @@
 	$effect(() => {
 		// Helps correlate "Safari batch of same error" with player state flips
 		log('state', { isFullscreen, isPlaying, hasError });
+	});
+
+	$effect(() => {
+		// Diagnostic: log the full HLS URL so it can be curl-tested and the JWT
+		// sub (= live input UID) can be decoded and cross-checked in CF dashboard.
+		log('liveSrc', liveSrc);
 	});
 
 	// Retry playback by remounting <media-player> periodically while session is
@@ -209,7 +225,10 @@
 				return;
 			}
 			log('remounting player (retry)');
-			player = undefined;
+			// Do NOT set player = undefined here. {#key playerKey} destroys the
+			// old <media-player> element and bind:this nulls `player` automatically.
+			// Explicitly setting player=undefined before the key change fires the
+			// cleanup immediately with player already null, causing TypeErrors.
 			playerKey += 1;
 		}, RETRY_INTERVAL_MS);
 
