@@ -74,9 +74,16 @@ export const POST = async ({ request, platform }) => {
 		throw error(400, 'Missing timestamp');
 	}
 
-	await kv.put(RELAY_STATUS_KEY, JSON.stringify(payload), {
-		expirationTtl: RELAY_STATUS_TTL_SECONDS
-	});
+	try {
+		await kv.put(RELAY_STATUS_KEY, JSON.stringify(payload), {
+			expirationTtl: RELAY_STATUS_TTL_SECONDS
+		});
+	} catch (e) {
+		// KV put() throws when the daily write limit is exceeded (free tier: 1,000/day).
+		// Log and continue — relay will retry on the next heartbeat interval.
+		const msg = e instanceof Error ? e.message : String(e);
+		console.warn(`relay status kv.put failed: ${msg}`);
+	}
 
 	return json({ ok: true });
 };

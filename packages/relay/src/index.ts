@@ -22,6 +22,13 @@ const healthPort = Number(process.env.RELAY_HEALTH_PORT ?? '9090');
 const healthHostname = process.env.RELAY_HEALTH_HOSTNAME ?? '0.0.0.0';
 
 const COOLDOWN_MS = 15_000;
+// Heartbeat: re-report current state periodically to keep the KV entry alive
+// (TTL is 120s). We only need to refresh well within that window; 60s is safe
+// and keeps heartbeat KV writes to ~1,440/day (far below the 1,000 free-tier
+// limit is per-operation count — see note). At 1/min this is 60×24 = 1,440.
+// NOTE: With state-change reports via sm.onTransition, idle relays write ~2-3
+// KV puts/day (startup + shutdown). Active streams add ~1/min during streaming.
+const HEARTBEAT_INTERVAL_MS = 60_000;
 
 if (!config.streamUrl) {
 	log.error('STREAM_URL is required');
@@ -58,10 +65,13 @@ const poller = new DemandPoller(config);
 const ffmpeg = new FfmpegManager(config);
 const reporter = new StatusReporter(config);
 
+let lastReportedAt = 0;
+
 sm.onTransition(async (event) => {
 	const publicState =
 		event.to === 'stopping' || event.to === 'cooldown' ? 'idle' : event.to;
 	await reporter.report(publicState);
+	lastReportedAt = Date.now();
 });
 
 ffmpeg.onExit((code, signal) => {
@@ -104,6 +114,15 @@ async function tick() {
 		}
 		scheduleTick();
 		return;
+	}
+
+	// Heartbeat: re-report current state periodically to refresh the KV TTL.
+	// Only fires when HEARTBEAT_INTERVAL_MS has elapsed since the last report
+	// (whether from a state transition or a prior heartbeat). This keeps KV
+	// writes far below the free-tier limit (~1/min vs the previous ~6/min).
+	if (Date.now() - lastReportedAt >= HEARTBEAT_INTERVAL_MS) {
+		await reporter.report(state);
+		lastReportedAt = Date.now();
 	}
 
 	if (state === 'idle' && result.shouldStream) {
@@ -161,6 +180,7 @@ async function run() {
 	}
 
 	await reporter.report('idle');
+	lastReportedAt = Date.now();
 
 	void tick().catch((err) => {
 		log.error(`tick fatal: ${err}`);

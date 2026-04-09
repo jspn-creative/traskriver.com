@@ -23,13 +23,13 @@ See: .planning/PROJECT.md
 
 ## Phase Progress
 
-| Phase                    | Status      | Goal                                                               |
-| ------------------------ | ----------- | ------------------------------------------------------------------ |
-| 05. Monorepo Restructure | Complete    | Devs work on web + relay in single repo with shared types          |
-| 06. Demand API           | Complete    | Worker endpoints for demand registration and relay polling         |
-| 07. Relay Service        | Complete    | TypeScript polling loop + ffmpeg state machine with crash recovery |
-| 08. Stream UX            | Complete    | Demand-aware UI states: starting, live, ended, unavailable         |
-| 09. Relay Deployment     | Complete    | Pi provisioning, systemd, Tailscale, deploy pipeline               |
+| Phase                    | Status   | Goal                                                               |
+| ------------------------ | -------- | ------------------------------------------------------------------ |
+| 05. Monorepo Restructure | Complete | Devs work on web + relay in single repo with shared types          |
+| 06. Demand API           | Complete | Worker endpoints for demand registration and relay polling         |
+| 07. Relay Service        | Complete | TypeScript polling loop + ffmpeg state machine with crash recovery |
+| 08. Stream UX            | Complete | Demand-aware UI states: starting, live, ended, unavailable         |
+| 09. Relay Deployment     | Complete | Pi provisioning, systemd, Tailscale, deploy pipeline               |
 
 ## Current Position
 
@@ -51,46 +51,46 @@ _None_
 
 ### Key Decisions (v3.0)
 
-| Decision                                       | Rationale                                                    |
-| ---------------------------------------------- | ------------------------------------------------------------ |
-| `git mv` for monorepo migration                | Preserves file history with `--follow`, minimal path changes |
-| Single KV key `stream-demand`                  | Binary demand question; no need to enumerate viewers         |
-| Read-before-write with 30s threshold           | Eliminates KV 429 errors, reduces write costs                |
-| Bearer token auth for demand API               | Simple, sufficient for single relay device                   |
-| setTimeout chaining (not setInterval)          | No drift, no overlap, backpressure-aware                     |
-| Relay status in KV + CF lifecycle endpoint     | Fast feedback + accurate stream readiness confirmation       |
-| Pi OS Lite + bash setup script                 | Lowest complexity, easy to iterate, version-controlled       |
-| Tailscale for remote access                    | Outbound-only, works behind any NAT, free tier sufficient    |
-| `.env` on boot partition                       | Simple for single device; deleted after first boot           |
-| RelayState: public 4-state vs internal 5-state | Public excludes stopping/cooldown per CONTEXT.md             |
-| RelayStatusPayload.state: string not enum      | No enum validation — relay may evolve states freely          |
-| statusApiUrl added to RelayConfig              | Relay needs endpoint URL for status POST reporting           |
-| Demand POST is public (no auth)                | Auth deferred to Stripe/paywall phase                        |
-| No expirationTtl on demand KV key              | Expiry calculated from timestamp age vs 5-min window         |
-| Relay status KV TTL 120s as heartbeat          | Stale entry = relay offline; automatic cleanup               |
-| Button-gated stream loading                    | getStreamInfo() only runs after user clicks "Start stream"   |
-| Map<State, Set<State>> for transitions         | O(1) lookup, exhaustive transition validation                |
-| StatusReporter never throws                    | Status failures are non-fatal warnings, not errors           |
-| DemandPoller tracks consecutive failures       | Exposed via PollResult for safety stop logic in Plan 02      |
-| Bun.spawn + exited promise for ffmpeg          | No Node.js child_process; native Bun subprocess management   |
-| SIGTERM + 10s SIGKILL fallback for ffmpeg stop | Ensures ffmpeg never becomes zombie process                  |
-| 15s cooldown before restart after ffmpeg crash | Prevents tight crash loops                                   |
-| starting→stopping allowed for demand expiry  | Matches main-loop stop path while ffmpeg still in starting   |
-| `.env.example` un-ignored in relay package     | `.env.*` ignore would block versioned env template           |
-| systemd restart guard 10/300 + 15m reset timer | Prevents permanent start-limit lockout while avoiding tight restart loops |
-| Bun at `/usr/local/bin/bun` in setup            | Keeps service ExecStart stable across root/user environments |
-| ff-only pull + diff-based unit sync in configure.ts | Makes deploy script idempotent and safe to re-run after code/config changes |
-| relay deploy CI path-filtered to relay/shared only | Avoids unnecessary Pi deploys from unrelated web-only commits |
-| Public GET /api/relay/status | Web app can poll relay status without relay bearer token |
-| Shared relay-status TTL/stale constants | API and frontend use one source of truth for stale detection |
-| Stream UX state driven by relay status + player events | Replaces fake timers with accurate lifecycle states (`starting/live/ended/unavailable`) |
-| Starting timeout excludes stale-relay windows | Prevents false timeout errors while relay heartbeat is offline |
-| Unavailable CTA remains clickable | Users can retry stream start while relay is offline (`buttonDisabled` excludes `unavailable`) |
+| Decision                                               | Rationale                                                                                     |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `git mv` for monorepo migration                        | Preserves file history with `--follow`, minimal path changes                                  |
+| Single KV key `stream-demand`                          | Binary demand question; no need to enumerate viewers                                          |
+| Read-before-write with 30s threshold                   | Eliminates KV 429 errors, reduces write costs                                                 |
+| Bearer token auth for demand API                       | Simple, sufficient for single relay device                                                    |
+| setTimeout chaining (not setInterval)                  | No drift, no overlap, backpressure-aware                                                      |
+| Relay status in KV + CF lifecycle endpoint             | Fast feedback + accurate stream readiness confirmation                                        |
+| Pi OS Lite + bash setup script                         | Lowest complexity, easy to iterate, version-controlled                                        |
+| Tailscale for remote access                            | Outbound-only, works behind any NAT, free tier sufficient                                     |
+| `.env` on boot partition                               | Simple for single device; deleted after first boot                                            |
+| RelayState: public 4-state vs internal 5-state         | Public excludes stopping/cooldown per CONTEXT.md                                              |
+| RelayStatusPayload.state: string not enum              | No enum validation — relay may evolve states freely                                           |
+| statusApiUrl added to RelayConfig                      | Relay needs endpoint URL for status POST reporting                                            |
+| Demand POST is public (no auth)                        | Auth deferred to Stripe/paywall phase                                                         |
+| No expirationTtl on demand KV key                      | Expiry calculated from timestamp age vs 5-min window                                          |
+| Relay status KV TTL 120s as heartbeat                  | Stale entry = relay offline; automatic cleanup                                                |
+| Button-gated stream loading                            | getStreamInfo() only runs after user clicks "Start stream"                                    |
+| Map<State, Set<State>> for transitions                 | O(1) lookup, exhaustive transition validation                                                 |
+| StatusReporter never throws                            | Status failures are non-fatal warnings, not errors                                            |
+| DemandPoller tracks consecutive failures               | Exposed via PollResult for safety stop logic in Plan 02                                       |
+| Bun.spawn + exited promise for ffmpeg                  | No Node.js child_process; native Bun subprocess management                                    |
+| SIGTERM + 10s SIGKILL fallback for ffmpeg stop         | Ensures ffmpeg never becomes zombie process                                                   |
+| 15s cooldown before restart after ffmpeg crash         | Prevents tight crash loops                                                                    |
+| starting→stopping allowed for demand expiry            | Matches main-loop stop path while ffmpeg still in starting                                    |
+| `.env.example` un-ignored in relay package             | `.env.*` ignore would block versioned env template                                            |
+| systemd restart guard 10/300 + 15m reset timer         | Prevents permanent start-limit lockout while avoiding tight restart loops                     |
+| Bun at `/usr/local/bin/bun` in setup                   | Keeps service ExecStart stable across root/user environments                                  |
+| ff-only pull + diff-based unit sync in configure.ts    | Makes deploy script idempotent and safe to re-run after code/config changes                   |
+| relay deploy CI path-filtered to relay/shared only     | Avoids unnecessary Pi deploys from unrelated web-only commits                                 |
+| Public GET /api/relay/status                           | Web app can poll relay status without relay bearer token                                      |
+| Shared relay-status TTL/stale constants                | API and frontend use one source of truth for stale detection                                  |
+| Stream UX state driven by relay status + player events | Replaces fake timers with accurate lifecycle states (`starting/live/ended/unavailable`)       |
+| Starting timeout excludes stale-relay windows          | Prevents false timeout errors while relay heartbeat is offline                                |
+| Unavailable CTA remains clickable                      | Users can retry stream start while relay is offline (`buttonDisabled` excludes `unavailable`) |
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
+| #          | Description                                                                                                                                                | Date       | Commit  | Directory                                                                                                           |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | 260408-cz3 | Fix PassDetailsPanel UX: spinner persists after demand reverts to idle state, and button color stays secondary after first click when it should be primary | 2026-04-08 | a02dfcf | [260408-cz3-fix-passdetailspanel-ux-spinner-persists](./quick/260408-cz3-fix-passdetailspanel-ux-spinner-persists/) |
 
 ## Last Session

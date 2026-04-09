@@ -11,7 +11,14 @@
 	import { getStreamInfo } from './stream.remote';
 
 	let phase = $state<
-		'idle' | 'starting' | 'live' | 'viewing' | 'ended' | 'ended_confirming' | 'unavailable' | 'error'
+		| 'idle'
+		| 'starting'
+		| 'live'
+		| 'viewing'
+		| 'ended'
+		| 'ended_confirming'
+		| 'unavailable'
+		| 'error'
 	>('idle');
 	let streamStandby = $state(true);
 	let streamError = $state(false);
@@ -386,13 +393,15 @@
 										? 'bg-secondary'
 										: 'bg-amber-500'}"
 				></div>
-				{streamError || phase === 'error'
-					? 'Error'
-					: phase === 'viewing'
-						? 'Live'
-						: phase === 'unavailable'
-							? 'Offline'
-							: phase === 'starting' || phase === 'live'
+			{streamError || phase === 'error'
+				? 'Error'
+				: phase === 'viewing'
+					? 'Live'
+					: phase === 'unavailable'
+						? 'Offline'
+						: phase === 'live'
+							? 'Connecting'
+							: phase === 'starting'
 								? 'Starting'
 								: phase === 'ended' || phase === 'ended_confirming'
 									? 'Ended'

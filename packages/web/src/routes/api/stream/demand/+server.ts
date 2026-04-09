@@ -19,7 +19,15 @@ export const POST = async ({ platform }) => {
 		}
 	}
 
-	await kv.put(DEMAND_KEY, now.toString());
+	try {
+		await kv.put(DEMAND_KEY, now.toString());
+	} catch (e) {
+		// KV put() throws when the daily write limit is exceeded (free tier: 1,000/day).
+		// Treat as a soft failure — the demand signal is best-effort; existing demand
+		// entries (read above) will continue to work until they expire naturally.
+		const msg = e instanceof Error ? e.message : String(e);
+		console.warn(`demand kv.put failed: ${msg}`);
+	}
 
 	return json({ ok: true });
 };

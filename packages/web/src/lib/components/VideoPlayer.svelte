@@ -33,6 +33,11 @@
 	let isFullscreen = $state(false);
 	let isPlaying = $state(false);
 	let hasError = $state(false);
+	// Incrementing this key destroys and remounts <media-player>, giving
+	// HLS.js a fresh start after a fatal 204/manifestParsingError.
+	let playerKey = $state(0);
+
+	const RETRY_INTERVAL_MS = 4_000;
 
 	$effect(() => {
 		// Initialize vidstack
@@ -91,17 +96,17 @@
 			if (!isFatal) {
 				log('non-fatal hls error, ignoring', { details });
 
-				// Nudge the player if it stalls due to a fragment timeout
-				if (details === 'fragLoadTimeOut' && sessionActive && player && !isPlaying) {
-					log('Attempting to recover from fragLoadTimeOut');
-					try {
-						player.play()?.catch(() => {});
-					} catch (e) {}
-				}
-				return;
+			// Nudge the player if it stalls due to a fragment timeout
+			if (details === 'fragLoadTimeOut' && sessionActive && player && typeof player.play === 'function' && !isPlaying) {
+				log('Attempting to recover from fragLoadTimeOut');
+				try {
+					player.play()?.catch(() => {});
+				} catch (e) {}
 			}
+			return;
+		}
 
-			logErr('Stream error:', e);
+		logErr('Stream error:', e);
 			hasError = true;
 			isPlaying = false;
 			onError?.();
@@ -159,12 +164,12 @@
 		// log them but don't surface the error UI or call onError.
 		if (!isFatal) {
 			log('non-fatal hls error, ignoring', { details });
-			if (details === 'fragLoadTimeOut' && sessionActive && player && !isPlaying) {
-				log('Attempting to recover from fragLoadTimeOut');
-				try {
-					player.play()?.catch(() => {});
-				} catch (e) {}
-			}
+		if (details === 'fragLoadTimeOut' && sessionActive && player && typeof player.play === 'function' && !isPlaying) {
+			log('Attempting to recover from fragLoadTimeOut');
+			try {
+				player.play()?.catch(() => {});
+			} catch (e) {}
+		}
 			return;
 		}
 
@@ -185,18 +190,32 @@
 		log('state', { isFullscreen, isPlaying, hasError });
 	});
 
+	// Retry playback by remounting <media-player> periodically while session is
+	// active but video isn't playing. After a fatal 204/manifestParsingError HLS.js
+	// stops all loading — calling player.play() is rejected with "media is not
+	// ready". The only reliable recovery is to destroy the element and create a
+	// fresh HLS.js instance. Incrementing `playerKey` triggers {#key playerKey}
+	// which remounts <media-player>. The new element has autoplay so it will start
+	// playing once the manifest becomes available without any explicit play() call.
 	$effect(() => {
-		if (sessionActive && player && !isPlaying) {
-			log('sessionActive is true, attempting to play');
-			try {
-				const promise = player.play();
-				if (promise !== undefined) {
-					promise.catch((e: any) => logErr('play error', e));
-				}
-			} catch (e) {
-				logErr('play exception', e);
+		if (!sessionActive || isPlaying) return;
+
+		log('starting remount retry loop');
+
+		// Retry on interval until playback starts or session ends
+		const id = setInterval(() => {
+			if (isPlaying) {
+				clearInterval(id);
+				return;
 			}
-		}
+			log('remounting player (retry)');
+			player = undefined;
+			playerKey += 1;
+		}, RETRY_INTERVAL_MS);
+
+		return () => {
+			clearInterval(id);
+		};
 	});
 </script>
 
@@ -205,21 +224,23 @@
 	class="group relative overflow-hidden bg-black {className ||
 		'rounded-3xl border border-white/10 shadow-2xl shadow-black/30'}"
 >
-	<media-player
-		bind:this={player}
-		title="River Stream"
-		src={liveSrc}
-		{poster}
-		autoplay
-		muted
-		playsinline
-		stream-type="live"
-		class="absolute inset-0 z-0 h-full w-full"
-		onplaying={onLivePlaying}
-		onerror={onLiveError}
-	>
-		<media-outlet></media-outlet>
-	</media-player>
+	{#key playerKey}
+		<media-player
+			bind:this={player}
+			title="River Stream"
+			src={liveSrc}
+			{poster}
+			autoplay
+			muted
+			playsinline
+			stream-type="live"
+			class="absolute inset-0 z-0 h-full w-full"
+			onplaying={onLivePlaying}
+			onerror={onLiveError}
+		>
+			<media-outlet></media-outlet>
+		</media-player>
+	{/key}
 
 	<!-- Explicit poster fallback to ensure it stays visible on error -->
 	<img
