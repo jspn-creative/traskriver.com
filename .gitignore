@@ -11,6 +11,8 @@ node_modules
 .cursor
 .opencode
 .planning
+.bg-shell
+.gsd
 
 # OS
 .DS_Store
