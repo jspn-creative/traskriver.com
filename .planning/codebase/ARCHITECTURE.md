@@ -1,130 +1,141 @@
 # Architecture
 
-**Analysis Date:** 2026-03-18
+**Analysis Date:** 2026-04-09
 
 ## Pattern Overview
 
-**Overall:** Serverless Edge Application / SvelteKit SSR
+**Overall:** Monorepo with three packages: a SvelteKit web app deployed as a Cloudflare Worker (static assets + request handler), a long-running Bun relay service at the edge of the network, and a shared TypeScript contract package.
 
 **Key Characteristics:**
-
-- Designed for edge deployment (Cloudflare Workers via `@sveltejs/adapter-cloudflare`).
-- Stateless authentication and session management using signed HTTP-only cookies (avoids database roundtrips at the edge).
-- Native Web Crypto API integration (`crypto.subtle`) for token generation and verification.
-- Decoupled media ingestion: uses a background Node/Bun script to transcode RTSP into static HLS segments served directly.
+- **Split runtime:** Browser UI and HTTP API live in `packages/web`; ingest/transcode runs in `packages/relay` (Bun + `ffmpeg`).
+- **Coordination via Cloudflare KV:** The Worker exposes authenticated APIs; relay and browser write/read demand and status through KV (`RIVER_KV` binding declared in `packages/web/src/app.d.ts`, configured in `packages/web/wrangler.jsonc`).
+- **SvelteKit server features:** Route modules under `packages/web/src/routes/`; server-only logic in `+server.ts` and `*.remote.ts` files using SvelteKit remote functions (`query` from `$app/server`).
 
 ## Layers
 
-**Routing & View Layer:**
+**Presentation (Svelte 5 UI):**
+- Purpose: Stream viewing UI, pass/checkout UX, drawer/sidebar, telemetry.
+- Location: `packages/web/src/routes/*.svelte`, `packages/web/src/lib/components/`
+- Contains: Runes (`$state`, `$effect`, `$derived`), `svelte:boundary` + async `await` for remote data, Vidstack-based player (`VideoPlayer.svelte`).
+- Depends on: Remote functions (`packages/web/src/routes/stream.remote.ts`), `fetch` to same-origin API routes, shared types from `@river-stream/shared`.
+- Used by: End users in the browser.
 
-- Purpose: Maps URLs to Svelte view components and handles server-side data loading.
-- Location: `src/routes/`
-- Contains: Svelte components (`+page.svelte`, `+layout.svelte`), Server Loaders (`+page.server.ts`).
-- Depends on: Component Layer, Domain Services.
-- Used by: End users (browsers).
+**HTTP API (SvelteKit handlers on Cloudflare):**
+- Purpose: KV-backed demand and relay status, Stripe checkout and webhooks, subscription cookie issuance checks.
+- Location: `packages/web/src/routes/api/**/+server.ts`
+- Contains: `GET`/`POST` handlers; `platform.env` for KV and secrets; JSON responses via `@sveltejs/kit`.
+- Depends on: `packages/web/src/lib/server/stripe.ts`, `packages/web/src/lib/server/subscription.ts`, `$env/dynamic/private` for Cloudflare Stream and Stripe env.
+- Used by: Browser (`fetch`), relay (`DemandPoller`, `StatusReporter` in `packages/relay/src/`).
 
-**API Layer:**
+**Server-only helpers (web):**
+- Purpose: Stripe client, HMAC subscription cookies, stream token signing inside remote queries.
+- Location: `packages/web/src/lib/server/`
+- Contains: `subscription.ts`, `stripe.ts`; signing logic also inlined in `packages/web/src/routes/stream.remote.ts`.
+- Depends on: Web Crypto in the Worker runtime, env vars.
+- Used by: `+page.server.ts`, `+server.ts`, `stream.remote.ts`.
 
-- Purpose: Exposes HTTP endpoints for frontend actions and external webhooks (e.g., Stripe).
-- Location: `src/routes/api/`
-- Contains: SvelteKit server endpoints (`+server.ts`).
-- Depends on: Domain Services.
-- Used by: Frontend forms, Stripe Webhooks.
+**Remote functions (typed server calls from components):**
+- Purpose: Type-safe server execution for stream manifest URL generation (JWT for Cloudflare Stream).
+- Location: `packages/web/src/routes/stream.remote.ts` (active pattern); `packages/web/src/routes/stream.copy.remote.ts` (alternate/debug variant).
+- Contains: `export const getStreamInfo = query(async () => { ... })`.
+- Depends on: `$app/server` (`getRequestEvent`, `query`), `$lib/server/subscription`.
+- Used by: `packages/web/src/routes/+page.svelte` via `await getStreamInfo()`.
 
-**Domain Services (Server):**
+**Relay service (Bun):**
+- Purpose: Poll demand API; run `ffmpeg` against RTSP; report state to Worker; optional local health HTTP server.
+- Location: `packages/relay/src/`
+- Contains: `index.ts` orchestration; `poller.ts`, `status-reporter.ts`, `ffmpeg.ts`, `state-machine.ts`, `health-server.ts`, `logger.ts`.
+- Depends on: `@river-stream/shared` (`RelayConfig`, payloads); env vars (`STREAM_URL`, `RTSP_URL`, `RELAY_BEARER_TOKEN`, URLs for demand/status APIs).
+- Used by: Ops/process manager (not imported by web).
 
-- Purpose: Encapsulates core business logic, secret management, and external service interactions.
-- Location: `src/lib/server/`
-- Contains: Pure TypeScript modules (`stripe.ts`, `subscription.ts`).
-- Depends on: SvelteKit environment variables (`$env/dynamic/private`), Stripe Node SDK.
-- Used by: Routing Layer, API Layer.
-
-**Component Layer:**
-
-- Purpose: Reusable UI elements for the frontend application.
-- Location: `src/lib/components/`
-- Contains: Svelte components (e.g., `VideoPlayer.svelte`).
-- Depends on: External frontend libraries (e.g., Vidstack).
-- Used by: View Layer.
+**Shared contract:**
+- Purpose: Single source of truth for API shapes and relay configuration typing.
+- Location: `packages/shared/index.ts`
+- Contains: `DemandResponse`, `RelayState`, `RelayStatusPayload`, `RelayStatusResponse`, `RelayConfig`, TTL constants.
+- Depends on: TypeScript only.
+- Used by: `packages/web` (routes, components), `packages/relay`.
 
 ## Data Flow
 
-**Subscription Acquisition (Test Access):**
+**Page load and access gate:**
 
-1. User submits POST to `/api/test-access`.
-2. Endpoint calls `createSubscriptionCookie()` in `src/lib/server/subscription.ts`.
-3. System generates a JSON payload, signs it using HMAC SHA-256 (`crypto.subtle`) with `COOKIE_SECRET`, and sets it as an HTTP-only cookie.
-4. User is redirected to `/` with the newly minted access cookie.
+1. Request hits SvelteKit; `packages/web/src/routes/+page.server.ts` runs `load` and ensures a signed subscription cookie via `hasActiveSubscription` / `createSubscriptionCookie` from `packages/web/src/lib/server/subscription.ts`.
+2. UI may call Stripe checkout (`POST` `packages/web/src/routes/api/stripe/checkout/+server.ts`) → redirect; success handler `packages/web/src/routes/api/stripe/success/+server.ts` sets subscription state (cookie).
 
-**Content Access Verification:**
+**Demand → relay → stream:**
 
-1. User requests `/` page.
-2. SvelteKit runs `load` function in `src/routes/+page.server.ts`.
-3. Server retrieves the `subscription` cookie and calls `hasActiveSubscription()`.
-4. System verifies the HMAC signature. If valid and unexpired, it injects the secret `streamUrl` into the page data.
-5. Client-side Svelte renders the `VideoPlayer.svelte` component utilizing the `streamUrl`.
+1. User triggers start; browser `POST`s `packages/web/src/routes/api/stream/demand/+server.ts`, which writes demand timestamp to KV (`DEMAND_KEY`).
+2. Relay `DemandPoller` (`packages/relay/src/poller.ts`) `GET`s the demand endpoint with `Authorization: Bearer <RELAY_API_TOKEN>` (token matches Worker `platform.env.RELAY_API_TOKEN`).
+3. When `shouldStream` is true, `packages/relay/src/index.ts` drives `RelayStateMachine`, starts `FfmpegManager` (`packages/relay/src/ffmpeg.ts`), and `StatusReporter` `POST`s to `packages/web/src/routes/api/relay/status/+server.ts` with JSON body matching `RelayStatusPayload` from `packages/shared/index.ts`.
+4. Browser polls `GET` `packages/web/src/routes/api/relay/status/+server.ts` for `RelayStatusResponse` (stale if timestamp older than `RELAY_STATUS_STALE_THRESHOLD_MS` in shared).
+5. When UI shows the player, `getStreamInfo` in `packages/web/src/routes/stream.remote.ts` signs a short-lived JWT (Web Crypto + env `CF_STREAM_*`) and returns `liveHlsUrl` for HLS playback.
 
-**State Management:**
-
-- Application uses completely stateless, self-contained signed cookies (`subscription`) for authorization.
-- The cookie payload contains a base64-encoded JSON object (e.g., `{ active: true, expiresAt: 1234567890 }`) accompanied by a signature.
-- There is no central database for managing session state or user accounts; access is purely token-driven.
+**State management:**
+- **Server:** KV keys for demand and relay status; Stripe for billing; cookies for subscription proof.
+- **Client:** Local UI phase machine and polling timers in `packages/web/src/routes/+page.svelte` (`$state` / `$effect`); no global client store library detected.
 
 ## Key Abstractions
 
-**Subscription Manager:**
+**`query` remote functions:**
+- Purpose: Callable server functions with request context (cookies, env) without manual `load` wiring for that data.
+- Examples: `packages/web/src/routes/stream.remote.ts`
+- Pattern: `import { query, getRequestEvent } from '$app/server'` (SvelteKit experimental remote functions, enabled in `packages/web/svelte.config.js`).
 
-- Purpose: Creates and validates access tokens using native web cryptography.
-- Examples: `src/lib/server/subscription.ts`
-- Pattern: JWT-like signed tokens (Base64Url Payload + HMAC Signature).
+**KV-backed APIs:**
+- Purpose: Durable small payloads shared between Worker and relay without a traditional database.
+- Examples: `packages/web/src/routes/api/stream/demand/+server.ts`, `packages/web/src/routes/api/relay/status/+server.ts`
+- Pattern: `platform?.env?.RIVER_KV` with `get`/`put` and optional `expirationTtl` for relay status.
 
-**Stripe Integrator:**
+**Relay state machine:**
+- Purpose: Enforce valid `RelayInternalState` transitions and notify `StatusReporter` on transitions.
+- Examples: `packages/relay/src/state-machine.ts`, wired in `packages/relay/src/index.ts`
+- Pattern: Explicit transition map + `onTransition` callbacks.
 
-- Purpose: Manages Stripe SDK initialization, configuration validation, and webhook secret management.
-- Examples: `src/lib/server/stripe.ts`
-- Pattern: Singleton/Lazy initialization (`stripe ??= new Stripe(...)`).
+**Subscription cookie:**
+- Purpose: Gate stream URL generation and page load with HMAC-signed payload (secret `COOKIE_SECRET` via `packages/web/src/lib/server/subscription.ts`).
+- Examples: Used in `packages/web/src/routes/+page.server.ts` and `packages/web/src/routes/stream.remote.ts`.
 
 ## Entry Points
 
-**Web Application Frontend:**
+**SvelteKit app (browser + SSR):**
+- Location: `packages/web/src/routes/+layout.svelte`, `packages/web/src/routes/+page.svelte`, `packages/web/src/app.html`
+- Triggers: HTTP requests to deployed Worker or Vite dev server.
+- Responsibilities: Shell layout, main stream UI, composition of `$lib/components`.
 
-- Location: `src/routes/+page.svelte`
-- Triggers: User visiting the root URL.
-- Responsibilities: Displays marketing copy, conditionally shows the video player if the user has an active subscription, or displays purchase/test options if not.
+**Cloudflare Worker bundle:**
+- Location: Built output referenced by `packages/web/wrangler.jsonc` (`main`: `.svelte-kit/cloudflare/_worker.js`)
+- Triggers: All dynamic routes and API routes; static assets from `.svelte-kit/cloudflare` via `assets` config.
+- Responsibilities: SSR, API, KV access, env bindings.
 
-**Checkout Session Initiator:**
+**Relay process:**
+- Location: `packages/relay/src/index.ts` (`bun run src/index.ts` per `packages/relay/package.json`)
+- Triggers: Manual/systemd/Tailscale host start; `SIGTERM`/`SIGINT` for graceful shutdown.
+- Responsibilities: Demand polling loop, ffmpeg lifecycle, status reporting, optional health endpoint (`packages/relay/src/health-server.ts`).
 
-- Location: `src/routes/api/stripe/checkout/+server.ts`
-- Triggers: User initiating a Stripe purchase.
-- Responsibilities: Validates Stripe config, creates a Checkout Session, redirects user to Stripe hosted checkout.
-
-**Stripe Webhook:**
-
-- Location: `src/routes/api/stripe/webhook/+server.ts`
-- Triggers: Incoming HTTP POST from Stripe servers.
-- Responsibilities: Validates webhook signatures using the Stripe SDK, logs or processes `checkout.session.completed` events.
-
-**Stream Ingestion Script:**
-
-- Location: `scripts/stream.ts`
-- Triggers: Run manually or as a background service (`bun run stream`).
-- Responsibilities: Spawns FFmpeg to pull an RTSP camera feed (`CAMERA_RTSP_URL`) and segment it into static HLS files (`static/stream/index.m3u8`).
+**Monorepo orchestration:**
+- Location: `package.json` (root scripts `dev`, `build`, `check`), `turbo.json`
+- Triggers: Developer/CI invoking `bun run` at repo root.
+- Responsibilities: Workspace-wide `build`/`check` via Turbo pipeline.
 
 ## Error Handling
 
-**Strategy:** Fail-fast with clear HTTP status codes.
+**Strategy:** HTTP status codes from SvelteKit (`error`, `json`); relay logs and continues polling where safe; KV `put` failures logged as soft failures in demand/status handlers.
 
 **Patterns:**
-
-- SvelteKit `error` throwing: Endpoints and page loaders use `@sveltejs/kit`'s `throw error(status, message)` to halt execution and return correct HTTP responses.
-- Configuration validation: Startup or lazy-loaded services (like Stripe) throw immediate JS Errors if required environment variables are missing (`requireEnv`).
+- Missing `platform.env` or KV: `throw error(503, ...)` in API routes (e.g. `packages/web/src/routes/api/stream/demand/+server.ts`).
+- Relay auth: `401` when `Authorization` bearer does not match `RELAY_API_TOKEN`.
+- Remote query misconfiguration: `throw new Error(...)` in `getStreamInfo` surfaced through `svelte:boundary` `failed` snippet in `+page.svelte`.
 
 ## Cross-Cutting Concerns
 
-**Validation:** Environment variables are validated on use (e.g., checking `isStripeConfigured()` before attempting to create a checkout session).
-**Authentication/Authorization:** Implemented via custom HMAC-signed cookies verified in the server loader of protected routes.
-**Media Processing:** Delegated completely to background CLI tools (`FFmpeg` via `Bun.spawn`), outputting static files to be served by the web server layer.
+**Logging:** `console` in Worker routes and `stream.copy.remote.ts`; structured-style logs in `packages/relay/src/logger.ts`.
+
+**Validation:** Manual checks on JSON payloads and relay state strings in `packages/web/src/routes/api/relay/status/+server.ts`; Stripe webhook body verification in `packages/web/src/routes/api/stripe/webhook/+server.ts` (read file for details when extending).
+
+**Authentication:**
+- Relay → Worker: shared bearer token (`RELAY_API_TOKEN`).
+- End-user stream access: signed cookie + Stripe subscription flow (see `subscription.ts` and Stripe routes).
 
 ---
 
-_Architecture analysis: 2026-03-18_
+*Architecture analysis: 2026-04-09*

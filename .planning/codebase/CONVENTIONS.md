@@ -1,106 +1,113 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-03-18
+**Analysis Date:** 2026-04-09
 
 ## Naming Patterns
 
 **Files:**
-
-- SvelteKit reserved files: `+page.svelte`, `+server.ts`, `+page.server.ts`
-- Utility and service files: `camelCase.ts` (e.g., `src/lib/server/stripe.ts`, `src/lib/server/subscription.ts`)
+- Svelte components: PascalCase, e.g. `PassDetailsPanel.svelte`, `VideoPlayer.svelte` — location: `packages/web/src/lib/components/`
+- Co-located route logic: `+page.svelte`, `+page.server.ts`, `+server.ts` under `packages/web/src/routes/`
+- SvelteKit remote functions: `*.remote.ts` next to routes, e.g. `packages/web/src/routes/stream.remote.ts`
+- Shared TypeScript: `packages/shared/` at package root (`index.ts`, types alongside)
+- Relay Bun entry and modules: `packages/relay/src/*.ts`; tests: `*.test.ts` beside source (e.g. `packages/relay/src/state-machine.test.ts`)
 
 **Functions:**
-
-- `camelCase` for all functions.
-- Defined as exported arrow functions (e.g., `export const getStripe = () => { ... }`).
+- camelCase for functions and methods (`getStreamInfo`, `transition`, `generateStreamToken`)
+- Server handlers export named HTTP verbs (`GET`, `POST`) in `+server.ts` files
 
 **Variables:**
-
-- `camelCase` for variables and constants.
-- `SCREAMING_SNAKE_CASE` for environment variables when accessed directly (e.g., `process.env.CAMERA_RTSP_URL`).
+- camelCase for locals and reactive state (`demandRegistered`, `relayStale`)
+- SCREAMING_SNAKE for module-level constants (`POLL_INTERVAL_MS`, `DEMAND_KEY`, `THROTTLE_MS`)
 
 **Types:**
-
-- `PascalCase` for types and interfaces (inferred from TypeScript standards; minimal explicit types defined).
+- PascalCase for interfaces and exported types (`DemandResponse`, `TransitionEvent`, `StreamInfo`)
+- String-literal unions for phases and states inline or in shared package (`RelayInternalState` in `@river-stream/shared`)
 
 ## Code Style
 
 **Formatting:**
-
-- Tool used: Prettier
-- Key settings: `useTabs: true`, `singleQuote: true`, `trailingComma: "none"`, `printWidth: 100`
-- Plugins: `prettier-plugin-svelte`, `prettier-plugin-tailwindcss`
+- Tool: Prettier (`prettier` ^3.8.1) with Svelte and Tailwind plugins
+- Config: `packages/web/.prettierrc` — tabs, single quotes, `trailingComma: "none"`, `printWidth: 100`
+- Tailwind class order: `prettier-plugin-tailwindcss` with `tailwindStylesheet` pointing to `packages/web/src/app.css`
+- Ignore patterns: `packages/web/.prettierignore`
 
 **Linting:**
+- No ESLint in repo `package.json` files — **quality gate is Prettier check**, not ESLint
+- Root `bun lint` runs `prettier --check` in `packages/web` only (`packages/web/package.json` `lint` script)
 
-- Tool used: `svelte-check` and `tsc` for type-checking. No traditional linter (like ESLint) is present.
-- Key rules: Strict mode is enabled in `tsconfig.json` (`"strict": true`).
+**Type checking:**
+- `bun check` at root runs Turbo `check` across workspaces (`turbo.json`)
+- Web: `svelte-kit sync` + `svelte-check` (`packages/web/package.json`)
+- Relay/shared: `tsc --noEmit` with strict base config `tsconfig.json` at repo root
 
 ## Import Organization
 
-**Order:**
-
-1. Built-in Node.js modules or framework externals (e.g., `import { dev } from '$app/environment'`, `import { error } from '@sveltejs/kit'`)
-2. Third-party dependencies (e.g., `import Stripe from 'stripe'`)
-3. Internal aliases and local paths (e.g., `import { getStripe } from '$lib/server/stripe'`)
+**Order (typical in Svelte routes and components):**
+1. Svelte / framework (`svelte/transition`, `@sveltejs/kit` helpers)
+2. Type-only imports (`import type { ... }`)
+3. Workspace package (`@river-stream/shared`)
+4. `$lib/...` and `$app/...` / `$env/...` aliases
+5. Relative imports (`./stream.remote`, sibling components)
 
 **Path Aliases:**
+- `$lib` → `packages/web/src/lib` (SvelteKit default)
+- `$app/server`, `$env/dynamic/private` — SvelteKit virtual modules
+- `@river-stream/shared` — workspace package (`packages/shared/package.json` `exports`)
 
-- SvelteKit aliases used extensively: `$lib`, `$app`, `$env/dynamic/private`.
-- Absolute imports are preferred over relative ones using aliases.
+**Example (actual pattern):** `packages/web/src/routes/+page.svelte` — transitions and easing, then `import type`, then `$lib/components/...`, then `./stream.remote`.
 
 ## Error Handling
 
-**Patterns:**
+**SvelteKit API routes (`packages/web/src/routes/api/**/+server.ts`):**
+- Use `throw error(status, message)` from `@sveltejs/kit` for HTTP errors (e.g. 401, 503)
+- Success responses: `return json(payload)` with `satisfies` for response shapes where used
+- Recoverable external failures: `try/catch` with `console.warn` and soft-degrade behavior (see `packages/web/src/routes/api/stream/demand/+server.ts` KV `put` failure)
 
-- **Early returns:** Checks for invalid states first and returns or throws immediately.
-- **SvelteKit Helpers:** Uses `throw error(status, message)` for API failures and `throw redirect(status, location)` for navigation.
-- **Type Narrowing:** When catching unknown errors, uses `instanceof Error` to extract messages safely (e.g., `const message = issue instanceof Error ? issue.message : 'Invalid'; throw error(400, message);`).
-- **Required Environment Checks:** Functions throw standard JavaScript `Error` objects during initialization if required config is missing.
+**Relay (`packages/relay/`):**
+- CLI-style failures: `process.exit(1)` after logging (e.g. `packages/relay/src/index.ts`)
+- Invalid state transitions: log warning, return boolean `false` from `RelayStateMachine.transition` (`packages/relay/src/state-machine.ts`)
 
 ## Logging
 
-**Framework:** `console`
+**Framework:** `console` (`console.warn` in API routes; relay uses custom logger `packages/relay/src/logger.ts` re-exported/used in `state-machine.ts`)
 
 **Patterns:**
-
-- Native `console.log()` used for routine event tracking (e.g., Stripe webhooks).
-- Native `console.error()` used for fatal initialization errors (e.g., missing environment variables in scripts).
+- Prefix or structured tags in relay logs (`log.state`, `log.warn`) — see `packages/relay/src/logger.ts`
+- Avoid throwing on best-effort paths when a degraded response is acceptable (demand KV write)
 
 ## Comments
 
 **When to Comment:**
-
-- Minimal. The codebase relies entirely on self-documenting, readable code. Comments are almost exclusively framework-generated defaults.
+- Explain non-obvious business rules (throttle windows, free-tier KV limits) — see comments in `packages/web/src/routes/api/stream/demand/+server.ts`
+- Section dividers in CSS theme files — `packages/web/src/app.css`
 
 **JSDoc/TSDoc:**
-
-- Not currently used.
+- Sparse; prefer clear names and `satisfies` / explicit types on exports where needed
 
 ## Function Design
 
-**Size:** Small and focused. Functions typically perform a single responsibility (e.g., encoding, decoding, fetching a config).
+**Size:** No enforced max; prefer focused functions in `+server.ts` and remote modules.
 
-**Parameters:**
-
-- Destructuring used for Svelte component props: `let { data } = $props<{...}>();`
-- SvelteKit endpoint destructuring: `export const POST = async ({ request, cookies }) => { ... }`
+**Parameters:** Destructuring for SvelteKit handlers (`async ({ platform })`, `async ({ request, platform })`).
 
 **Return Values:**
-
-- Implicit returns widely used via arrow functions.
-- **Void pattern:** Explicit use of the `void` operator for unawaited, ignored Promises (e.g., `void defineCustomElements();`, `void document.exitFullscreen();`). This is a key stylistic convention in Svelte components.
+- Project workspace guidance: avoid redundant explicit TypeScript return types on functions unless needed for clarity; async crypto helpers may use explicit return types (e.g. `generateStreamToken` in `packages/web/src/routes/stream.remote.ts`)
 
 ## Module Design
 
 **Exports:**
-
-- Named exports exclusively for constants and functions (`export const ...`). Default exports are only used implicitly by Svelte compiler for `.svelte` components.
+- `+server.ts`: named exports `GET`, `POST`, etc.
+- Shared types and constants: centralize in `packages/shared/` for web + relay
 
 **Barrel Files:**
+- Shared package single entry `packages/shared/index.ts` re-exporting public API
 
-- `src/lib/index.ts` exists but is currently empty. Direct imports to specific modules are preferred.
+## Styling (UI)
+
+**Tailwind CSS v4:** Configuration in CSS (`@import 'tailwindcss'`, `@theme`, `@custom-variant`) — primary file `packages/web/src/app.css`. Use utility classes in Svelte; Prettier sorts class strings via Tailwind plugin.
+
+**Svelte 5:** Runes (`$state`, `$derived`, `$effect`, `$props`), `<script lang="ts">` — see `packages/web/src/lib/components/PassDetailsPanel.svelte`, `packages/web/src/routes/+page.svelte`.
 
 ---
 
-_Convention analysis: 2026-03-18_
+*Convention analysis: 2026-04-09*
