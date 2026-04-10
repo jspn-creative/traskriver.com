@@ -1,6 +1,5 @@
 import { env } from '$env/dynamic/private';
-import { getRequestEvent, query } from '$app/server';
-import { hasActiveSubscription, createSubscriptionCookie } from '$lib/server/subscription';
+import { query } from '$app/server';
 
 export type StreamInfo = {
 	liveHlsUrl: string;
@@ -26,7 +25,7 @@ const generateStreamToken = async (
 
 	const header = toBase64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: keyId }));
 	const payload = toBase64Url(
-		JSON.stringify({ sub: uid, kid: keyId, exp: Math.floor(Date.now() / 1000) + 3600 })
+		JSON.stringify({ sub: uid, kid: keyId, exp: Math.floor(Date.now() / 1000) + 120 })
 	);
 	const signingInput = `${header}.${payload}`;
 
@@ -41,14 +40,6 @@ const generateStreamToken = async (
 };
 
 export const getStreamInfo = query(async () => {
-	const event = getRequestEvent();
-	const hasAccess = await hasActiveSubscription(event.cookies.get('subscription'));
-
-	if (!hasAccess) {
-		const cookieValue = await createSubscriptionCookie();
-		event.cookies.set('subscription', cookieValue, { path: '/' });
-	}
-
 	const customer = env.CF_STREAM_CUSTOMER_CODE;
 	const uid = env.CF_STREAM_LIVE_INPUT_UID;
 
