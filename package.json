@@ -22,7 +22,7 @@
 		"check:web": "bun run --cwd packages/web check",
 		"check:relay": "bun run --cwd packages/relay check",
 		"lint": "bun run --cwd packages/web lint",
-		"format": "bun run --cwd packages/web format",
+		"format": "bunx prettier --write .",
 		"gen": "bun run --cwd packages/web gen"
 	},
 	"devDependencies": {

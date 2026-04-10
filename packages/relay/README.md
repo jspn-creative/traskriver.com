@@ -98,16 +98,16 @@ systemctl stop river-relay
 
 ```json
 {
-  "tagOwners": {
-    "tag:ci": ["autogroup:admin"]
-  },
-  "grants": [
-    {
-      "src": ["tag:ci"],
-      "dst": ["relay-hostname.tailnet.ts.net:22"],
-      "ip": ["tcp:22"]
-    }
-  ]
+	"tagOwners": {
+		"tag:ci": ["autogroup:admin"]
+	},
+	"grants": [
+		{
+			"src": ["tag:ci"],
+			"dst": ["relay-hostname.tailnet.ts.net:22"],
+			"ip": ["tcp:22"]
+		}
+	]
 }
 ```
 

@@ -1,6 +1,7 @@
 const relayPrefix = '[relay]';
 
-const formatMessage = (message: string) => `${relayPrefix} [${new Date().toISOString()}] ${message}`;
+const formatMessage = (message: string) =>
+	`${relayPrefix} [${new Date().toISOString()}] ${message}`;
 
 export const log = {
 	info(message: string) {

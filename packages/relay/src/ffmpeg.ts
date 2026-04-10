@@ -86,11 +86,7 @@ export class FfmpegManager {
 			const exitCode = subprocess.exitCode;
 			const signalStr = subprocess.signalCode ? String(subprocess.signalCode) : null;
 			this.fireExitCallbacks(exitCode, signalStr);
-			if (
-				!this.intentionalStop &&
-				exitCode !== null &&
-				exitCode !== 0
-			) {
+			if (!this.intentionalStop && exitCode !== null && exitCode !== 0) {
 				const stderrTail = this.getStderrTail();
 				log.error(`ffmpeg failed (exit ${exitCode}) stderr tail:\n${stderrTail}`);
 			}

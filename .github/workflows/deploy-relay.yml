@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/relay/**"
-      - "packages/shared/**"
+      - 'packages/relay/**'
+      - 'packages/shared/**'
 
 jobs:
   deploy:
