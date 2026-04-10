@@ -25,7 +25,7 @@
 **Types:**
 
 - PascalCase for interfaces and exported types (`DemandResponse`, `TransitionEvent`, `StreamInfo`)
-- String-literal unions for phases and states inline or in shared package (`RelayInternalState` in `@river-stream/shared`)
+- String-literal unions for phases and states inline or in shared package (`RelayInternalState` in `@traskriver/shared`)
 
 ## Code Style
 
@@ -53,7 +53,7 @@
 
 1. Svelte / framework (`svelte/transition`, `@sveltejs/kit` helpers)
 2. Type-only imports (`import type { ... }`)
-3. Workspace package (`@river-stream/shared`)
+3. Workspace package (`@traskriver/shared`)
 4. `$lib/...` and `$app/...` / `$env/...` aliases
 5. Relative imports (`./stream.remote`, sibling components)
 
@@ -61,7 +61,7 @@
 
 - `$lib` → `packages/web/src/lib` (SvelteKit default)
 - `$app/server`, `$env/dynamic/private` — SvelteKit virtual modules
-- `@river-stream/shared` — workspace package (`packages/shared/package.json` `exports`)
+- `@traskriver/shared` — workspace package (`packages/shared/package.json` `exports`)
 
 **Example (actual pattern):** `packages/web/src/routes/+page.svelte` — transitions and easing, then `import type`, then `$lib/components/...`, then `./stream.remote`.
 
