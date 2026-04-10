@@ -5,7 +5,7 @@ import {
 	RELAY_STATUS_TTL_SECONDS,
 	type RelayStatusPayload,
 	type RelayStatusResponse
-} from '@river-stream/shared';
+} from '@traskriver/shared';
 
 const RELAY_STATUS_KEY = 'relay-status';
 

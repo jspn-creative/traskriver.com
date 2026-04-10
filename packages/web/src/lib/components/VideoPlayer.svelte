@@ -21,11 +21,11 @@
 	const isBrowser = typeof window !== 'undefined';
 	const log = (...args: unknown[]) => {
 		if (!isBrowser) return;
-		console.log('[river-stream][VideoPlayer]', ...args);
+		console.log('[traskriver][VideoPlayer]', ...args);
 	};
 	const logErr = (...args: unknown[]) => {
 		if (!isBrowser) return;
-		console.error('[river-stream][VideoPlayer]', ...args);
+		console.error('[traskriver][VideoPlayer]', ...args);
 	};
 
 	let container: HTMLDivElement | undefined = $state();
@@ -46,9 +46,7 @@
 	// first requested and the CDN edge hasn't cached the live manifest yet).
 	// Appending a query param makes each attempt a unique URL, guaranteeing a
 	// fresh request reaches CF Stream's origin on every retry.
-	let cacheBustedSrc = $derived(
-		liveSrc + (liveSrc.includes('?') ? '&' : '?') + '_cb=' + playerKey
-	);
+	let cacheBustedSrc = $derived(liveSrc + (liveSrc.includes('?') ? '&' : '?') + '_cb=' + playerKey);
 
 	$effect(() => {
 		// Initialize vidstack
@@ -123,7 +121,13 @@
 				log('non-fatal hls error, ignoring', { details });
 
 				// Nudge the player if it stalls due to a fragment timeout
-				if (details === 'fragLoadTimeOut' && sessionActive && el && typeof (el as any).play === 'function' && !isPlaying) {
+				if (
+					details === 'fragLoadTimeOut' &&
+					sessionActive &&
+					el &&
+					typeof (el as any).play === 'function' &&
+					!isPlaying
+				) {
 					log('Attempting to recover from fragLoadTimeOut');
 					try {
 						(el as any).play()?.catch(() => {});
@@ -192,7 +196,13 @@
 			log('non-fatal hls error, ignoring', { details });
 
 			// Nudge the player if it stalls due to a fragment timeout
-			if (details === 'fragLoadTimeOut' && sessionActive && player && typeof player.play === 'function' && !isPlaying) {
+			if (
+				details === 'fragLoadTimeOut' &&
+				sessionActive &&
+				player &&
+				typeof player.play === 'function' &&
+				!isPlaying
+			) {
 				log('Attempting to recover from fragLoadTimeOut');
 				try {
 					player.play()?.catch(() => {});

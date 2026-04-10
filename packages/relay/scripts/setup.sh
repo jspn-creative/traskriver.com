@@ -4,7 +4,7 @@ set -euo pipefail
 # One-time provisioning script for fresh Pi OS Lite.
 RELAY_DIR="/opt/river-relay"
 RELAY_USER="relay"
-REPO_URL="git@github.com:jspn-creative/river-stream.git"
+REPO_URL="git@github.com:jspn-creative/traskriver.com.git"
 
 # --- Preflight ---
 if [[ $EUID -ne 0 ]]; then
@@ -143,10 +143,10 @@ systemctl enable river-relay-reset.timer
 # --- 10) Install app dependencies ---
 echo "Installing relay dependencies..."
 # The root package.json references packages/web which isn't cloned.
-# Write a minimal workspace root so bun resolves @river-stream/shared.
+# Write a minimal workspace root so bun resolves @traskriver/shared.
 cat > "$RELAY_DIR/package.json" <<'ROOTPKG'
 {
-  "name": "river-stream",
+  "name": "traskriver",
   "private": true,
   "workspaces": ["packages/relay", "packages/shared"]
 }

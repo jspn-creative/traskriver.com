@@ -1,2 +1,2 @@
 // place files you want to import through the `$lib` alias in this folder.
-export type { DemandResponse, RelayState } from '@river-stream/shared';
+export type { DemandResponse, RelayState } from '@traskriver/shared';

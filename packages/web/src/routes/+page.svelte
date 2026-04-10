@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import type { RelayStatusResponse } from '@river-stream/shared';
+	import type { RelayStatusResponse } from '@traskriver/shared';
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 	import PassDetailsPanel from '$lib/components/PassDetailsPanel.svelte';
 	import TelemetryFooter from '$lib/components/TelemetryFooter.svelte';
@@ -70,7 +70,7 @@
 	let sidebarWidth = $derived(phase === 'viewing' ? '300px' : '420px');
 	const log = (...args: unknown[]) => {
 		if (!isBrowser) return;
-		console.log('[river-stream][page]', ...args);
+		console.log('[traskriver][page]', ...args);
 	};
 
 	const prefetchRelayStatus = async () => {
@@ -393,19 +393,19 @@
 										? 'bg-secondary'
 										: 'bg-amber-500'}"
 				></div>
-			{streamError || phase === 'error'
-				? 'Error'
-				: phase === 'viewing'
-					? 'Live'
-					: phase === 'unavailable'
-						? 'Offline'
-						: phase === 'live'
-							? 'Connecting'
-							: phase === 'starting'
-								? 'Starting'
-								: phase === 'ended' || phase === 'ended_confirming'
-									? 'Ended'
-									: 'Standby'}
+				{streamError || phase === 'error'
+					? 'Error'
+					: phase === 'viewing'
+						? 'Live'
+						: phase === 'unavailable'
+							? 'Offline'
+							: phase === 'live'
+								? 'Connecting'
+								: phase === 'starting'
+									? 'Starting'
+									: phase === 'ended' || phase === 'ended_confirming'
+										? 'Ended'
+										: 'Standby'}
 			</div>
 		</header>
 

@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 
-import type { DemandResponse } from '@river-stream/shared';
+import type { DemandResponse } from '@traskriver/shared';
 
 const DEMAND_KEY = 'stream-demand';
 const THROTTLE_MS = 30_000;

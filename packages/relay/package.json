@@ -1,5 +1,5 @@
 {
-	"name": "@river-stream/relay",
+	"name": "@traskriver/relay",
 	"version": "0.0.1",
 	"type": "module",
 	"main": "./src/index.ts",
@@ -11,7 +11,7 @@
 		"check": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@river-stream/shared": "workspace:*",
+		"@traskriver/shared": "workspace:*",
 		"@types/node": "^25.5.0",
 		"bun-types": "^1.2.23",
 		"typescript": "^5.9.3"
