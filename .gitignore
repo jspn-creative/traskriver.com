@@ -10,7 +10,7 @@ node_modules
 
 .cursor
 .opencode
-.planning
+# .planning
 .bg-shell
 .gsd
 .impeccable.md

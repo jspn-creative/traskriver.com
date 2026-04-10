@@ -1,0 +1,10 @@
+{
+	"project_name": "Trask River Cam",
+	"current_milestone": "v1.1",
+	"current_milestone_name": "Analytics & User-Ready Polish",
+	"workflow": {
+		"research": true,
+		"commit_docs": true
+	},
+	"starting_phase_number": 1
+}
