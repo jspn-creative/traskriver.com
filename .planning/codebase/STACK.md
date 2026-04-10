@@ -64,7 +64,7 @@
 
 - Relay has no npm deps beyond TypeScript tooling; uses Bun stdlib, `ffmpeg` on PATH (`packages/relay/src/index.ts`, `packages/relay/src/ffmpeg.ts`).
 
-- `@river-stream/shared` — workspace package for shared TypeScript types (`packages/shared/index.ts`).
+- `@traskriver/shared` — workspace package for shared TypeScript types (`packages/shared/index.ts`).
 
 ## Configuration
 

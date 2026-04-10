@@ -5,18 +5,18 @@
 ## Directory Layout
 
 ```
-river-stream/
+traskriver/
 ├── package.json              # Workspaces, root scripts (dev/build/check via turbo)
 ├── turbo.json                # Turbo task graph (build outputs, check)
 ├── scripts/
 │   └── push-stream.ts        # Repo-level script (referenced from web package.json)
 ├── packages/
 │   ├── shared/
-│   │   ├── package.json      # @river-stream/shared — types + constants only
+│   │   ├── package.json      # @traskriver/shared — types + constants only
 │   │   ├── index.ts          # Public exports (DemandResponse, RelayConfig, etc.)
 │   │   └── tsconfig.json
 │   ├── web/
-│   │   ├── package.json      # @river-stream/web — SvelteKit + Vite + Wrangler
+│   │   ├── package.json      # @traskriver/web — SvelteKit + Vite + Wrangler
 │   │   ├── svelte.config.js  # adapter-cloudflare, remoteFunctions, runes
 │   │   ├── vite.config.ts    # Tailwind v4, sveltekit, SSR noExternal for UI libs
 │   │   ├── tsconfig.json     # extends .svelte-kit/tsconfig.json, worker types
@@ -44,7 +44,7 @@ river-stream/
 │   │   │           └── test-kv/+server.ts
 │   │   └── static/           # robots.txt, stream/.gitkeep
 │   └── relay/
-│       ├── package.json      # @river-stream/relay — Bun entry src/index.ts
+│       ├── package.json      # @traskriver/relay — Bun entry src/index.ts
 │       ├── tsconfig.json
 │       ├── scripts/          # setup.sh, boot-sync.sh, configure.ts
 │       └── src/
@@ -133,7 +133,7 @@ river-stream/
 **Imports:**
 
 - `$lib/...` for `packages/web/src/lib/...` (SvelteKit alias).
-- `@river-stream/shared` for shared types/constants.
+- `@traskriver/shared` for shared types/constants.
 
 ## Where to Add New Code
 
