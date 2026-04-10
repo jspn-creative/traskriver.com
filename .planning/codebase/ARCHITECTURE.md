@@ -19,7 +19,7 @@
 - Purpose: Stream viewing UI, drawer/sidebar, telemetry.
 - Location: `packages/web/src/routes/*.svelte`, `packages/web/src/lib/components/`
 - Contains: Runes (`$state`, `$effect`, `$derived`), `svelte:boundary` + async `await` for remote data, Vidstack-based player (`VideoPlayer.svelte`).
-- Depends on: Remote functions (`packages/web/src/routes/stream.remote.ts`), `fetch` to same-origin API routes, shared types from `@traskriver/shared`.
+- Depends on: Remote functions (`packages/web/src/routes/stream.remote.ts`), `fetch` to same-origin API routes, shared types from `@river-stream/shared`.
 - Used by: End users in the browser.
 
 **HTTP API (SvelteKit handlers on Cloudflare):**
@@ -49,7 +49,7 @@
 - Purpose: Poll demand API; run `ffmpeg` against RTSP; report state to Worker; optional local health HTTP server.
 - Location: `packages/relay/src/`
 - Contains: `index.ts` orchestration; `poller.ts`, `status-reporter.ts`, `ffmpeg.ts`, `state-machine.ts`, `health-server.ts`, `logger.ts`.
-- Depends on: `@traskriver/shared` (`RelayConfig`, payloads); env vars (`STREAM_URL`, `RTSP_URL`, `RELAY_BEARER_TOKEN`, URLs for demand/status APIs).
+- Depends on: `@river-stream/shared` (`RelayConfig`, payloads); env vars (`STREAM_URL`, `RTSP_URL`, `RELAY_BEARER_TOKEN`, URLs for demand/status APIs).
 - Used by: Raspberry Pi deployed on-site. Not imported or used by web.
 
 **Shared contract:**

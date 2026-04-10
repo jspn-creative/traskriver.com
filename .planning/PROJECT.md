@@ -8,26 +8,16 @@ A live-streaming web app for a river camera on the Trask River in Tillamook, OR.
 
 Users can see the Trask River live, on-demand, from anywhere — the stream starts when they want it and shows real conditions.
 
-## Current milestone
+## Current Milestone: v1.1 Analytics & User-Ready Polish
 
-**v1.2 shipped 2026-04-13** — see [.planning/MILESTONES.md](MILESTONES.md) and [.planning/milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md).
+**Goal:** Add usage analytics via Counterscale, overhaul sidebar content for anglers, and add river/fishing context data so the app is ready to share with actual users.
 
-**Next:** define v1.3 (or next minor) with `/gsd-new-milestone` — requirements and roadmap were reset for a clean planning pass.
+**Target features:**
 
-## Previous milestones
-
-### v1.2 Stream Reliability & Error Handling (COMPLETE 2026-04-13)
-
-- HLS playback reliability (STRM-01–STRM-05): HLS.js-first recovery, startup-tolerant empty manifests, 3600s JWT TTL, quieter logs, `ended_confirming` only after `viewing`
-- Counterscale CORS (CORS-01): dedicated `counterscale-proxy` Worker + layout `reporterUrl` update
-- 2 phases, 3 plans; archives: `milestones/v1.2-ROADMAP.md`, `milestones/v1.2-REQUIREMENTS.md`
-
-### v1.1 Analytics & User-Ready Polish (COMPLETE 2026-04-11)
-
-- Counterscale analytics (ANLY-01, ANLY-02)
-- Sidebar content overhaul for anglers (SIDE-01–SIDE-04)
-- River conditions data in sidebar (RIVR-01–RIVR-04, FOOT-01)
-- 3/3 phases, 11/11 requirements delivered
+- Counterscale analytics with custom engagement events
+- Sidebar content overhaul (branding, description, always-visible weather + start button)
+- River conditions footer (sunrise/sunset, USGS flow/temp, seasonal fish run status)
+- Copy and content cleanup for angler audience
 
 ## Requirements
 
@@ -39,24 +29,20 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - ✓ HLS video playback with error recovery and stream state phases — v1.0
 - ✓ Relay state machine with status reporting to KV — v1.0
 - ✓ Responsive drawer/sidebar layout (mobile drawer, desktop sidebar) — v1.0
-- ✓ Angler-focused sidebar: Trask River branding, always-visible weather, sticky stream CTA — Phase 2 (SIDE-01–SIDE-04); product-style PassDetailsPanel removed
+- ✓ Pass details panel with stream controls — v1.0
 - ✓ Local weather display — v1.0
-- ✓ River conditions in sidebar (USGS flow/temp, freshness, sunrise/sunset, fish runs); telemetry bitrate footer removed — Phase 3 (RIVR-01–RIVR-04, FOOT-01)
+- ✓ Telemetry footer with encoding/bitrate info — v1.0
 - ✓ Relay CI/CD deployment via Tailscale + GitHub Actions — v1.0
 - ✓ Systemd service management on Raspberry Pi — v1.0
-- ✓ Counterscale production pageviews (apex + www) — Phase 1 (ANLY-01, ANLY-02)
-- ✓ HLS playback reliability: HLS.js-first recovery, startup-tolerant manifest errors, 3600s signed URL TTL, dev-only stream logs, `ended_confirming` only after `viewing` — v1.2 Phase 01 (STRM-01–STRM-05)
-- ✓ Counterscale CORS fix for production origins (CORS-01) — v1.2 Phase 02; proxy Worker at `counterscale-proxy.jspn.workers.dev`
 
 ### Active
 
-<!-- Next milestone — populate via /gsd-new-milestone -->
+<!-- Current scope — v1.1 milestone. -->
 
-_(none)_
-
-### Deferred
-
-- [ ] Counterscale engagement / custom events (ANLY-03, deferred to v1.x)
+- [ ] Counterscale analytics integration (unique visitors, engagement events)
+- [ ] Sidebar content overhaul (branding, description, always-visible weather + controls)
+- [ ] River conditions footer (sunrise/sunset, USGS flow/temp, fish run status)
+- [ ] Copy and content cleanup for angler audience
 
 ### Out of Scope
 
@@ -73,10 +59,10 @@ _(none)_
 - **Deployment:** SvelteKit on Cloudflare Workers (web), Bun on Raspberry Pi (relay)
 - **Video pipeline:** RTSP camera → ffmpeg → RTMPS → Cloudflare Stream → HLS
 - **State coordination:** Cloudflare KV for demand signals and relay status
-- **Analytics:** Counterscale tracker in `packages/web` root layout → CORS proxy at `counterscale-proxy.jspn.workers.dev` → upstream `counterscale.jspn.workers.dev`
+- **Analytics:** Counterscale deployed at `https://counterscale.jspn.workers.dev/` (not yet integrated)
 - **Data sources:** USGS gauges for live river data; fish run status will be static seasonal content
 - **Audience:** Primarily anglers checking the Trask River before fishing trips
-- **Monorepo:** `packages/web`, `packages/relay`, `packages/shared`, `packages/counterscale-proxy` with Turbo + Bun workspaces
+- **Monorepo:** `packages/web`, `packages/relay`, `packages/shared` with Turbo + Bun workspaces
 
 ## Constraints
 
@@ -87,17 +73,15 @@ _(none)_
 
 ## Key Decisions
 
-| Decision                           | Rationale                                                                                        | Outcome |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------ | ------- |
-| Cloudflare Stream for video CDN    | Low-latency HLS with global edge, simple JWT signing                                             | ✓ Good  |
-| KV for demand/status coordination  | Lightweight, no database needed for two keys                                                     | ✓ Good  |
-| On-demand streaming (not 24/7)     | Save bandwidth and compute on Pi; stream only when someone wants to watch                        | ✓ Good  |
-| Bun for relay runtime              | Fast startup, good subprocess management, runs well on Pi                                        | ✓ Good  |
-| Counterscale for analytics         | Privacy-friendly, self-hosted on Workers, lightweight                                            | ✓ Good  |
-| USGS API for river data            | Free, reliable public data for Trask River gauge                                                 | ✓ Good  |
-| Static fish run table              | Seasonal patterns are predictable; avoids complex data sourcing                                  | ✓ Good  |
-| HLS.js owns transient recovery     | Avoid remount loops; vidstack `hls-error` + fatal-only page escalation                           | ✓ Good  |
-| CORS proxy Worker for Counterscale | Upstream Worker cannot emit CORS; thin proxy on same account with `global_fetch_strictly_public` | ✓ Good  |
+| Decision                          | Rationale                                                                 | Outcome   |
+| --------------------------------- | ------------------------------------------------------------------------- | --------- |
+| Cloudflare Stream for video CDN   | Low-latency HLS with global edge, simple JWT signing                      | ✓ Good    |
+| KV for demand/status coordination | Lightweight, no database needed for two keys                              | ✓ Good    |
+| On-demand streaming (not 24/7)    | Save bandwidth and compute on Pi; stream only when someone wants to watch | ✓ Good    |
+| Bun for relay runtime             | Fast startup, good subprocess management, runs well on Pi                 | ✓ Good    |
+| Counterscale for analytics        | Privacy-friendly, self-hosted on Workers, lightweight                     | — Pending |
+| USGS API for river data           | Free, reliable public data for Trask River gauge                          | — Pending |
+| Static fish run table             | Seasonal patterns are predictable; avoids complex data sourcing           | — Pending |
 
 ## Evolution
 
@@ -120,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-13 after v1.2 milestone complete_
+_Last updated: 2026-04-10 after milestone v1.1 started_

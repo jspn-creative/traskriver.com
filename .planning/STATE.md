@@ -1,59 +1,51 @@
----
-gsd_state_version: 1.0
-milestone: pending
-milestone_name: next
-status: v1.2 shipped — planning next milestone
-stopped_at: Milestone v1.2 archived
-last_updated: '2026-04-13T21:00:00.000Z'
-progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
----
-
 # State: Trask River Cam
 
 ## Project Reference
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
-**Last shipped:** v1.2 Stream Reliability & Error Handling (2026-04-13)
-**Current focus:** Run `/gsd-new-milestone` to define the next version
-
-## Milestone History
-
-### v1.2 — Stream Reliability & Error Handling (COMPLETE)
-
-- **Completed:** 2026-04-13
-- **Phases:** 2/2, plans 3/3 — HLS reliability + Counterscale CORS proxy
-- **Archive:** `.planning/milestones/v1.2-ROADMAP.md`, `v1.2-REQUIREMENTS.md`
-- **Summary:** `.planning/MILESTONES.md`
-
-### v1.1 — Analytics & User-Ready Polish (COMPLETE)
-
-- **Completed:** 2026-04-11
-- **Phases:** 3/3 complete, 4/4 plans executed, 11/11 requirements delivered
+**Current milestone:** v1.1 — Analytics & User-Ready Polish
+**Current focus:** Phase 1 — Analytics Integration
 
 ## Current Position
 
-Milestone **v1.2** complete. No active phase — next work starts with `/gsd-new-milestone`.
+**Phase:** 1 of 3 — Analytics Integration
+**Plan:** Not yet planned
+**Status:** Not started
+**Progress:** ░░░░░░░░░░ 0%
+
+## Phase Summary
+
+| Phase                         | Status      | Plans |
+| ----------------------------- | ----------- | ----- |
+| 1. Analytics Integration      | **Current** | TBD   |
+| 2. Sidebar & Content Overhaul | Not started | TBD   |
+| 3. River Conditions Data      | Not started | TBD   |
+
+## Performance Metrics
+
+| Metric                 | Value |
+| ---------------------- | ----- |
+| Plans completed        | 0     |
+| Plans failed           | 0     |
+| Phases completed       | 0/3   |
+| Requirements delivered | 0/11  |
 
 ## Accumulated Context
 
 ### Decisions Made
 
-- [v1.2]: Counterscale analytics proxied through `counterscale-proxy.jspn.workers.dev` (CORS); `global_fetch_strictly_public` + minimal upstream headers required for Worker→workers.dev subrequests
-- [v1.2]: HLS.js handles transient manifest/level errors; page only escalates stream-end after `viewing`; JWT stream URL TTL 3600s
+- _None yet_
 
 ### Carried Forward
 
-- Monolithic `+page.svelte` (~558 lines) — extract when doing UI overhaul
-- `LiveViewerCount.svelte` console noise on poll — clean up if touched
-- Post-ship report: relay can show `shouldStream=true` while UI stays in `streamStandby` — investigate separately from v1.2 scope
+- Monolithic `+page.svelte` (~480 lines) identified as tech debt — consider extracting during UI overhaul
+- `LiveViewerCount.svelte` has console noise on every poll — clean up if touched
+- Unauthenticated demand POST has 30s throttle — sufficient for now
+- vidstack is version-sensitive — pin and test after changes
 
 ### TODOs
 
-- _None_
+- _None yet_
 
 ### Blockers
 
@@ -63,14 +55,15 @@ Milestone **v1.2** complete. No active phase — next work starts with `/gsd-new
 
 ### Last Session
 
-- **Date:** 2026-04-13
-- **Activity:** Completed v1.2 Phase 02 (CORS proxy); milestone archived via `/gsd-complete-milestone`
-- **Stopped at:** Ready for `/gsd-new-milestone`
+- **Date:** 2026-04-10
+- **Activity:** Roadmap created — 3 phases, 11 requirements mapped
+- **Stopped at:** Roadmap approval
 
 ### Next Session Should
 
-1. `/gsd-new-milestone` — define next version scope and requirements
+1. Run `/gsd-plan-phase 1` to plan Analytics Integration
+2. Phase 1 is decoupled from all UI work — can start immediately
 
 ---
 
-_Last updated: 2026-04-13_
+_Last updated: 2026-04-10_
