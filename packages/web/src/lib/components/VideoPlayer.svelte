@@ -39,6 +39,17 @@
 
 	const RETRY_INTERVAL_MS = 4_000;
 
+	// Derive a cache-busted manifest URL that changes on every remount.
+	// Each {#key playerKey} cycle creates a new HLS.js instance that fetches
+	// the manifest. Without a unique URL, the browser's HTTP cache may serve a
+	// stale 204 response (CF Stream returns 204 when a signed-URL manifest is
+	// first requested and the CDN edge hasn't cached the live manifest yet).
+	// Appending a query param makes each attempt a unique URL, guaranteeing a
+	// fresh request reaches CF Stream's origin on every retry.
+	let cacheBustedSrc = $derived(
+		liveSrc + (liveSrc.includes('?') ? '&' : '?') + '_cb=' + playerKey
+	);
+
 	$effect(() => {
 		// Initialize vidstack
 		log('defineCustomElements()');
@@ -64,7 +75,14 @@
 					levelLoadingTimeOut: 20000,
 					// Live stream specific configs
 					liveSyncDurationCount: 3,
-					liveMaxLatencyDurationCount: 10
+					liveMaxLatencyDurationCount: 10,
+					// Bypass browser HTTP cache for manifest requests. CF Stream
+					// may return 204 for a signed-URL manifest the first time it's
+					// requested at a CDN edge; without cache-busting the browser
+					// serves the stale 204 on every retry.
+					xhrSetup: (xhr: XMLHttpRequest) => {
+						xhr.setRequestHeader('Cache-Control', 'no-cache, no-store');
+					}
 				};
 			}
 		};
@@ -204,6 +222,7 @@
 		// Diagnostic: log the full HLS URL so it can be curl-tested and the JWT
 		// sub (= live input UID) can be decoded and cross-checked in CF dashboard.
 		log('liveSrc', liveSrc);
+		log('cacheBustedSrc', cacheBustedSrc);
 	});
 
 	// Retry playback by remounting <media-player> periodically while session is
@@ -247,7 +266,7 @@
 		<media-player
 			bind:this={player}
 			title="River Stream"
-			src={liveSrc}
+			src={cacheBustedSrc}
 			{poster}
 			autoplay
 			muted
