@@ -10,7 +10,7 @@
 | #   | Phase                      | Goal                                                                  | Requirements                                | Success Criteria |
 | --- | -------------------------- | --------------------------------------------------------------------- | ------------------------------------------- | ---------------- |
 | 1   | Analytics Integration      | Usage tracking is live and reporting                                  | ANLY-01, ANLY-02                            | 2 ✓ (2026-04-11) |
-| 2   | Sidebar & Content Overhaul | Sidebar presents angler-relevant content with always-visible controls | SIDE-01, SIDE-02, SIDE-03, SIDE-04          | 4                |
+| 2   | Sidebar & Content Overhaul | Sidebar presents angler-relevant content with always-visible controls | SIDE-01, SIDE-02, SIDE-03, SIDE-04          | 4 ✓ (2026-04-11) |
 | 3   | River Conditions Data      | Users can check river conditions alongside the live stream            | RIVR-01, RIVR-02, RIVR-03, RIVR-04, FOOT-01 | 5                |
 
 ## Phase Details
@@ -64,11 +64,11 @@ Plans:
 - Watch for mobile drawer overflow after adding always-visible weather + button
 - This phase establishes the layout container that Phase 3's data components will slot into
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 
-- [ ] 02-01-PLAN.md — Overhaul sidebar layout: branding, always-visible weather, sticky stream button, delete PassDetailsPanel
+- [x] 02-01-PLAN.md — Overhaul sidebar layout: branding, always-visible weather, sticky stream button, delete PassDetailsPanel (completed 2026-04-11)
 
 **UI hint:** yes
 

@@ -14,10 +14,10 @@ Requirements for milestone v1.1: Analytics & User-Ready Polish. Each maps to roa
 
 ### Sidebar
 
-- [ ] **SIDE-01**: Sidebar header displays "Trask River Cam" branding with a brief description of the river
-- [ ] **SIDE-02**: Local weather conditions are always visible in the sidebar regardless of stream state
-- [ ] **SIDE-03**: Start/restart stream button is always visible in the sidebar regardless of stream state
-- [ ] **SIDE-04**: Product-page copy (pricing, "24/7 Video Access", spec tables, filler content) is removed and replaced with angler-relevant content
+- [x] **SIDE-01**: Sidebar header displays "Trask River Cam" branding with a brief description of the river
+- [x] **SIDE-02**: Local weather conditions are always visible in the sidebar regardless of stream state
+- [x] **SIDE-03**: Start/restart stream button is always visible in the sidebar regardless of stream state
+- [x] **SIDE-04**: Product-page copy (pricing, "24/7 Video Access", spec tables, filler content) is removed and replaced with angler-relevant content
 
 ### River Data
 
@@ -69,10 +69,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ----------- | ------- | -------- |
 | ANLY-01     | Phase 1 | Complete |
 | ANLY-02     | Phase 1 | Complete |
-| SIDE-01     | Phase 2 | Pending  |
-| SIDE-02     | Phase 2 | Pending  |
-| SIDE-03     | Phase 2 | Pending  |
-| SIDE-04     | Phase 2 | Pending  |
+| SIDE-01     | Phase 2 | Complete |
+| SIDE-02     | Phase 2 | Complete |
+| SIDE-03     | Phase 2 | Complete |
+| SIDE-04     | Phase 2 | Complete |
 | RIVR-01     | Phase 3 | Pending  |
 | RIVR-02     | Phase 3 | Pending  |
 | RIVR-03     | Phase 3 | Pending  |

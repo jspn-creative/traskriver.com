@@ -29,7 +29,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - ✓ HLS video playback with error recovery and stream state phases — v1.0
 - ✓ Relay state machine with status reporting to KV — v1.0
 - ✓ Responsive drawer/sidebar layout (mobile drawer, desktop sidebar) — v1.0
-- ✓ Pass details panel with stream controls — v1.0
+- ✓ Angler-focused sidebar: Trask River branding, always-visible weather, sticky stream CTA — Phase 2 (SIDE-01–SIDE-04); product-style PassDetailsPanel removed
 - ✓ Local weather display — v1.0
 - ✓ Telemetry footer with encoding/bitrate info — v1.0
 - ✓ Relay CI/CD deployment via Tailscale + GitHub Actions — v1.0
@@ -41,9 +41,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 <!-- Current scope — v1.1 milestone. -->
 
 - [ ] Counterscale engagement / custom events (ANLY-03, deferred to v1.x)
-- [ ] Sidebar content overhaul (branding, description, always-visible weather + controls)
 - [ ] River conditions footer (sunrise/sunset, USGS flow/temp, fish run status)
-- [ ] Copy and content cleanup for angler audience
 
 ### Out of Scope
 
@@ -105,4 +103,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-11 after Phase 1 (analytics) complete_
+_Last updated: 2026-04-11 after Phase 2 (sidebar & content) complete_
