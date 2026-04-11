@@ -64,7 +64,12 @@ Plans:
 - Watch for mobile drawer overflow after adding always-visible weather + button
 - This phase establishes the layout container that Phase 3's data components will slot into
 
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+
+- [ ] 02-01-PLAN.md — Overhaul sidebar layout: branding, always-visible weather, sticky stream button, delete PassDetailsPanel
+
 **UI hint:** yes
 
 ---
