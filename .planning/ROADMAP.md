@@ -35,7 +35,11 @@
 - Test SPA navigation tracking — may need `afterNavigate` manual calls in SvelteKit
 - This phase has zero visual impact — validates the tracking pipeline before any UI changes
 
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+
+- [ ] 01-01-PLAN.md — Install Counterscale tracker with production-gated init in root layout
 
 ---
 
