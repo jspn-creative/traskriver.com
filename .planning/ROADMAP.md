@@ -99,7 +99,13 @@ Plans:
 - No new server routes or KV bindings — all client-side fetch to public CORS APIs
 - Expected new components: `RiverConditions.svelte`, `FishRunStatus.svelte`, `$lib/data/fish-runs.ts`
 
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+
+- [ ] 03-01-PLAN.md — Create river data components (fish-runs data, RiverConditions, FishRunStatus, sunrise/sunset in LocalWeather)
+- [ ] 03-02-PLAN.md — Wire components into sidebar and replace TelemetryFooter
+
 **UI hint:** yes
 
 ---
