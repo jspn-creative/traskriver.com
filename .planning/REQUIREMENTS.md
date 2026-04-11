@@ -28,7 +28,7 @@ Requirements for milestone v1.1: Analytics & User-Ready Polish. Each maps to roa
 
 ### Footer
 
-- [ ] **FOOT-01**: Telemetry footer (encoding/bitrate) is replaced with river conditions data
+- [x] **FOOT-01**: Telemetry footer (encoding/bitrate) is replaced with river conditions data
 
 ## Future Requirements
 
@@ -77,7 +77,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RIVR-02     | Phase 3 | Complete |
 | RIVR-03     | Phase 3 | Complete |
 | RIVR-04     | Phase 3 | Complete |
-| FOOT-01     | Phase 3 | Pending  |
+| FOOT-01     | Phase 3 | Complete |
 
 **Coverage:**
 
@@ -88,4 +88,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 
 _Requirements defined: 2026-04-10_
-_Last updated: 2026-04-10 after roadmap creation_
+_Last updated: 2026-04-11 after Phase 3 complete (FOOT-01)_

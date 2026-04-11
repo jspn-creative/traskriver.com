@@ -16,7 +16,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 
 - Counterscale analytics with custom engagement events
 - Sidebar content overhaul (branding, description, always-visible weather + start button)
-- River conditions footer (sunrise/sunset, USGS flow/temp, seasonal fish run status)
+- River conditions in sidebar (sunrise/sunset, USGS flow/temp, seasonal fish run status) — shipped Phase 3
 - Copy and content cleanup for angler audience
 
 ## Requirements
@@ -31,7 +31,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - ✓ Responsive drawer/sidebar layout (mobile drawer, desktop sidebar) — v1.0
 - ✓ Angler-focused sidebar: Trask River branding, always-visible weather, sticky stream CTA — Phase 2 (SIDE-01–SIDE-04); product-style PassDetailsPanel removed
 - ✓ Local weather display — v1.0
-- ✓ Telemetry footer with encoding/bitrate info — v1.0
+- ✓ River conditions in sidebar (USGS flow/temp, freshness, sunrise/sunset, fish runs); telemetry bitrate footer removed — Phase 3 (RIVR-01–RIVR-04, FOOT-01)
 - ✓ Relay CI/CD deployment via Tailscale + GitHub Actions — v1.0
 - ✓ Systemd service management on Raspberry Pi — v1.0
 - ✓ Counterscale production pageviews (apex + www) — Phase 1 (ANLY-01, ANLY-02)
@@ -41,7 +41,6 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 <!-- Current scope — v1.1 milestone. -->
 
 - [ ] Counterscale engagement / custom events (ANLY-03, deferred to v1.x)
-- [ ] River conditions footer (sunrise/sunset, USGS flow/temp, fish run status)
 
 ### Out of Scope
 
@@ -72,15 +71,15 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 
 ## Key Decisions
 
-| Decision                          | Rationale                                                                 | Outcome   |
-| --------------------------------- | ------------------------------------------------------------------------- | --------- |
-| Cloudflare Stream for video CDN   | Low-latency HLS with global edge, simple JWT signing                      | ✓ Good    |
-| KV for demand/status coordination | Lightweight, no database needed for two keys                              | ✓ Good    |
-| On-demand streaming (not 24/7)    | Save bandwidth and compute on Pi; stream only when someone wants to watch | ✓ Good    |
-| Bun for relay runtime             | Fast startup, good subprocess management, runs well on Pi                 | ✓ Good    |
-| Counterscale for analytics        | Privacy-friendly, self-hosted on Workers, lightweight                     | ✓ Good    |
-| USGS API for river data           | Free, reliable public data for Trask River gauge                          | — Pending |
-| Static fish run table             | Seasonal patterns are predictable; avoids complex data sourcing           | — Pending |
+| Decision                          | Rationale                                                                 | Outcome |
+| --------------------------------- | ------------------------------------------------------------------------- | ------- |
+| Cloudflare Stream for video CDN   | Low-latency HLS with global edge, simple JWT signing                      | ✓ Good  |
+| KV for demand/status coordination | Lightweight, no database needed for two keys                              | ✓ Good  |
+| On-demand streaming (not 24/7)    | Save bandwidth and compute on Pi; stream only when someone wants to watch | ✓ Good  |
+| Bun for relay runtime             | Fast startup, good subprocess management, runs well on Pi                 | ✓ Good  |
+| Counterscale for analytics        | Privacy-friendly, self-hosted on Workers, lightweight                     | ✓ Good  |
+| USGS API for river data           | Free, reliable public data for Trask River gauge                          | ✓ Good  |
+| Static fish run table             | Seasonal patterns are predictable; avoids complex data sourcing           | ✓ Good  |
 
 ## Evolution
 
@@ -103,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-11 after Phase 2 (sidebar & content) complete_
+_Last updated: 2026-04-11 after Phase 3 (river conditions data) complete_

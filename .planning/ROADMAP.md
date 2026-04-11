@@ -11,7 +11,7 @@
 | --- | -------------------------- | --------------------------------------------------------------------- | ------------------------------------------- | ---------------- |
 | 1   | Analytics Integration      | Usage tracking is live and reporting                                  | ANLY-01, ANLY-02                            | 2 ✓ (2026-04-11) |
 | 2   | Sidebar & Content Overhaul | Sidebar presents angler-relevant content with always-visible controls | SIDE-01, SIDE-02, SIDE-03, SIDE-04          | 4 ✓ (2026-04-11) |
-| 3   | River Conditions Data      | Users can check river conditions alongside the live stream            | RIVR-01, RIVR-02, RIVR-03, RIVR-04, FOOT-01 | 5                |
+| 3   | River Conditions Data      | Users can check river conditions alongside the live stream            | RIVR-01, RIVR-02, RIVR-03, RIVR-04, FOOT-01 | 5 ✓ (2026-04-11) |
 
 ## Phase Details
 
@@ -99,12 +99,12 @@ Plans:
 - No new server routes or KV bindings — all client-side fetch to public CORS APIs
 - Expected new components: `RiverConditions.svelte`, `FishRunStatus.svelte`, `$lib/data/fish-runs.ts`
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 
-- [ ] 03-01-PLAN.md — Create river data components (fish-runs data, RiverConditions, FishRunStatus, sunrise/sunset in LocalWeather)
-- [ ] 03-02-PLAN.md — Wire components into sidebar and replace TelemetryFooter
+- [x] 03-01-PLAN.md — Create river data components (fish-runs data, RiverConditions, FishRunStatus, sunrise/sunset in LocalWeather) (completed 2026-04-11)
+- [x] 03-02-PLAN.md — Wire components into sidebar and replace TelemetryFooter (completed 2026-04-11)
 
 **UI hint:** yes
 
