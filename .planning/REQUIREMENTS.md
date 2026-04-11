@@ -9,8 +9,8 @@ Requirements for milestone v1.1: Analytics & User-Ready Polish. Each maps to roa
 
 ### Analytics
 
-- [ ] **ANLY-01**: Counterscale tracker is loaded on every page visit and records unique visitors
-- [ ] **ANLY-02**: Pageview data (visitors, referrers, devices) appears in Counterscale dashboard
+- [x] **ANLY-01**: Counterscale tracker is loaded on every page visit and records unique visitors
+- [x] **ANLY-02**: Pageview data (visitors, referrers, devices) appears in Counterscale dashboard
 
 ### Sidebar
 
@@ -65,19 +65,19 @@ Explicitly excluded. Documented to prevent scope creep.
 
 Which phases cover which requirements. Updated during roadmap creation.
 
-| Requirement | Phase   | Status  |
-| ----------- | ------- | ------- |
-| ANLY-01     | Phase 1 | Pending |
-| ANLY-02     | Phase 1 | Pending |
-| SIDE-01     | Phase 2 | Pending |
-| SIDE-02     | Phase 2 | Pending |
-| SIDE-03     | Phase 2 | Pending |
-| SIDE-04     | Phase 2 | Pending |
-| RIVR-01     | Phase 3 | Pending |
-| RIVR-02     | Phase 3 | Pending |
-| RIVR-03     | Phase 3 | Pending |
-| RIVR-04     | Phase 3 | Pending |
-| FOOT-01     | Phase 3 | Pending |
+| Requirement | Phase   | Status   |
+| ----------- | ------- | -------- |
+| ANLY-01     | Phase 1 | Complete |
+| ANLY-02     | Phase 1 | Complete |
+| SIDE-01     | Phase 2 | Pending  |
+| SIDE-02     | Phase 2 | Pending  |
+| SIDE-03     | Phase 2 | Pending  |
+| SIDE-04     | Phase 2 | Pending  |
+| RIVR-01     | Phase 3 | Pending  |
+| RIVR-02     | Phase 3 | Pending  |
+| RIVR-03     | Phase 3 | Pending  |
+| RIVR-04     | Phase 3 | Pending  |
+| FOOT-01     | Phase 3 | Pending  |
 
 **Coverage:**
 

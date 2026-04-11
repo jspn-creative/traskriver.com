@@ -34,12 +34,13 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - ✓ Telemetry footer with encoding/bitrate info — v1.0
 - ✓ Relay CI/CD deployment via Tailscale + GitHub Actions — v1.0
 - ✓ Systemd service management on Raspberry Pi — v1.0
+- ✓ Counterscale production pageviews (apex + www) — Phase 1 (ANLY-01, ANLY-02)
 
 ### Active
 
 <!-- Current scope — v1.1 milestone. -->
 
-- [ ] Counterscale analytics integration (unique visitors, engagement events)
+- [ ] Counterscale engagement / custom events (ANLY-03, deferred to v1.x)
 - [ ] Sidebar content overhaul (branding, description, always-visible weather + controls)
 - [ ] River conditions footer (sunrise/sunset, USGS flow/temp, fish run status)
 - [ ] Copy and content cleanup for angler audience
@@ -59,7 +60,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - **Deployment:** SvelteKit on Cloudflare Workers (web), Bun on Raspberry Pi (relay)
 - **Video pipeline:** RTSP camera → ffmpeg → RTMPS → Cloudflare Stream → HLS
 - **State coordination:** Cloudflare KV for demand signals and relay status
-- **Analytics:** Counterscale deployed at `https://counterscale.jspn.workers.dev/` (not yet integrated)
+- **Analytics:** Counterscale tracker integrated in `packages/web` root layout → `counterscale.jspn.workers.dev`
 - **Data sources:** USGS gauges for live river data; fish run status will be static seasonal content
 - **Audience:** Primarily anglers checking the Trask River before fishing trips
 - **Monorepo:** `packages/web`, `packages/relay`, `packages/shared` with Turbo + Bun workspaces
@@ -79,7 +80,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 | KV for demand/status coordination | Lightweight, no database needed for two keys                              | ✓ Good    |
 | On-demand streaming (not 24/7)    | Save bandwidth and compute on Pi; stream only when someone wants to watch | ✓ Good    |
 | Bun for relay runtime             | Fast startup, good subprocess management, runs well on Pi                 | ✓ Good    |
-| Counterscale for analytics        | Privacy-friendly, self-hosted on Workers, lightweight                     | — Pending |
+| Counterscale for analytics        | Privacy-friendly, self-hosted on Workers, lightweight                     | ✓ Good    |
 | USGS API for river data           | Free, reliable public data for Trask River gauge                          | — Pending |
 | Static fish run table             | Seasonal patterns are predictable; avoids complex data sourcing           | — Pending |
 
@@ -104,4 +105,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-10 after milestone v1.1 started_
+_Last updated: 2026-04-11 after Phase 1 (analytics) complete_
