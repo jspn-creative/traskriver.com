@@ -6,8 +6,6 @@
 	let { children } = $props();
 
 	$effect(() => {
-		if (typeof window === 'undefined') return;
-
 		const hostname = window.location.hostname;
 		const isProduction = hostname === 'traskriver.com' || hostname === 'www.traskriver.com';
 
