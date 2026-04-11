@@ -30,10 +30,10 @@ gaps: []
 
 | #   | Truth                                                              | Status             | Evidence                                                                                                                                        |
 | --- | ------------------------------------------------------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Production pageviews reach Counterscale (apex `traskriver.com`)    | ✓ VERIFIED         | `+layout.svelte`: `Counterscale.init` with `siteId` + `reporterUrl`; runs only when `hostname === 'traskriver.com'`                             |
+| 1   | Production pageviews reach Counterscale (`traskriver.com` / `www`) | ✓ VERIFIED         | `+layout.svelte`: `Counterscale.init` with `siteId` + `reporterUrl`; runs when hostname is apex or `www`                                        |
 | 2   | SPA client-side navigation registers additional pageviews          | ✓ VERIFIED         | `@counterscale/tracker` dist patches `history.pushState` and uses `popstate` (see `dist/module/index.js`); `autoTrackPageviews` default applies |
-| 3   | Dev (localhost) does not send tracking to Counterscale             | ✓ VERIFIED         | Init skipped when hostname ≠ `traskriver.com` (localhost returns before `init`)                                                                 |
-| 4   | Cloudflare preview / non-prod hosts do not send tracking           | ✓ VERIFIED         | Same hostname gate; only apex production host matches                                                                                           |
+| 3   | Dev (localhost) does not send tracking to Counterscale             | ✓ VERIFIED         | Init skipped unless hostname is production apex or `www`                                                                                        |
+| 4   | Cloudflare preview / non-prod hosts do not send tracking           | ✓ VERIFIED         | Hostname gate allows only `traskriver.com` and `www.traskriver.com`                                                                             |
 | 5   | Dashboard shows visitors, referrers, device breakdown for the site | ✓ VERIFIED (human) | Session **2026-04-11**: user approved production + dashboard verification per plan Task 2 / SUMMARY                                             |
 | 6   | Site builds and type-checks after changes                          | ✓ VERIFIED         | `cd packages/web && bun run check` — 0 errors                                                                                                   |
 
