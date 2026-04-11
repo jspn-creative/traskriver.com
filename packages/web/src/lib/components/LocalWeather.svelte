@@ -46,7 +46,7 @@
 >
 	<div class="mb-8">
 		<h2 class="mb-2 text-2xs font-medium tracking-label text-secondary uppercase">
-			Local Telemetry
+			Current Weather
 		</h2>
 		<p class="font-display text-2xl tracking-tight text-primary">Tillamook, OR</p>
 	</div>
@@ -101,16 +101,16 @@
 					<div
 						class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-700 shadow-sm shadow-emerald-700/40"
 					></div>
-					<span class="text-xs font-medium text-secondary">Sensors Active</span>
+					<span class="text-xs font-medium text-secondary">Weather Data Live</span>
 				</div>
 				<p class="mt-2 pl-3.5 text-2xs leading-tight text-secondary/60">
-					Sensor data updated hourly from Tillamook coast stations.
+					Data from Open-Meteo. Updated hourly.
 				</p>
 			</div>
 		</div>
 	{:else}
 		<div class="flex flex-1 items-center justify-center">
-			<p class="text-sm text-secondary">Unable to reach sensor array.</p>
+			<p class="text-sm text-secondary">Weather data unavailable.</p>
 		</div>
 	{/if}
 </div>
