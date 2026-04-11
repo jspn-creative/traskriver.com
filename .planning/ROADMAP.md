@@ -7,11 +7,11 @@
 
 ## Phase Overview
 
-| #   | Phase                      | Goal                                                                  | Requirements                                | Success Criteria      |
-| --- | -------------------------- | --------------------------------------------------------------------- | ------------------------------------------- | --------------------- |
-| 1   | Analytics Integration      | Usage tracking is live and reporting                                  | ANLY-01, ANLY-02                            | Complete (2026-04-11) |
-| 2   | Sidebar & Content Overhaul | Sidebar presents angler-relevant content with always-visible controls | SIDE-01, SIDE-02, SIDE-03, SIDE-04          | 4                     |
-| 3   | River Conditions Data      | Users can check river conditions alongside the live stream            | RIVR-01, RIVR-02, RIVR-03, RIVR-04, FOOT-01 | 5                     |
+| #   | Phase                      | Goal                                                                  | Requirements                                | Success Criteria |
+| --- | -------------------------- | --------------------------------------------------------------------- | ------------------------------------------- | ---------------- |
+| 1   | Analytics Integration      | Usage tracking is live and reporting                                  | ANLY-01, ANLY-02                            | 2 ✓ (2026-04-11) |
+| 2   | Sidebar & Content Overhaul | Sidebar presents angler-relevant content with always-visible controls | SIDE-01, SIDE-02, SIDE-03, SIDE-04          | 4                |
+| 3   | River Conditions Data      | Users can check river conditions alongside the live stream            | RIVR-01, RIVR-02, RIVR-03, RIVR-04, FOOT-01 | 5                |
 
 ## Phase Details
 
