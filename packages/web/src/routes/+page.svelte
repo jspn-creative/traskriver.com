@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { RelayStatusResponse } from '@traskriver/shared';
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
-	import TelemetryFooter from '$lib/components/TelemetryFooter.svelte';
 	import LocalWeather from '$lib/components/LocalWeather.svelte';
+	import RiverConditions from '$lib/components/RiverConditions.svelte';
+	import FishRunStatus from '$lib/components/FishRunStatus.svelte';
 	import { Drawer, DrawerContent } from '$lib/components/ui/drawer';
 	import defaultJpg from '$lib/assets/default.jpg';
 	import { getStreamInfo } from './stream.remote';
@@ -474,6 +475,8 @@
 					</div>
 
 					<LocalWeather />
+					<RiverConditions />
+					<FishRunStatus />
 				</div>
 
 				<div
@@ -545,7 +548,6 @@
 							<p class="mt-2 text-center text-2xs text-red-600" role="alert">{demandError}</p>
 						{/if}
 					</div>
-					<TelemetryFooter />
 				</div>
 			</DrawerContent>
 		</Drawer>

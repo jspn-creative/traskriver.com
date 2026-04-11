@@ -21,10 +21,10 @@ Requirements for milestone v1.1: Analytics & User-Ready Polish. Each maps to roa
 
 ### River Data
 
-- [ ] **RIVR-01**: User can see sunrise and sunset times for the Trask River location
-- [ ] **RIVR-02**: User can see which fish species are currently in season on the Trask River
-- [ ] **RIVR-03**: User can see current river flow (cfs) and water temperature from USGS gauge data
-- [ ] **RIVR-04**: River data displays a freshness indicator showing when data was last updated
+- [x] **RIVR-01**: User can see sunrise and sunset times for the Trask River location
+- [x] **RIVR-02**: User can see which fish species are currently in season on the Trask River
+- [x] **RIVR-03**: User can see current river flow (cfs) and water temperature from USGS gauge data
+- [x] **RIVR-04**: River data displays a freshness indicator showing when data was last updated
 
 ### Footer
 
@@ -73,10 +73,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SIDE-02     | Phase 2 | Complete |
 | SIDE-03     | Phase 2 | Complete |
 | SIDE-04     | Phase 2 | Complete |
-| RIVR-01     | Phase 3 | Pending  |
-| RIVR-02     | Phase 3 | Pending  |
-| RIVR-03     | Phase 3 | Pending  |
-| RIVR-04     | Phase 3 | Pending  |
+| RIVR-01     | Phase 3 | Complete |
+| RIVR-02     | Phase 3 | Complete |
+| RIVR-03     | Phase 3 | Complete |
+| RIVR-04     | Phase 3 | Complete |
 | FOOT-01     | Phase 3 | Pending  |
 
 **Coverage:**
