@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
 	import type { RelayStatusResponse } from '@traskriver/shared';
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
-	import PassDetailsPanel from '$lib/components/PassDetailsPanel.svelte';
 	import TelemetryFooter from '$lib/components/TelemetryFooter.svelte';
 	import LocalWeather from '$lib/components/LocalWeather.svelte';
 	import { Drawer, DrawerContent } from '$lib/components/ui/drawer';
@@ -68,6 +65,23 @@
 
 	let sessionActive = $derived(phase !== 'idle' && phase !== 'ended' && phase !== 'error');
 	let sidebarWidth = $derived(phase === 'viewing' ? '300px' : '420px');
+	let isStarting = $derived(phase === 'starting');
+	let buttonDisabled = $derived((sessionActive && phase !== 'unavailable') || demandLoading);
+	const ctaLabel = $derived(
+		demandLoading
+			? 'Starting stream…'
+			: phase === 'starting'
+				? 'Starting stream…'
+				: phase === 'unavailable'
+					? 'Try starting stream'
+					: phase === 'live' || phase === 'viewing'
+						? 'Streaming'
+						: phase === 'ended' || phase === 'ended_confirming'
+							? 'Stream ended'
+							: phase === 'error'
+								? 'Stream error'
+								: 'Start stream'
+	);
 	const log = (...args: unknown[]) => {
 		if (!isBrowser) return;
 		console.log('[traskriver][page]', ...args);
@@ -427,7 +441,7 @@
 					transform="rotate(-90 12 12)"
 				/>
 			</svg>
-			{phase === 'viewing' ? 'Conditions' : 'View Pass'}
+			{phase === 'viewing' ? 'Conditions' : 'Stream Info'}
 		</button>
 	</main>
 
@@ -448,31 +462,87 @@
 					? 'top-0 right-0 mt-0 h-full rounded-none transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]'
 					: 'max-h-[85vh]'}"
 			>
-				{#if phase === 'viewing'}
-					<div
-						out:fade={{ duration: 200, easing: cubicOut }}
-						in:fade={{ duration: 400, delay: 100, easing: cubicOut }}
-						class="flex min-w-0 flex-1 flex-col"
-					>
-						<LocalWeather />
+				<div class="flex min-w-0 flex-1 flex-col">
+					<div class="px-5 pt-8 pb-6 md:px-12 md:pt-16 md:pb-8">
+						<h2 class="font-display text-2xl tracking-tight text-primary">Trask River Cam</h2>
+						<p class="mt-1 text-sm text-secondary">Tillamook, OR</p>
+						<p class="mt-3 text-sm leading-relaxed text-secondary">
+							A live look at the Trask River — known for its winter Steelhead and fall Chinook
+							salmon runs on Oregon's north coast.
+						</p>
 					</div>
-				{:else}
-					<div
-						out:fade={{ duration: 250, easing: cubicOut }}
-						in:fade={{ duration: 300, easing: cubicOut }}
-						class="flex min-w-0 flex-1 flex-col"
+
+					<LocalWeather />
+
+					<TelemetryFooter />
+				</div>
+
+				<div class="sticky bottom-0 z-10 border-t border-sepia bg-light px-5 py-4 md:px-12 md:py-6">
+					{#if isStarting && demandRegistered}
+						<p class="mb-2 animate-pulse text-center text-2xs text-secondary">
+							{relayStale
+								? 'Relay appears offline — stream may take longer.'
+								: 'Live feed connecting — please wait.'}
+						</p>
+					{/if}
+
+					<button
+						onclick={phase === 'ended' ||
+						phase === 'ended_confirming' ||
+						phase === 'error' ||
+						phase === 'unavailable'
+							? restartStream
+							: registerDemand}
+						disabled={buttonDisabled}
+						class="relative w-full overflow-hidden rounded-sm py-[18px] text-xs font-medium tracking-ui text-light transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-light focus-visible:outline-none {buttonDisabled
+							? 'cursor-not-allowed shadow-inner'
+							: 'cursor-pointer bg-primary hover:bg-primary/90 active:scale-[0.98]'} {isStarting ||
+						demandLoading
+							? 'bg-secondary/90'
+							: phase === 'live' || phase === 'viewing'
+								? 'bg-emerald-700/80'
+								: 'bg-primary'}"
 					>
-						<PassDetailsPanel
-							{phase}
-							{demandRegistered}
-							{demandLoading}
-							{demandError}
-							{relayStale}
-							onStartStream={registerDemand}
-						/>
-					</div>
-				{/if}
-				<TelemetryFooter />
+						<div class="relative flex items-center justify-center gap-2">
+							{#if isStarting || demandLoading}
+								<svg
+									class="h-4 w-4 animate-spin text-white/70"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									></circle>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+							{:else if phase === 'live' || phase === 'viewing'}
+								<svg
+									class="h-4 w-4 text-white"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									stroke-width="2.5"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+								</svg>
+							{/if}
+							<span>{ctaLabel}</span>
+						</div>
+					</button>
+					{#if demandError}
+						<p class="mt-2 text-center text-2xs text-red-600" role="alert">{demandError}</p>
+					{/if}
+				</div>
 			</DrawerContent>
 		</Drawer>
 	</aside>
