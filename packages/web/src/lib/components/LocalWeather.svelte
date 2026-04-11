@@ -3,16 +3,32 @@
 	import { cubicOut } from 'svelte/easing';
 
 	let weather = $state<any>(null);
+	let sunTimes = $state<{ sunrise: string; sunset: string } | null>(null);
 	let loading = $state(true);
 
 	$effect(() => {
 		const fetchWeather = async () => {
 			try {
 				const res = await fetch(
-					'https://api.open-meteo.com/v1/forecast?latitude=45.4562&longitude=-123.844&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FLos_Angeles'
+					'https://api.open-meteo.com/v1/forecast?latitude=45.4562&longitude=-123.844&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FLos_Angeles&daily=sunrise,sunset'
 				);
-				const data = (await res.json()) as { current: unknown };
+				const data = (await res.json()) as {
+					current: unknown;
+					daily?: { sunrise?: string[]; sunset?: string[] };
+				};
 				weather = data.current;
+				if (data.daily?.sunrise?.[0] && data.daily?.sunset?.[0]) {
+					sunTimes = {
+						sunrise: new Date(data.daily.sunrise[0]).toLocaleTimeString('en-US', {
+							hour: 'numeric',
+							minute: '2-digit'
+						}),
+						sunset: new Date(data.daily.sunset[0]).toLocaleTimeString('en-US', {
+							hour: 'numeric',
+							minute: '2-digit'
+						})
+					};
+				}
 			} catch (e) {
 				// silently fall through to error state
 			} finally {
@@ -89,6 +105,17 @@
 					>
 					<span class="font-mono text-sm text-primary">{weather.precipitation} in</span>
 				</div>
+				{#if sunTimes}
+					<div class="flex flex-col gap-1.5">
+						<span class="text-2xs font-medium tracking-label text-secondary uppercase">Sunrise</span
+						>
+						<span class="font-mono text-sm text-primary">{sunTimes.sunrise}</span>
+					</div>
+					<div class="flex flex-col gap-1.5">
+						<span class="text-2xs font-medium tracking-label text-secondary uppercase">Sunset</span>
+						<span class="font-mono text-sm text-primary">{sunTimes.sunset}</span>
+					</div>
+				{/if}
 			</div>
 
 			<div class="mt-auto">
