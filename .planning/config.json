@@ -2,9 +2,28 @@
 	"project_name": "Trask River Cam",
 	"current_milestone": "v1.1",
 	"current_milestone_name": "Analytics & User-Ready Polish",
+	"starting_phase_number": 1,
+	"model_profile": "inherit",
 	"workflow": {
 		"research": true,
-		"commit_docs": true
+		"plan_check": true,
+		"verifier": true,
+		"auto_advance": false,
+		"nyquist_validation": false,
+		"ui_phase": false,
+		"ui_safety_gate": false,
+		"commit_docs": true,
+		"text_mode": false,
+		"research_before_questions": false,
+		"skip_discuss": false,
+		"use_worktrees": true
 	},
-	"starting_phase_number": 1
+	"git": {
+		"branching_strategy": "phase",
+		"quick_branch_template": null
+	},
+	"hooks": {
+		"context_warnings": true,
+		"workflow_guard": true
+	}
 }
