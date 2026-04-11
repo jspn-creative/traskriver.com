@@ -42,13 +42,11 @@
 
 <div
 	in:fly={{ y: 16, duration: 700, delay: 200, easing: cubicOut }}
-	class="flex flex-col px-5 py-8 md:px-12 md:py-16"
+	class="flex flex-col px-5 py-8 md:px-12"
 >
-	<div class="mb-8">
-		<h2 class="mb-2 text-2xs font-medium tracking-label text-secondary uppercase">
-			Local Telemetry
-		</h2>
-		<p class="font-display text-2xl tracking-tight text-primary">Tillamook, OR</p>
+	<div class="mb-2">
+		<h2 class="text-2xs font-medium tracking-label text-secondary uppercase">Current Weather</h2>
+		<p class="font-display text-xl font-semibold tracking-tight text-primary">Tillamook, OR</p>
 	</div>
 
 	{#if loading}
@@ -63,9 +61,6 @@
 			class="flex flex-col gap-6"
 		>
 			<div class="flex flex-col gap-1 border-b border-sepia pb-6">
-				<span class="text-2xs font-medium tracking-label text-secondary uppercase"
-					>Current Conditions</span
-				>
 				<div class="mt-1 flex items-baseline gap-3">
 					<span class="font-display text-4xl text-primary"
 						>{Math.round(weather.temperature_2m)}°</span
@@ -101,16 +96,14 @@
 					<div
 						class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-700 shadow-sm shadow-emerald-700/40"
 					></div>
-					<span class="text-xs font-medium text-secondary">Sensors Active</span>
+					<span class="text-xs font-medium text-secondary">Weather Data Live</span>
 				</div>
-				<p class="mt-2 pl-3.5 text-2xs leading-tight text-secondary/60">
-					Sensor data updated hourly from Tillamook coast stations.
-				</p>
+				<p class="mt-2 pl-3.5 text-2xs leading-tight text-secondary/60">Updated hourly.</p>
 			</div>
 		</div>
 	{:else}
 		<div class="flex flex-1 items-center justify-center">
-			<p class="text-sm text-secondary">Unable to reach sensor array.</p>
+			<p class="text-sm text-secondary">Weather data unavailable.</p>
 		</div>
 	{/if}
 </div>
