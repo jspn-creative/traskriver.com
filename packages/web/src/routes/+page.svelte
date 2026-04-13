@@ -18,7 +18,6 @@
 		| 'unavailable'
 		| 'error'
 	>('idle');
-	let streamStandby = $state(true);
 	let streamError = $state(false);
 	let demandRegistered = $state(false);
 	let demandLoading = $state(false);
@@ -66,6 +65,9 @@
 	});
 
 	let sessionActive = $derived(phase !== 'idle' && phase !== 'ended' && phase !== 'error');
+	let showPlayer = $derived(
+		phase === 'live' || phase === 'viewing' || phase === 'ended_confirming'
+	);
 	let sidebarWidth = $derived(phase === 'viewing' ? '300px' : '420px');
 	let isStarting = $derived(phase === 'starting');
 	let buttonDisabled = $derived((sessionActive && phase !== 'unavailable') || demandLoading);
@@ -193,7 +195,6 @@
 		if (__DEV__) console.debug('[page] playback started');
 		phase = 'viewing';
 		polling = false;
-		streamStandby = false;
 		streamError = false;
 	};
 
@@ -219,7 +220,6 @@
 			}
 			demandRegistered = true;
 			phase = 'starting';
-			streamStandby = true;
 			streamError = false;
 			startingTimestamp = Date.now();
 			startingUnavailableAccumulatedMs = 0;
@@ -236,7 +236,6 @@
 		if (__DEV__) console.debug('[page] restarting stream');
 		phase = 'idle';
 		demandRegistered = false;
-		streamStandby = true;
 		streamError = false;
 		startingTimestamp = null;
 		startingUnavailableAccumulatedMs = 0;
@@ -251,7 +250,7 @@
 			console.debug('[page]', {
 				phase,
 				sessionActive,
-				streamStandby,
+				showPlayer,
 				streamError,
 				demandRegistered,
 				relayStale,
@@ -296,14 +295,18 @@
 				{@const stream = await getStreamInfo()}
 
 				<div class="absolute inset-0 z-0 overflow-hidden">
-					<VideoPlayer
-						liveSrc={stream.liveHlsUrl}
-						poster={defaultJpg}
-						class="relative h-full w-full"
-						{sessionActive}
-						onPlaying={onPlaybackStart}
-						onError={onPlaybackError}
-					/>
+					{#if showPlayer}
+						<VideoPlayer
+							liveSrc={stream.liveHlsUrl}
+							poster={defaultJpg}
+							class="relative h-full w-full"
+							{sessionActive}
+							onPlaying={onPlaybackStart}
+							onError={onPlaybackError}
+						/>
+					{:else}
+						<img src={defaultJpg} alt="" class="h-full w-full object-cover" />
+					{/if}
 					<div
 						class="absolute inset-0 z-10 bg-linear-to-b from-primary/30 via-light/30 to-primary/30 backdrop-blur-2xl transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] {sessionActive
 							? 'pointer-events-none opacity-0'

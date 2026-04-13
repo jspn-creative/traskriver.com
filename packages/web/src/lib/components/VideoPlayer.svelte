@@ -3,6 +3,7 @@
 	import defaultPoster from '$lib/assets/default.jpg';
 
 	const __DEV__ = import.meta.env.DEV;
+	const MANIFEST_PROBE_INTERVAL_MS = 3_000;
 
 	let {
 		liveSrc,
@@ -25,13 +26,127 @@
 	let isFullscreen = $state(false);
 	let isPlaying = $state(false);
 	let hasError = $state(false);
+	let manifestReady = $state(false);
 	/** Only for last-resort remount after fatal HLS error */
 	let playerKey = $state(0);
 
 	let remountTimeout: ReturnType<typeof setTimeout> | undefined;
+	let emptyManifestCount = 0;
 
 	$effect(() => {
 		void defineCustomElements();
+	});
+
+	// Probe the HLS manifest before initialising the player.
+	// CF Stream needs 10-30s after the relay reports "live" to produce HLS
+	// segments.  Polling here avoids mounting HLS.js against an empty manifest
+	// (which caused hundreds of noisy levelEmptyError retries).
+	//
+	// CF Stream serves a two-level manifest: a master playlist with
+	// #EXT-X-STREAM-INF entries pointing to per-rendition playlists.  The master
+	// appears almost immediately, but the rendition playlists stay empty until
+	// segments have actually been encoded.  We therefore follow through to the
+	// first rendition and check *that* for #EXTINF before declaring ready.
+	$effect(() => {
+		if (manifestReady) return;
+
+		let cancelled = false;
+
+		/** Fetch a URL with cache-busting. */
+		const fetchCacheBusted = (url: string) => {
+			const sep = url.includes('?') ? '&' : '?';
+			return fetch(`${url}${sep}_cb=${Date.now()}`, {
+				signal: AbortSignal.timeout(5_000),
+				cache: 'no-store'
+			});
+		};
+
+		/** Extract the first rendition playlist URI from a master manifest. */
+		const extractRenditionUrl = (masterText: string, masterUrl: string): string | null => {
+			// Lines after #EXT-X-STREAM-INF are relative or absolute URIs.
+			const lines = masterText.split('\n');
+			for (let i = 0; i < lines.length; i++) {
+				if (lines[i].startsWith('#EXT-X-STREAM-INF') && i + 1 < lines.length) {
+					const uri = lines[i + 1].trim();
+					if (!uri || uri.startsWith('#')) continue;
+					// Resolve relative URIs against the master URL
+					try {
+						return new URL(uri, masterUrl).href;
+					} catch {
+						return null;
+					}
+				}
+			}
+			return null;
+		};
+
+		const probe = async () => {
+			try {
+				const masterUrl = liveSrc;
+				const res = await fetchCacheBusted(masterUrl);
+				if (cancelled) return;
+
+				if (!res.ok) {
+					if (__DEV__) console.debug('[VideoPlayer] manifest probe:', res.status);
+					if (!cancelled) setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
+					return;
+				}
+
+				const text = await res.text();
+				if (cancelled) return;
+
+				if (!text.includes('#EXTM3U')) {
+					if (__DEV__) console.debug('[VideoPlayer] manifest not ready yet');
+					if (!cancelled) setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
+					return;
+				}
+
+				// Single-level manifest (has segments directly) — ready.
+				if (text.includes('#EXTINF')) {
+					if (__DEV__) console.debug('[VideoPlayer] manifest ready — mounting player');
+					manifestReady = true;
+					return;
+				}
+
+				// Multi-level (master) manifest — follow through to a rendition.
+				if (text.includes('#EXT-X-STREAM-INF')) {
+					const renditionUrl = extractRenditionUrl(text, masterUrl);
+					if (!renditionUrl) {
+						if (__DEV__)
+							console.debug('[VideoPlayer] master manifest has no parseable rendition URI');
+						if (!cancelled) setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
+						return;
+					}
+
+					const rendRes = await fetchCacheBusted(renditionUrl);
+					if (cancelled) return;
+					if (rendRes.ok) {
+						const rendText = await rendRes.text();
+						if (rendText.includes('#EXTINF')) {
+							if (__DEV__) console.debug('[VideoPlayer] manifest ready — mounting player');
+							manifestReady = true;
+							return;
+						}
+						if (__DEV__)
+							console.debug('[VideoPlayer] rendition playlist exists but no segments yet');
+					} else {
+						if (__DEV__) console.debug('[VideoPlayer] rendition probe:', rendRes.status);
+					}
+				} else {
+					if (__DEV__) console.debug('[VideoPlayer] manifest exists but no segments yet');
+				}
+			} catch {
+				if (__DEV__) console.debug('[VideoPlayer] manifest probe failed');
+			}
+			if (!cancelled) {
+				setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
+			}
+		};
+
+		void probe();
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	$effect(() => {
@@ -48,7 +163,16 @@
 					manifestLoadingTimeOut: 20000,
 					levelLoadingTimeOut: 20000,
 					liveSyncDurationCount: 3,
-					liveMaxLatencyDurationCount: 10
+					liveMaxLatencyDurationCount: 10,
+					// Cache-bust m3u8 requests via URL query param (not a request header)
+					// to avoid stale empty-manifest responses without triggering CORS preflight.
+					xhrSetup(xhr: XMLHttpRequest, url: string) {
+						if (url.endsWith('.m3u8') || url.includes('.m3u8?')) {
+							const bust = `_cb=${Date.now()}`;
+							const sep = url.includes('?') ? '&' : '?';
+							xhr.open('GET', `${url}${sep}${bust}`, true);
+						}
+					}
 				};
 			}
 		};
@@ -68,11 +192,20 @@
 			const code = detail.response?.code;
 
 			if (errorDetails === 'levelEmptyError') {
-				if (__DEV__) console.debug('[VideoPlayer] empty manifest — HLS.js will retry');
+				emptyManifestCount += 1;
+				// Log only the first occurrence and then every 10th to avoid flooding
+				if (__DEV__ && (emptyManifestCount === 1 || emptyManifestCount % 10 === 0))
+					console.debug(
+						`[VideoPlayer] empty manifest — HLS.js will retry (×${emptyManifestCount})`
+					);
 				return;
 			}
 
-			if (errorDetails === 'manifestParsingError' || code === 204) {
+			// manifestParsingError / 204 = CF Stream hasn't produced HLS segments yet.
+			// Non-fatal: HLS.js will retry internally.
+			// Fatal: HLS.js has stopped — fall through to fatal handling so the
+			// remount timer can recover with a fresh instance.
+			if (!isFatal && (errorDetails === 'manifestParsingError' || code === 204)) {
 				if (__DEV__) console.debug('[VideoPlayer] manifest not ready — waiting');
 				return;
 			}
@@ -104,8 +237,24 @@
 	const fsLabel = $derived(isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
 
 	const onLivePlaying = () => {
+		if (isPlaying) return; // already reported
 		isPlaying = true;
 		hasError = false;
+
+		// Seek to the live edge so the viewer isn't stuck on stale buffer.
+		if (player) {
+			try {
+				const el = player as any;
+				const duration = el.duration;
+				if (Number.isFinite(duration) && duration > 0) {
+					el.currentTime = duration;
+					if (__DEV__) console.debug('[VideoPlayer] seeked to live edge', duration);
+				}
+			} catch {
+				// non-critical — player will still play
+			}
+		}
+
 		onPlaying?.();
 	};
 
@@ -131,7 +280,8 @@
 	};
 
 	$effect(() => {
-		if (__DEV__) console.debug('[VideoPlayer]', { isFullscreen, isPlaying, hasError });
+		if (__DEV__)
+			console.debug('[VideoPlayer]', { manifestReady, isFullscreen, isPlaying, hasError });
 	});
 </script>
 
@@ -140,22 +290,24 @@
 	class="group relative overflow-hidden bg-black {className ||
 		'rounded-3xl border border-white/10 shadow-2xl shadow-black/30'}"
 >
-	{#key playerKey}
-		<media-player
-			bind:this={player}
-			title="River Stream"
-			src={liveSrc}
-			{poster}
-			autoplay
-			muted
-			playsinline
-			stream-type="live"
-			class="absolute inset-0 z-0 h-full w-full"
-			onplaying={onLivePlaying}
-		>
-			<media-outlet></media-outlet>
-		</media-player>
-	{/key}
+	{#if manifestReady}
+		{#key playerKey}
+			<media-player
+				bind:this={player}
+				title="River Stream"
+				src={liveSrc}
+				{poster}
+				autoplay
+				muted
+				playsinline
+				stream-type="live"
+				class="absolute inset-0 z-0 h-full w-full"
+				onplaying={onLivePlaying}
+			>
+				<media-outlet></media-outlet>
+			</media-player>
+		{/key}
+	{/if}
 
 	<!-- Explicit poster fallback to ensure it stays visible on error -->
 	<img

@@ -18,6 +18,7 @@
 		"build": "turbo run build",
 		"build:relay": "bun run --cwd packages/relay build",
 		"deploy": "bun run --cwd packages/web deploy",
+		"deploy:preview": "bun run --cwd packages/web deploy:preview",
 		"preview": "bun run --cwd packages/web preview",
 		"check": "turbo run check",
 		"check:web": "bun run --cwd packages/web check",
