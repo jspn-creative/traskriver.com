@@ -36,6 +36,7 @@
 	const STARTING_TIMEOUT_MS = 60_000;
 	const MIN_STARTING_MS = 6_000;
 	const isBrowser = typeof window !== 'undefined';
+	const __DEV__ = import.meta.env.DEV;
 
 	$effect(() => {
 		if (!isBrowser) return;
@@ -83,11 +84,6 @@
 								? 'Stream error'
 								: 'Start stream'
 	);
-	const log = (...args: unknown[]) => {
-		if (!isBrowser) return;
-		console.log('[traskriver][page]', ...args);
-	};
-
 	const prefetchRelayStatus = async () => {
 		try {
 			const res = await fetch('/api/relay/status');
@@ -96,7 +92,7 @@
 			relayStale = data.stale;
 			lastKnownRelayState = data.state;
 		} catch {
-			log('relay status prefetch failed');
+			if (__DEV__) console.debug('[page] relay prefetch failed');
 		}
 	};
 
@@ -164,7 +160,7 @@
 				}
 			}
 		} catch {
-			log('relay status poll failed');
+			if (__DEV__) console.debug('[page] relay poll failed');
 		}
 	};
 
@@ -194,7 +190,7 @@
 	});
 
 	const onPlaybackStart = () => {
-		log('onPlaybackStart');
+		if (__DEV__) console.debug('[page] playback started');
 		phase = 'viewing';
 		polling = false;
 		streamStandby = false;
@@ -202,11 +198,14 @@
 	};
 
 	const onPlaybackError = () => {
-		log('onPlaybackError — resuming relay polling for end confirmation');
 		streamError = true;
-		if (phase === 'viewing' || phase === 'live') {
+
+		if (phase === 'viewing') {
+			if (__DEV__) console.debug('[page] playback lost during viewing — confirming stream status');
 			phase = 'ended_confirming';
 			polling = true;
+		} else if (phase === 'live') {
+			if (__DEV__) console.debug('[page] HLS fatal error during startup — staying in live phase');
 		}
 	};
 
@@ -234,7 +233,7 @@
 	};
 
 	const restartStream = () => {
-		log('restartStream — full reset');
+		if (__DEV__) console.debug('[page] restarting stream');
 		phase = 'idle';
 		demandRegistered = false;
 		streamStandby = true;
@@ -248,15 +247,16 @@
 	};
 
 	$effect(() => {
-		log('state', {
-			phase,
-			sessionActive,
-			streamStandby,
-			streamError,
-			demandRegistered,
-			relayStale,
-			lastKnownRelayState
-		});
+		if (__DEV__)
+			console.debug('[page]', {
+				phase,
+				sessionActive,
+				streamStandby,
+				streamError,
+				demandRegistered,
+				relayStale,
+				lastKnownRelayState
+			});
 	});
 </script>
 
@@ -282,7 +282,7 @@
 						</p>
 						<button
 							onclick={() => {
-								log('Retry clicked: getStreamInfo().refresh()');
+								if (__DEV__) console.debug('[page] retry — refreshing stream info');
 								void getStreamInfo().refresh();
 								reset();
 							}}

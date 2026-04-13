@@ -131,8 +131,7 @@
 	};
 
 	$effect(() => {
-		if (__DEV__)
-			console.debug('[VideoPlayer]', { isFullscreen, isPlaying, hasError });
+		if (__DEV__) console.debug('[VideoPlayer]', { isFullscreen, isPlaying, hasError });
 	});
 </script>
 
