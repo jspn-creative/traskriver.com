@@ -2,6 +2,8 @@
 	import { defineCustomElements } from 'vidstack/elements';
 	import defaultPoster from '$lib/assets/default.jpg';
 
+	const __DEV__ = import.meta.env.DEV;
+
 	let {
 		liveSrc,
 		poster = defaultPoster,
@@ -18,69 +20,35 @@
 		onError?: () => void;
 	}>();
 
-	const isBrowser = typeof window !== 'undefined';
-	const log = (...args: unknown[]) => {
-		if (!isBrowser) return;
-		console.log('[traskriver][VideoPlayer]', ...args);
-	};
-	const logErr = (...args: unknown[]) => {
-		if (!isBrowser) return;
-		console.error('[traskriver][VideoPlayer]', ...args);
-	};
-
 	let container: HTMLDivElement | undefined = $state();
 	let player: any = $state();
 	let isFullscreen = $state(false);
 	let isPlaying = $state(false);
 	let hasError = $state(false);
-	// Incrementing this key destroys and remounts <media-player>, giving
-	// HLS.js a fresh start after a fatal 204/manifestParsingError.
+	/** Only for last-resort remount after fatal HLS error */
 	let playerKey = $state(0);
 
-	const RETRY_INTERVAL_MS = 4_000;
-
-	// Derive a cache-busted manifest URL that changes on every remount.
-	// Each {#key playerKey} cycle creates a new HLS.js instance that fetches
-	// the manifest. Without a unique URL, the browser's HTTP cache may serve a
-	// stale 204 response (CF Stream returns 204 when a signed-URL manifest is
-	// first requested and the CDN edge hasn't cached the live manifest yet).
-	// Appending a query param makes each attempt a unique URL, guaranteeing a
-	// fresh request reaches CF Stream's origin on every retry.
-	let cacheBustedSrc = $derived(liveSrc + (liveSrc.includes('?') ? '&' : '?') + '_cb=' + playerKey);
+	let remountTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	$effect(() => {
-		// Initialize vidstack
-		log('defineCustomElements()');
 		void defineCustomElements();
 	});
 
 	$effect(() => {
 		if (!player) return;
-		// Capture the element reference now. By the time the cleanup runs,
-		// {#key playerKey} will have set `player` to null via bind:this, so
-		// reading `player` directly in cleanup would throw a null-pointer error.
 		const el = player;
 
 		const onProviderChange = (e: any) => {
 			const provider = e.detail;
 			if (provider?.type === 'hls') {
-				log('Configuring HLS provider');
+				if (__DEV__) console.debug('[VideoPlayer] configuring HLS provider');
 				provider.config = {
 					...provider.config,
-					// Increase timeouts to be more resilient to slow network/stream
 					fragLoadingTimeOut: 20000,
 					manifestLoadingTimeOut: 20000,
 					levelLoadingTimeOut: 20000,
-					// Live stream specific configs
 					liveSyncDurationCount: 3,
-					liveMaxLatencyDurationCount: 10,
-					// Bypass browser HTTP cache for manifest requests. CF Stream
-					// may return 204 for a signed-URL manifest the first time it's
-					// requested at a CDN edge; without cache-busting the browser
-					// serves the stale 204 on every retry.
-					xhrSetup: (xhr: XMLHttpRequest) => {
-						xhr.setRequestHeader('Cache-Control', 'no-cache, no-store');
-					}
+					liveMaxLatencyDurationCount: 10
 				};
 			}
 		};
@@ -91,72 +59,37 @@
 
 	$effect(() => {
 		if (!player) return;
-		// Capture the element reference now. By the time the cleanup runs,
-		// {#key playerKey} will have set `player` to null via bind:this, so
-		// reading `player` directly in cleanup would throw a null-pointer error.
 		const el = player;
 
-		const handleError = (e: any) => {
-			// A 204 response (stream offline / not yet broadcasting) causes a
-			// manifestParsingError. Treat it as standby — not a fatal error.
-			const errorType = e?.detail?.type ?? e?.detail?.details ?? '';
-			const details = e?.detail?.details ?? '';
-			const code = e?.detail?.response?.code;
-			const isFatal = e?.detail?.fatal !== false; // HLS.js sets fatal:false for recoverable errors
-			const isOffline =
-				errorType === 'manifestParsingError' || code === 204 || details === 'manifestParsingError';
+		const handleHlsError = (e: any) => {
+			const detail = e?.detail ?? {};
+			const errorDetails = detail.details ?? '';
+			const isFatal = detail.fatal === true;
+			const code = detail.response?.code;
 
-			log('handleError(listener)', {
-				errorType,
-				details,
-				code,
-				isOffline,
-				isFatal
-			});
-			if (isOffline) return;
-
-			// Non-fatal HLS errors (e.g. bufferStalledError in Safari) are recoverable —
-			// log them but don't surface the error UI or call onError.
-			if (!isFatal) {
-				log('non-fatal hls error, ignoring', { details });
-
-				// Nudge the player if it stalls due to a fragment timeout
-				if (
-					details === 'fragLoadTimeOut' &&
-					sessionActive &&
-					el &&
-					typeof (el as any).play === 'function' &&
-					!isPlaying
-				) {
-					log('Attempting to recover from fragLoadTimeOut');
-					try {
-						(el as any).play()?.catch(() => {});
-					} catch (_e) {}
-				}
+			if (errorDetails === 'levelEmptyError') {
+				if (__DEV__) console.debug('[VideoPlayer] empty manifest — HLS.js will retry');
 				return;
 			}
 
-			logErr('Stream error:', e);
+			if (errorDetails === 'manifestParsingError' || code === 204) {
+				if (__DEV__) console.debug('[VideoPlayer] manifest not ready — waiting');
+				return;
+			}
+
+			if (!isFatal) {
+				if (__DEV__) console.debug('[VideoPlayer] non-fatal HLS error:', errorDetails);
+				return;
+			}
+
+			console.warn('[VideoPlayer] fatal HLS error:', errorDetails);
 			hasError = true;
 			isPlaying = false;
 			onError?.();
 		};
 
-		log('attach listeners', {
-			hasPlayer: !!el
-		});
-		el.addEventListener('error', handleError);
-		el.addEventListener('provider-error', handleError);
-		el.addEventListener('hls-error', handleError);
-		el.addEventListener('fatal-error', handleError);
-
-		return () => {
-			log('cleanup listeners');
-			el.removeEventListener('error', handleError);
-			el.removeEventListener('provider-error', handleError);
-			el.removeEventListener('hls-error', handleError);
-			el.removeEventListener('fatal-error', handleError);
-		};
+		el.addEventListener('hls-error', handleHlsError);
+		return () => el.removeEventListener('hls-error', handleHlsError);
 	});
 
 	$effect(() => {
@@ -171,99 +104,35 @@
 	const fsLabel = $derived(isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
 
 	const onLivePlaying = () => {
-		log('onplaying');
 		isPlaying = true;
 		hasError = false;
 		onPlaying?.();
 	};
 
-	const onLiveError = (e: any) => {
-		// 204 / manifestParsingError = stream offline, not a fatal error
-		const details = e?.detail?.details ?? e?.detail?.type ?? '';
-		const code = e?.detail?.response?.code;
-		const isFatal = e?.detail?.fatal !== false; // HLS.js sets fatal:false for recoverable errors
-		log('onerror(media-player event)', {
-			details,
-			code,
-			isFatal,
-			isOffline: details === 'manifestParsingError' || code === 204
-		});
-		if (details === 'manifestParsingError' || code === 204) return;
-
-		// Non-fatal HLS errors (e.g. bufferStalledError in Safari) are recoverable —
-		// log them but don't surface the error UI or call onError.
-		if (!isFatal) {
-			log('non-fatal hls error, ignoring', { details });
-
-			// Nudge the player if it stalls due to a fragment timeout
-			if (
-				details === 'fragLoadTimeOut' &&
-				sessionActive &&
-				player &&
-				typeof player.play === 'function' &&
-				!isPlaying
-			) {
-				log('Attempting to recover from fragLoadTimeOut');
-				try {
-					player.play()?.catch(() => {});
-				} catch (_e) {}
-			}
+	$effect(() => {
+		if (!hasError || !sessionActive || isPlaying) {
+			clearTimeout(remountTimeout);
 			return;
 		}
 
-		hasError = true;
-		isPlaying = false;
-		onError?.();
-	};
+		remountTimeout = setTimeout(() => {
+			if (__DEV__) console.debug('[VideoPlayer] last-resort remount after fatal error');
+			playerKey += 1;
+			hasError = false;
+		}, 10_000);
+
+		return () => clearTimeout(remountTimeout);
+	});
 
 	const toggleFullscreen = () => {
-		log('toggleFullscreen');
 		if (!container) return;
 		if (document.fullscreenElement) void document.exitFullscreen();
 		else void container.requestFullscreen();
 	};
 
 	$effect(() => {
-		// Helps correlate "Safari batch of same error" with player state flips
-		log('state', { isFullscreen, isPlaying, hasError });
-	});
-
-	$effect(() => {
-		// Diagnostic: log the full HLS URL so it can be curl-tested and the JWT
-		// sub (= live input UID) can be decoded and cross-checked in CF dashboard.
-		log('liveSrc', liveSrc);
-		log('cacheBustedSrc', cacheBustedSrc);
-	});
-
-	// Retry playback by remounting <media-player> periodically while session is
-	// active but video isn't playing. After a fatal 204/manifestParsingError HLS.js
-	// stops all loading — calling player.play() is rejected with "media is not
-	// ready". The only reliable recovery is to destroy the element and create a
-	// fresh HLS.js instance. Incrementing `playerKey` triggers {#key playerKey}
-	// which remounts <media-player>. The new element has autoplay so it will start
-	// playing once the manifest becomes available without any explicit play() call.
-	$effect(() => {
-		if (!sessionActive || isPlaying) return;
-
-		log('starting remount retry loop');
-
-		// Retry on interval until playback starts or session ends
-		const id = setInterval(() => {
-			if (isPlaying) {
-				clearInterval(id);
-				return;
-			}
-			log('remounting player (retry)');
-			// Do NOT set player = undefined here. {#key playerKey} destroys the
-			// old <media-player> element and bind:this nulls `player` automatically.
-			// Explicitly setting player=undefined before the key change fires the
-			// cleanup immediately with player already null, causing TypeErrors.
-			playerKey += 1;
-		}, RETRY_INTERVAL_MS);
-
-		return () => {
-			clearInterval(id);
-		};
+		if (__DEV__)
+			console.debug('[VideoPlayer]', { isFullscreen, isPlaying, hasError });
 	});
 </script>
 
@@ -276,7 +145,7 @@
 		<media-player
 			bind:this={player}
 			title="River Stream"
-			src={cacheBustedSrc}
+			src={liveSrc}
 			{poster}
 			autoplay
 			muted
@@ -284,7 +153,6 @@
 			stream-type="live"
 			class="absolute inset-0 z-0 h-full w-full"
 			onplaying={onLivePlaying}
-			onerror={onLiveError}
 		>
 			<media-outlet></media-outlet>
 		</media-player>
