@@ -51,7 +51,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 
 <!-- Current scope — v1.2 milestone. -->
 
-- [ ] Fix Counterscale CORS headers on Worker (CORS-01)
+- ✓ Fix Counterscale CORS headers on Worker (CORS-01) — Phase 02; proxy Worker at counterscale-proxy.jspn.workers.dev
 - [ ] Counterscale engagement / custom events (ANLY-03, deferred to v1.x)
 
 ### Out of Scope
@@ -69,10 +69,10 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - **Deployment:** SvelteKit on Cloudflare Workers (web), Bun on Raspberry Pi (relay)
 - **Video pipeline:** RTSP camera → ffmpeg → RTMPS → Cloudflare Stream → HLS
 - **State coordination:** Cloudflare KV for demand signals and relay status
-- **Analytics:** Counterscale tracker integrated in `packages/web` root layout → `counterscale.jspn.workers.dev`
+- **Analytics:** Counterscale tracker in `packages/web` root layout → CORS proxy at `counterscale-proxy.jspn.workers.dev` → upstream `counterscale.jspn.workers.dev`
 - **Data sources:** USGS gauges for live river data; fish run status will be static seasonal content
 - **Audience:** Primarily anglers checking the Trask River before fishing trips
-- **Monorepo:** `packages/web`, `packages/relay`, `packages/shared` with Turbo + Bun workspaces
+- **Monorepo:** `packages/web`, `packages/relay`, `packages/shared`, `packages/counterscale-proxy` with Turbo + Bun workspaces
 
 ## Constraints
 
@@ -114,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-13 after Phase 01 (v1.2 HLS playback reliability) complete_
+_Last updated: 2026-04-13 after Phase 02 (v1.2 Counterscale CORS fix) complete_
