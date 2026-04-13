@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: milestone
-status: unknown
-stopped_at: Phase 2 context gathered
-last_updated: "2026-04-13T20:34:35.150Z"
+milestone: pending
+milestone_name: next
+status: v1.2 shipped — planning next milestone
+stopped_at: Milestone v1.2 archived
+last_updated: '2026-04-13T21:00:00.000Z'
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # State: Trask River Cam
@@ -17,45 +17,43 @@ progress:
 ## Project Reference
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
-**Current milestone:** v1.2 — Stream Reliability & Error Handling
-**Current focus:** Phase 02 — counterscale-cors-fix
+**Last shipped:** v1.2 Stream Reliability & Error Handling (2026-04-13)
+**Current focus:** Run `/gsd-new-milestone` to define the next version
 
 ## Milestone History
+
+### v1.2 — Stream Reliability & Error Handling (COMPLETE)
+
+- **Completed:** 2026-04-13
+- **Phases:** 2/2, plans 3/3 — HLS reliability + Counterscale CORS proxy
+- **Archive:** `.planning/milestones/v1.2-ROADMAP.md`, `v1.2-REQUIREMENTS.md`
+- **Summary:** `.planning/MILESTONES.md`
 
 ### v1.1 — Analytics & User-Ready Polish (COMPLETE)
 
 - **Completed:** 2026-04-11
 - **Phases:** 3/3 complete, 4/4 plans executed, 11/11 requirements delivered
-- **Summary:** Counterscale analytics, sidebar overhaul, river conditions data
 
 ## Current Position
 
-Phase: 02 (counterscale-cors-fix) — EXECUTING
-Plan: 1 of 1
-
-## Phase Summary
-
-**Phase 01 (hls-playback-reliability):** complete — 2/2 plans, see `01-VERIFICATION.md`.
+Milestone **v1.2** complete. No active phase — next work starts with `/gsd-new-milestone`.
 
 ## Accumulated Context
 
 ### Decisions Made
 
-- [v1.1 Phase 01]: Counterscale init in root `$effect` with `reporterUrl`, hostname gate for `traskriver.com` + `www.traskriver.com`
-- [v1.1 Phase 02]: Sidebar is static stack (branding + LocalWeather + sticky CTA); `PassDetailsPanel` removed; viewing CTA label `Streaming`
-- [v1.1 Phase 03]: USGS river gauge + fish run status + sunrise/sunset; `TelemetryFooter` removed; `RiverConditions` / `FishRunStatus` in scroll column above CTA
+- [v1.2]: Counterscale analytics proxied through `counterscale-proxy.jspn.workers.dev` (CORS); `global_fetch_strictly_public` + minimal upstream headers required for Worker→workers.dev subrequests
+- [v1.2]: HLS.js handles transient manifest/level errors; page only escalates stream-end after `viewing`; JWT stream URL TTL 3600s
 
 ### Carried Forward
 
-- Monolithic `+page.svelte` (~480 lines) identified as tech debt — consider extracting during UI overhaul
-- `LiveViewerCount.svelte` has console noise on every poll — clean up if touched
-- Unauthenticated demand POST has 30s throttle — sufficient for now
-- vidstack is version-sensitive — pin and test after changes
-- HLS reliability fixes shipped (Phase 01); debug write-up retained at `.planning/debug/hls-playback-reliability.md`
+- Monolithic `+page.svelte` (~558 lines) — extract when doing UI overhaul
+- `LiveViewerCount.svelte` console noise on poll — clean up if touched
+- Post-ship report: relay can show `shouldStream=true` while UI stays in `streamStandby` — investigate separately from v1.2 scope
 
 ### TODOs
 
-- _None yet_
+- _None_
 
 ### Blockers
 
@@ -66,12 +64,12 @@ Plan: 1 of 1
 ### Last Session
 
 - **Date:** 2026-04-13
-- **Activity:** Debug session — diagnosed HLS playback reliability issues (6 root causes found). Completed milestone v1.1. Created milestone v1.2.
-- **Stopped at:** Phase 2 context gathered
+- **Activity:** Completed v1.2 Phase 02 (CORS proxy); milestone archived via `/gsd-complete-milestone`
+- **Stopped at:** Ready for `/gsd-new-milestone`
 
 ### Next Session Should
 
-1. `/gsd-plan-phase 2` then `/gsd-execute-phase 2` for Counterscale CORS (CORS-01)
+1. `/gsd-new-milestone` — define next version scope and requirements
 
 ---
 

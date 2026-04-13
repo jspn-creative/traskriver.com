@@ -8,19 +8,19 @@ A live-streaming web app for a river camera on the Trask River in Tillamook, OR.
 
 Users can see the Trask River live, on-demand, from anywhere — the stream starts when they want it and shows real conditions.
 
-## Current Milestone: v1.2 Stream Reliability & Error Handling
+## Current milestone
 
-**Goal:** Fix HLS playback reliability so the stream starts consistently across all browsers without excessive retries, console noise, or user-visible errors.
+**v1.2 shipped 2026-04-13** — see [.planning/MILESTONES.md](MILESTONES.md) and [.planning/milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md).
 
-**Target features:**
+**Next:** define v1.3 (or next minor) with `/gsd-new-milestone` — requirements and roadmap were reset for a clean planning pass.
 
-- Replace destructive remount retry loop with HLS.js-native error recovery
-- Proper stream startup state that expects empty manifests during Cloudflare Stream warmup
-- Longer JWT TTL to prevent token expiry during retries
-- Clean up console logging noise
-- Fix Counterscale CORS configuration
+## Previous milestones
 
-## Previous Milestones
+### v1.2 Stream Reliability & Error Handling (COMPLETE 2026-04-13)
+
+- HLS playback reliability (STRM-01–STRM-05): HLS.js-first recovery, startup-tolerant empty manifests, 3600s JWT TTL, quieter logs, `ended_confirming` only after `viewing`
+- Counterscale CORS (CORS-01): dedicated `counterscale-proxy` Worker + layout `reporterUrl` update
+- 2 phases, 3 plans; archives: `milestones/v1.2-ROADMAP.md`, `milestones/v1.2-REQUIREMENTS.md`
 
 ### v1.1 Analytics & User-Ready Polish (COMPLETE 2026-04-11)
 
@@ -45,13 +45,17 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - ✓ Relay CI/CD deployment via Tailscale + GitHub Actions — v1.0
 - ✓ Systemd service management on Raspberry Pi — v1.0
 - ✓ Counterscale production pageviews (apex + www) — Phase 1 (ANLY-01, ANLY-02)
-- ✓ HLS playback reliability: HLS.js-first recovery, startup-tolerant manifest errors, 3600s signed URL TTL, dev-only stream logs, `ended_confirming` only after `viewing` — Phase 01 (STRM-01–STRM-05)
+- ✓ HLS playback reliability: HLS.js-first recovery, startup-tolerant manifest errors, 3600s signed URL TTL, dev-only stream logs, `ended_confirming` only after `viewing` — v1.2 Phase 01 (STRM-01–STRM-05)
+- ✓ Counterscale CORS fix for production origins (CORS-01) — v1.2 Phase 02; proxy Worker at `counterscale-proxy.jspn.workers.dev`
 
 ### Active
 
-<!-- Current scope — v1.2 milestone. -->
+<!-- Next milestone — populate via /gsd-new-milestone -->
 
-- ✓ Fix Counterscale CORS headers on Worker (CORS-01) — Phase 02; proxy Worker at counterscale-proxy.jspn.workers.dev
+_(none)_
+
+### Deferred
+
 - [ ] Counterscale engagement / custom events (ANLY-03, deferred to v1.x)
 
 ### Out of Scope
@@ -83,15 +87,17 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 
 ## Key Decisions
 
-| Decision                          | Rationale                                                                 | Outcome |
-| --------------------------------- | ------------------------------------------------------------------------- | ------- |
-| Cloudflare Stream for video CDN   | Low-latency HLS with global edge, simple JWT signing                      | ✓ Good  |
-| KV for demand/status coordination | Lightweight, no database needed for two keys                              | ✓ Good  |
-| On-demand streaming (not 24/7)    | Save bandwidth and compute on Pi; stream only when someone wants to watch | ✓ Good  |
-| Bun for relay runtime             | Fast startup, good subprocess management, runs well on Pi                 | ✓ Good  |
-| Counterscale for analytics        | Privacy-friendly, self-hosted on Workers, lightweight                     | ✓ Good  |
-| USGS API for river data           | Free, reliable public data for Trask River gauge                          | ✓ Good  |
-| Static fish run table             | Seasonal patterns are predictable; avoids complex data sourcing           | ✓ Good  |
+| Decision                           | Rationale                                                                                        | Outcome |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------ | ------- |
+| Cloudflare Stream for video CDN    | Low-latency HLS with global edge, simple JWT signing                                             | ✓ Good  |
+| KV for demand/status coordination  | Lightweight, no database needed for two keys                                                     | ✓ Good  |
+| On-demand streaming (not 24/7)     | Save bandwidth and compute on Pi; stream only when someone wants to watch                        | ✓ Good  |
+| Bun for relay runtime              | Fast startup, good subprocess management, runs well on Pi                                        | ✓ Good  |
+| Counterscale for analytics         | Privacy-friendly, self-hosted on Workers, lightweight                                            | ✓ Good  |
+| USGS API for river data            | Free, reliable public data for Trask River gauge                                                 | ✓ Good  |
+| Static fish run table              | Seasonal patterns are predictable; avoids complex data sourcing                                  | ✓ Good  |
+| HLS.js owns transient recovery     | Avoid remount loops; vidstack `hls-error` + fatal-only page escalation                           | ✓ Good  |
+| CORS proxy Worker for Counterscale | Upstream Worker cannot emit CORS; thin proxy on same account with `global_fetch_strictly_public` | ✓ Good  |
 
 ## Evolution
 
@@ -114,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-13 after Phase 02 (v1.2 Counterscale CORS fix) complete_
+_Last updated: 2026-04-13 after v1.2 milestone complete_
