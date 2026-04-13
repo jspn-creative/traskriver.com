@@ -66,7 +66,11 @@ Plans:
 - Integration code in `+layout.svelte` is correct — the Worker just doesn't respond with CORS headers
 - This may require updating the Counterscale Worker's wrangler config or adding middleware
 
-**Plans:** 0 plans — needs `/gsd-plan-phase`
+**Plans:** 1 plan
+
+Plans:
+
+- [ ] 02-01-PLAN.md — Create CORS proxy Worker, update client reporterUrl, verify zero CORS errors
 
 ---
 
