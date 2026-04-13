@@ -13,7 +13,7 @@
 
 		Counterscale.init({
 			siteId: 'traskriver.com',
-			reporterUrl: 'https://counterscale.jspn.workers.dev/tracker'
+			reporterUrl: 'https://counterscale-proxy.jspn.workers.dev'
 		});
 
 		return () => {

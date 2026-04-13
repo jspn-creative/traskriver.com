@@ -3,6 +3,7 @@
 	"name": "counterscale-proxy",
 	"account_id": "e1c1047c245641f3c40cb70ea0d8f7c6",
 	"compatibility_date": "2026-03-17",
+	"compatibility_flags": ["global_fetch_strictly_public"],
 	"main": "src/index.ts",
 	"observability": {
 		"enabled": true
