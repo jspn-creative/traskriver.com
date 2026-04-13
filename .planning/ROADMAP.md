@@ -1,112 +1,72 @@
-# Roadmap: Trask River Cam v1.1
+# Roadmap: Trask River Cam v1.2
 
-**Milestone:** v1.1 — Analytics & User-Ready Polish
-**Created:** 2026-04-10
-**Phases:** 3
-**Requirements:** 11
+**Milestone:** v1.2 — Stream Reliability & Error Handling
+**Created:** 2026-04-13
+**Phases:** 2
+**Requirements:** 6
+**Debug reference:** `.planning/debug/hls-playback-reliability.md`
 
 ## Phase Overview
 
-| #   | Phase                      | Goal                                                                  | Requirements                                | Success Criteria |
-| --- | -------------------------- | --------------------------------------------------------------------- | ------------------------------------------- | ---------------- |
-| 1   | Analytics Integration      | Usage tracking is live and reporting                                  | ANLY-01, ANLY-02                            | 2 ✓ (2026-04-11) |
-| 2   | Sidebar & Content Overhaul | Sidebar presents angler-relevant content with always-visible controls | SIDE-01, SIDE-02, SIDE-03, SIDE-04          | 4 ✓ (2026-04-11) |
-| 3   | River Conditions Data      | Users can check river conditions alongside the live stream            | RIVR-01, RIVR-02, RIVR-03, RIVR-04, FOOT-01 | 5 ✓ (2026-04-11) |
+| #   | Phase                    | Goal                                                                     | Requirements                                | Success Criteria |
+| --- | ------------------------ | ------------------------------------------------------------------------ | ------------------------------------------- | ---------------- |
+| 1   | HLS Playback Reliability | Stream starts consistently with minimal retries and clean console output | STRM-01, STRM-02, STRM-03, STRM-04, STRM-05 | 5 pending        |
+| 2   | Counterscale CORS Fix    | Analytics requests succeed without CORS errors                           | CORS-01                                     | 1 pending        |
 
 ## Phase Details
 
-### Phase 1: Analytics Integration
+### Phase 1: HLS Playback Reliability
 
-**Goal:** Every page visit is tracked and visitor data appears in the Counterscale dashboard
-**Depends on:** Nothing (decoupled from all UI work)
-**Requirements:** ANLY-01, ANLY-02
+**Goal:** The HLS video stream starts consistently across all browsers within seconds, using HLS.js's built-in recovery instead of destructive remounts, with clean console output
+**Depends on:** Nothing
+**Requirements:** STRM-01, STRM-02, STRM-03, STRM-04, STRM-05
 
 **Success Criteria:**
 
-1. Opening the site in a browser registers a pageview in the Counterscale dashboard
-2. The Counterscale dashboard shows unique visitors, referrer sources, and device breakdowns for traskriver.com
+1. VideoPlayer does not remount `<media-player>` as its primary retry strategy — only as a last resort after HLS.js recovery fails
+2. `levelEmptyError` during stream startup is logged once at debug level and handled silently — no console spam, no page state transitions
+3. JWT signed URL has a TTL of at least 3600 seconds
+4. Console output during normal stream startup is limited to meaningful state transitions (e.g., "connecting", "buffering", "playing")
+5. Page state machine does not enter `ended_confirming` for transient HLS startup errors — only for actual stream end or unrecoverable errors
 
 **Key context:**
 
-- Counterscale is already deployed at `counterscale.jspn.workers.dev` — only the tracker integration is needed
-- Use `reporterUrl` config key, NOT `deploymentUrl` (npm README is wrong, source code uses `reporterUrl`)
-- `@counterscale/tracker` (^3.4.1) is the only npm package to install
-- Custom events are NOT supported by Counterscale (Issue #200) — engagement tracking deferred to ANLY-03 (v1.x)
-- Test SPA navigation tracking — may need `afterNavigate` manual calls in SvelteKit
-- This phase has zero visual impact — validates the tracking pipeline before any UI changes
+- Root causes RC1–RC5 from `.planning/debug/hls-playback-reliability.md` all apply to this phase
+- **CRITICAL: The stream state machine in +page.svelte is tightly coupled to VideoPlayer error events** — changes to error handling MUST be tested against all stream phases (idle → starting → viewing → timeout → restart)
+- HLS.js has built-in retry with exponential backoff for `levelEmptyError` — the fix should trust this mechanism
+- Safari uses native HLS (not HLS.js) — test error recovery behavior in both Chrome and Safari
+- The `xhrSetup` Cache-Control header should be removed (redundant with cache-bust param and may cause CORS preflight)
+- The dual error handler architecture (handleError + onLiveError) should be consolidated
+- vidstack is version-sensitive — pin and test after changes (carried from v1.1)
+- Consider adding a `connecting`/`buffering` visual state for users while HLS manifest is empty
 
-**Plans:** 1/1 plans complete
+**Plans:** 2 plans
 
 Plans:
 
-- [x] 01-01-PLAN.md — Install Counterscale tracker with production-gated init in root layout (completed 2026-04-11)
+- [ ] 01-01-PLAN.md — Replace remount retry loop with HLS.js-native recovery, consolidate error handlers, clean up logging
+- [ ] 01-02-PLAN.md — Extend JWT TTL to 3600s, harden page state machine (ended_confirming only from viewing)
 
 ---
 
-### Phase 2: Sidebar & Content Overhaul
+### Phase 2: Counterscale CORS Fix
 
-**Goal:** The sidebar presents "Trask River Cam" branding and angler-relevant content with weather and stream controls always visible
-**Depends on:** Phase 1
-**Requirements:** SIDE-01, SIDE-02, SIDE-03, SIDE-04
-
-**Success Criteria:**
-
-1. The sidebar header shows "Trask River Cam" branding with a brief description of the river and its location
-2. Local weather conditions are visible in the sidebar at all times — before, during, and after streaming
-3. The start/restart stream button is visible in the sidebar at all times — no hunting through panels
-4. All product-page filler copy (pricing, "24/7 Video Access", spec tables) is gone and replaced with content relevant to anglers checking the river
-
-**Key context:**
-
-- Current sidebar swaps content based on stream phase (`{#if phase === 'viewing'}`) — the overhaul changes this to an always-visible stacked layout
-- **CRITICAL: Do NOT refactor the stream state machine in +page.svelte** — change sidebar content and layout only, leave stream logic untouched
-- Test all stream phase transitions (idle → starting → viewing → timeout → restart) after layout changes
-- Watch for mobile drawer overflow after adding always-visible weather + button
-- This phase establishes the layout container that Phase 3's data components will slot into
-
-**Plans:** 1/1 plans complete
-
-Plans:
-
-- [x] 02-01-PLAN.md — Overhaul sidebar layout: branding, always-visible weather, sticky stream button, delete PassDetailsPanel (completed 2026-04-11)
-
-**UI hint:** yes
-
----
-
-### Phase 3: River Conditions Data
-
-**Goal:** Users can see current river conditions (flow, temperature, sunrise/sunset, fish runs) with clear freshness indicators
-**Depends on:** Phase 2 (data components slot into the sidebar layout established in Phase 2)
-**Requirements:** RIVR-01, RIVR-02, RIVR-03, RIVR-04, FOOT-01
+**Goal:** Counterscale analytics tracker requests from traskriver.com succeed without CORS errors
+**Depends on:** Nothing (independent of Phase 1)
+**Requirements:** CORS-01
 
 **Success Criteria:**
 
-1. User can see today's sunrise and sunset times for the Trask River location
-2. User can see which fish species are currently in season on the Trask River
-3. User can see current river flow (cfs) and water temperature sourced from USGS gauge data
-4. Each piece of river data shows when it was last updated (e.g., "Updated 23 min ago")
-5. The old telemetry footer (encoding/bitrate) is replaced with the river conditions data
+1. Opening traskriver.com produces no CORS errors for counterscale.jspn.workers.dev requests in the browser console
 
 **Key context:**
 
-- USGS gauge 14302480 is confirmed live — returns discharge (cfs, param `00060`), water temp (param `00010`), and gage height
-- Parse USGS response by parameter code, never by array index — handle partial/offline gauge data gracefully
-- USGS rate limiting: fetch once per component mount, not on every state change — data updates hourly at most
-- Sunrise/sunset: extend existing Open-Meteo weather API call with `&daily=sunrise,sunset` — no suncalc library needed
-- Fish run status: static TypeScript lookup table (`$lib/data/fish-runs.ts`) based on ODFW seasonal data
-- Match existing `LocalWeather.svelte` pattern: self-contained component that owns its own fetch/state
-- No new server routes or KV bindings — all client-side fetch to public CORS APIs
-- Expected new components: `RiverConditions.svelte`, `FishRunStatus.svelte`, `$lib/data/fish-runs.ts`
+- The fix is on the Counterscale Cloudflare Worker deployment, NOT in this repo's code
+- The Worker needs to return `Access-Control-Allow-Origin` headers (either `*` or `https://traskriver.com`)
+- Integration code in `+layout.svelte` is correct — the Worker just doesn't respond with CORS headers
+- This may require updating the Counterscale Worker's wrangler config or adding middleware
 
-**Plans:** 2/2 plans complete
-
-Plans:
-
-- [x] 03-01-PLAN.md — Create river data components (fish-runs data, RiverConditions, FishRunStatus, sunrise/sunset in LocalWeather) (completed 2026-04-11)
-- [x] 03-02-PLAN.md — Wire components into sidebar and replace TelemetryFooter (completed 2026-04-11)
-
-**UI hint:** yes
+**Plans:** 0 plans — needs `/gsd-plan-phase`
 
 ---
 
@@ -114,20 +74,15 @@ Plans:
 
 | Requirement | Phase   |
 | ----------- | ------- |
-| ANLY-01     | Phase 1 |
-| ANLY-02     | Phase 1 |
-| SIDE-01     | Phase 2 |
-| SIDE-02     | Phase 2 |
-| SIDE-03     | Phase 2 |
-| SIDE-04     | Phase 2 |
-| RIVR-01     | Phase 3 |
-| RIVR-02     | Phase 3 |
-| RIVR-03     | Phase 3 |
-| RIVR-04     | Phase 3 |
-| FOOT-01     | Phase 3 |
+| STRM-01     | Phase 1 |
+| STRM-02     | Phase 1 |
+| STRM-03     | Phase 1 |
+| STRM-04     | Phase 1 |
+| STRM-05     | Phase 1 |
+| CORS-01     | Phase 2 |
 
-**Coverage:** 11/11 requirements mapped ✓
+**Coverage:** 6/6 requirements mapped
 
 ---
 
-_Roadmap created: 2026-04-10_
+_Roadmap created: 2026-04-13_

@@ -1,15 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
+milestone: v1.2
 milestone_name: milestone
-status: Ready
-stopped_at: Milestone v1.1 phases complete — Phase 3 verified
-last_updated: '2026-04-11T01:51:14.019Z'
+status: Ready to execute
+stopped_at: Milestone v1.2 created, awaiting phase planning
+last_updated: '2026-04-13T18:58:46.676Z'
 progress:
   total_phases: 3
-  completed_phases: 3
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 4
+  completed_plans: 2
+  percent: 50
 ---
 
 # State: Trask River Cam
@@ -17,40 +18,32 @@ progress:
 ## Project Reference
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
-**Current milestone:** v1.1 — Analytics & User-Ready Polish
-**Current focus:** Milestone v1.1 complete — all 3 phases shipped
+**Current milestone:** v1.2 — Stream Reliability & Error Handling
+**Current focus:** Fix HLS playback reliability issues identified in debug session
+
+## Milestone History
+
+### v1.1 — Analytics & User-Ready Polish (COMPLETE)
+
+- **Completed:** 2026-04-11
+- **Phases:** 3/3 complete, 4/4 plans executed, 11/11 requirements delivered
+- **Summary:** Counterscale analytics, sidebar overhaul, river conditions data
 
 ## Current Position
 
-Phase: 03 (river-conditions-data) — Complete
-Plan: 03-02 (last)
+Phase: None — milestone just created, awaiting planning
 
 ## Phase Summary
 
-| Phase                         | Status   | Plans |
-| ----------------------------- | -------- | ----- |
-| 1. Analytics Integration      | Complete | 1/1   |
-| 2. Sidebar & Content Overhaul | Complete | 1/1   |
-| 3. River Conditions Data      | Complete | 2/2   |
-
-## Performance Metrics
-
-| Metric                 | Value |
-| ---------------------- | ----- | ------- | ------- |
-| Plans completed        | 4     |
-| Plans failed           | 0     |
-| Phases completed       | 3/3   |
-| Requirements delivered | 11/11 |
-| Phase 03 P01           | 8 min | 2 tasks | 4 files |
-| Phase 03 P02           | 5 min | 2 tasks | 1 files |
+_No phases yet — use `/gsd-plan-phase` to plan the first phase_
 
 ## Accumulated Context
 
 ### Decisions Made
 
-- [Phase 01]: Counterscale init in root `$effect` with `reporterUrl`, hostname gate for `traskriver.com` + `www.traskriver.com`
-- [Phase 02]: Sidebar is static stack (branding + LocalWeather + sticky CTA); `PassDetailsPanel` removed; viewing CTA label `Streaming`
-- [Phase 03]: USGS river gauge + fish run status + sunrise/sunset; `TelemetryFooter` removed; `RiverConditions` / `FishRunStatus` in scroll column above CTA
+- [v1.1 Phase 01]: Counterscale init in root `$effect` with `reporterUrl`, hostname gate for `traskriver.com` + `www.traskriver.com`
+- [v1.1 Phase 02]: Sidebar is static stack (branding + LocalWeather + sticky CTA); `PassDetailsPanel` removed; viewing CTA label `Streaming`
+- [v1.1 Phase 03]: USGS river gauge + fish run status + sunrise/sunset; `TelemetryFooter` removed; `RiverConditions` / `FishRunStatus` in scroll column above CTA
 
 ### Carried Forward
 
@@ -58,6 +51,7 @@ Plan: 03-02 (last)
 - `LiveViewerCount.svelte` has console noise on every poll — clean up if touched
 - Unauthenticated demand POST has 30s throttle — sufficient for now
 - vidstack is version-sensitive — pin and test after changes
+- **[DEBUG] HLS playback reliability issues** — see `.planning/debug/hls-playback-reliability.md` for full root cause analysis
 
 ### TODOs
 
@@ -71,14 +65,14 @@ Plan: 03-02 (last)
 
 ### Last Session
 
-- **Date:** 2026-04-11
-- **Activity:** Phase 03 executed — river data components, sidebar wiring, 03-VERIFICATION, human-approved UI check
-- **Stopped at:** Milestone v1.1 all phases complete
+- **Date:** 2026-04-13
+- **Activity:** Debug session — diagnosed HLS playback reliability issues (6 root causes found). Completed milestone v1.1. Created milestone v1.2.
+- **Stopped at:** Milestone v1.2 created, awaiting phase planning
 
 ### Next Session Should
 
-1. `/gsd-complete-milestone` or plan v1.2 / next milestone as needed
+1. `/gsd-plan-phase` to plan the HLS reliability fix phase based on debug findings
 
 ---
 
-_Last updated: 2026-04-11_
+_Last updated: 2026-04-13_

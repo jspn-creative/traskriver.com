@@ -30,6 +30,22 @@ Requirements for milestone v1.1: Analytics & User-Ready Polish. Each maps to roa
 
 - [x] **FOOT-01**: Telemetry footer (encoding/bitrate) is replaced with river conditions data
 
+## v1.2 Requirements
+
+Requirements for milestone v1.2: Stream Reliability & Error Handling. Identified via debug session analyzing production console logs.
+
+### Stream Playback
+
+- [ ] **STRM-01**: VideoPlayer does not use destructive remount as its primary retry mechanism — HLS.js's built-in recovery is used for transient errors
+- [ ] **STRM-02**: Empty HLS manifests during Cloudflare Stream warmup (levelEmptyError) are handled as an expected startup condition, not as errors that trigger retries
+- [ ] **STRM-03**: JWT signed URL TTL is long enough that tokens cannot expire during normal stream startup (minimum 1 hour)
+- [ ] **STRM-04**: VideoPlayer console logging is reduced to meaningful state transitions only — no per-error spam for expected transient conditions
+- [ ] **STRM-05**: Page state machine does not enter `ended_confirming` phase due to transient HLS startup errors
+
+### Analytics
+
+- [ ] **CORS-01**: Counterscale analytics tracker requests from traskriver.com are not blocked by CORS policy
+
 ## Future Requirements
 
 Deferred to v1.x. Tracked but not in current roadmap.

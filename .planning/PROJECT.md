@@ -8,16 +8,26 @@ A live-streaming web app for a river camera on the Trask River in Tillamook, OR.
 
 Users can see the Trask River live, on-demand, from anywhere — the stream starts when they want it and shows real conditions.
 
-## Current Milestone: v1.1 Analytics & User-Ready Polish
+## Current Milestone: v1.2 Stream Reliability & Error Handling
 
-**Goal:** Add usage analytics via Counterscale, overhaul sidebar content for anglers, and add river/fishing context data so the app is ready to share with actual users.
+**Goal:** Fix HLS playback reliability so the stream starts consistently across all browsers without excessive retries, console noise, or user-visible errors.
 
 **Target features:**
 
-- Counterscale analytics with custom engagement events
-- Sidebar content overhaul (branding, description, always-visible weather + start button)
-- River conditions in sidebar (sunrise/sunset, USGS flow/temp, seasonal fish run status) — shipped Phase 3
-- Copy and content cleanup for angler audience
+- Replace destructive remount retry loop with HLS.js-native error recovery
+- Proper stream startup state that expects empty manifests during Cloudflare Stream warmup
+- Longer JWT TTL to prevent token expiry during retries
+- Clean up console logging noise
+- Fix Counterscale CORS configuration
+
+## Previous Milestones
+
+### v1.1 Analytics & User-Ready Polish (COMPLETE 2026-04-11)
+
+- Counterscale analytics (ANLY-01, ANLY-02)
+- Sidebar content overhaul for anglers (SIDE-01–SIDE-04)
+- River conditions data in sidebar (RIVR-01–RIVR-04, FOOT-01)
+- 3/3 phases, 11/11 requirements delivered
 
 ## Requirements
 
@@ -38,8 +48,13 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 
 ### Active
 
-<!-- Current scope — v1.1 milestone. -->
+<!-- Current scope — v1.2 milestone. -->
 
+- [ ] Remove destructive remount retry loop from VideoPlayer (STRM-01)
+- [ ] Implement HLS.js-native error recovery with proper stream startup state (STRM-02)
+- [ ] Extend JWT TTL and add token refresh logic (STRM-03)
+- [ ] Clean up excessive console logging in VideoPlayer (STRM-04)
+- [ ] Fix Counterscale CORS headers on Worker (CORS-01)
 - [ ] Counterscale engagement / custom events (ANLY-03, deferred to v1.x)
 
 ### Out of Scope
