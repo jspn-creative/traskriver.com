@@ -44,7 +44,7 @@ Requirements for milestone v1.2: Stream Reliability & Error Handling. Identified
 
 ### Analytics
 
-- [ ] **CORS-01**: Counterscale analytics tracker requests from traskriver.com are not blocked by CORS policy
+- [x] **CORS-01**: Counterscale analytics tracker requests from traskriver.com are not blocked by CORS policy
 
 ## Future Requirements
 
