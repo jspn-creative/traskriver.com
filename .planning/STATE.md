@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: milestone
-status: Ready to plan
-stopped_at: Phase 2 complete — verification committed
-last_updated: '2026-04-11T01:15:00.000Z'
+milestone: pending
+milestone_name: next
+status: v1.2 shipped — planning next milestone
+stopped_at: Milestone v1.2 archived
+last_updated: '2026-04-13T21:00:00.000Z'
 progress:
-  total_phases: 3
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # State: Trask River Cam
@@ -17,48 +17,43 @@ progress:
 ## Project Reference
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
-**Current milestone:** v1.1 — Analytics & User-Ready Polish
-**Current focus:** Phase 03 — river-conditions-data
+**Last shipped:** v1.2 Stream Reliability & Error Handling (2026-04-13)
+**Current focus:** Run `/gsd-new-milestone` to define the next version
+
+## Milestone History
+
+### v1.2 — Stream Reliability & Error Handling (COMPLETE)
+
+- **Completed:** 2026-04-13
+- **Phases:** 2/2, plans 3/3 — HLS reliability + Counterscale CORS proxy
+- **Archive:** `.planning/milestones/v1.2-ROADMAP.md`, `v1.2-REQUIREMENTS.md`
+- **Summary:** `.planning/MILESTONES.md`
+
+### v1.1 — Analytics & User-Ready Polish (COMPLETE)
+
+- **Completed:** 2026-04-11
+- **Phases:** 3/3 complete, 4/4 plans executed, 11/11 requirements delivered
 
 ## Current Position
 
-Phase: 03 (river-conditions-data) — not started
-Plan: TBD
-
-## Phase Summary
-
-| Phase                         | Status   | Plans |
-| ----------------------------- | -------- | ----- |
-| 1. Analytics Integration      | Complete | 1/1   |
-| 2. Sidebar & Content Overhaul | Complete | 1/1   |
-| 3. River Conditions Data      | **Next** | TBD   |
-
-## Performance Metrics
-
-| Metric                 | Value |
-| ---------------------- | ----- |
-| Plans completed        | 2     |
-| Plans failed           | 0     |
-| Phases completed       | 2/3   |
-| Requirements delivered | 6/11  |
+Milestone **v1.2** complete. No active phase — next work starts with `/gsd-new-milestone`.
 
 ## Accumulated Context
 
 ### Decisions Made
 
-- [Phase 01]: Counterscale init in root `$effect` with `reporterUrl`, hostname gate for `traskriver.com` + `www.traskriver.com`
-- [Phase 02]: Sidebar is static stack (branding + LocalWeather + TelemetryFooter + sticky CTA); `PassDetailsPanel` removed; viewing CTA label `Streaming`
+- [v1.2]: Counterscale analytics proxied through `counterscale-proxy.jspn.workers.dev` (CORS); `global_fetch_strictly_public` + minimal upstream headers required for Worker→workers.dev subrequests
+- [v1.2]: HLS.js handles transient manifest/level errors; page only escalates stream-end after `viewing`; JWT stream URL TTL 3600s
 
 ### Carried Forward
 
-- Monolithic `+page.svelte` (~480 lines) identified as tech debt — consider extracting during UI overhaul
-- `LiveViewerCount.svelte` has console noise on every poll — clean up if touched
-- Unauthenticated demand POST has 30s throttle — sufficient for now
-- vidstack is version-sensitive — pin and test after changes
+- Monolithic `+page.svelte` (~558 lines) — extract when doing UI overhaul
+- `LiveViewerCount.svelte` console noise on poll — clean up if touched
+- Post-ship report: relay can show `shouldStream=true` while UI stays in `streamStandby` — investigate separately from v1.2 scope
 
 ### TODOs
 
-- _None yet_
+- _None_
 
 ### Blockers
 
@@ -68,14 +63,14 @@ Plan: TBD
 
 ### Last Session
 
-- **Date:** 2026-04-11
-- **Activity:** Phase 02 executed — sidebar overhaul, LocalWeather copy, 02-VERIFICATION, phase complete
-- **Stopped at:** Phase 3 ready to plan
+- **Date:** 2026-04-13
+- **Activity:** Completed v1.2 Phase 02 (CORS proxy); milestone archived via `/gsd-complete-milestone`
+- **Stopped at:** Ready for `/gsd-new-milestone`
 
 ### Next Session Should
 
-1. Run `/gsd-discuss-phase 3` or `/gsd-plan-phase 3` for River Conditions Data
+1. `/gsd-new-milestone` — define next version scope and requirements
 
 ---
 
-_Last updated: 2026-04-11_
+_Last updated: 2026-04-13_

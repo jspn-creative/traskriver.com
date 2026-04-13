@@ -9,6 +9,9 @@ const encoder = new TextEncoder();
 const toBase64Url = (value: string) =>
 	btoa(value).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
 
+/** Cloudflare Stream signed-URL lifetime. Must exceed worst-case startup time. */
+const JWT_TTL_SECONDS = 3600;
+
 const generateStreamToken = async (
 	uid: string,
 	keyId: string,
@@ -25,7 +28,11 @@ const generateStreamToken = async (
 
 	const header = toBase64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: keyId }));
 	const payload = toBase64Url(
-		JSON.stringify({ sub: uid, kid: keyId, exp: Math.floor(Date.now() / 1000) + 120 })
+		JSON.stringify({
+			sub: uid,
+			kid: keyId,
+			exp: Math.floor(Date.now() / 1000) + JWT_TTL_SECONDS
+		})
 	);
 	const signingInput = `${header}.${payload}`;
 

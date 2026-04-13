@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { RelayStatusResponse } from '@traskriver/shared';
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
-	import TelemetryFooter from '$lib/components/TelemetryFooter.svelte';
 	import LocalWeather from '$lib/components/LocalWeather.svelte';
+	import RiverConditions from '$lib/components/RiverConditions.svelte';
+	import FishRunStatus from '$lib/components/FishRunStatus.svelte';
 	import { Drawer, DrawerContent } from '$lib/components/ui/drawer';
 	import defaultJpg from '$lib/assets/default.jpg';
 	import { getStreamInfo } from './stream.remote';
@@ -17,7 +18,6 @@
 		| 'unavailable'
 		| 'error'
 	>('idle');
-	let streamStandby = $state(true);
 	let streamError = $state(false);
 	let demandRegistered = $state(false);
 	let demandLoading = $state(false);
@@ -35,6 +35,7 @@
 	const STARTING_TIMEOUT_MS = 60_000;
 	const MIN_STARTING_MS = 6_000;
 	const isBrowser = typeof window !== 'undefined';
+	const __DEV__ = import.meta.env.DEV;
 
 	$effect(() => {
 		if (!isBrowser) return;
@@ -64,6 +65,9 @@
 	});
 
 	let sessionActive = $derived(phase !== 'idle' && phase !== 'ended' && phase !== 'error');
+	let showPlayer = $derived(
+		phase === 'live' || phase === 'viewing' || phase === 'ended_confirming'
+	);
 	let sidebarWidth = $derived(phase === 'viewing' ? '300px' : '420px');
 	let isStarting = $derived(phase === 'starting');
 	let buttonDisabled = $derived((sessionActive && phase !== 'unavailable') || demandLoading);
@@ -82,11 +86,6 @@
 								? 'Stream error'
 								: 'Start stream'
 	);
-	const log = (...args: unknown[]) => {
-		if (!isBrowser) return;
-		console.log('[traskriver][page]', ...args);
-	};
-
 	const prefetchRelayStatus = async () => {
 		try {
 			const res = await fetch('/api/relay/status');
@@ -95,7 +94,7 @@
 			relayStale = data.stale;
 			lastKnownRelayState = data.state;
 		} catch {
-			log('relay status prefetch failed');
+			if (__DEV__) console.debug('[page] relay prefetch failed');
 		}
 	};
 
@@ -163,7 +162,7 @@
 				}
 			}
 		} catch {
-			log('relay status poll failed');
+			if (__DEV__) console.debug('[page] relay poll failed');
 		}
 	};
 
@@ -193,19 +192,21 @@
 	});
 
 	const onPlaybackStart = () => {
-		log('onPlaybackStart');
+		if (__DEV__) console.debug('[page] playback started');
 		phase = 'viewing';
 		polling = false;
-		streamStandby = false;
 		streamError = false;
 	};
 
 	const onPlaybackError = () => {
-		log('onPlaybackError — resuming relay polling for end confirmation');
 		streamError = true;
-		if (phase === 'viewing' || phase === 'live') {
+
+		if (phase === 'viewing') {
+			if (__DEV__) console.debug('[page] playback lost during viewing — confirming stream status');
 			phase = 'ended_confirming';
 			polling = true;
+		} else if (phase === 'live') {
+			if (__DEV__) console.debug('[page] HLS fatal error during startup — staying in live phase');
 		}
 	};
 
@@ -219,7 +220,6 @@
 			}
 			demandRegistered = true;
 			phase = 'starting';
-			streamStandby = true;
 			streamError = false;
 			startingTimestamp = Date.now();
 			startingUnavailableAccumulatedMs = 0;
@@ -233,10 +233,9 @@
 	};
 
 	const restartStream = () => {
-		log('restartStream — full reset');
+		if (__DEV__) console.debug('[page] restarting stream');
 		phase = 'idle';
 		demandRegistered = false;
-		streamStandby = true;
 		streamError = false;
 		startingTimestamp = null;
 		startingUnavailableAccumulatedMs = 0;
@@ -247,15 +246,16 @@
 	};
 
 	$effect(() => {
-		log('state', {
-			phase,
-			sessionActive,
-			streamStandby,
-			streamError,
-			demandRegistered,
-			relayStale,
-			lastKnownRelayState
-		});
+		if (__DEV__)
+			console.debug('[page]', {
+				phase,
+				sessionActive,
+				showPlayer,
+				streamError,
+				demandRegistered,
+				relayStale,
+				lastKnownRelayState
+			});
 	});
 </script>
 
@@ -281,7 +281,7 @@
 						</p>
 						<button
 							onclick={() => {
-								log('Retry clicked: getStreamInfo().refresh()');
+								if (__DEV__) console.debug('[page] retry — refreshing stream info');
 								void getStreamInfo().refresh();
 								reset();
 							}}
@@ -295,14 +295,18 @@
 				{@const stream = await getStreamInfo()}
 
 				<div class="absolute inset-0 z-0 overflow-hidden">
-					<VideoPlayer
-						liveSrc={stream.liveHlsUrl}
-						poster={defaultJpg}
-						class="relative h-full w-full"
-						{sessionActive}
-						onPlaying={onPlaybackStart}
-						onError={onPlaybackError}
-					/>
+					{#if showPlayer}
+						<VideoPlayer
+							liveSrc={stream.liveHlsUrl}
+							poster={defaultJpg}
+							class="relative h-full w-full"
+							{sessionActive}
+							onPlaying={onPlaybackStart}
+							onError={onPlaybackError}
+						/>
+					{:else}
+						<img src={defaultJpg} alt="" class="h-full w-full object-cover" />
+					{/if}
 					<div
 						class="absolute inset-0 z-10 bg-linear-to-b from-primary/30 via-light/30 to-primary/30 backdrop-blur-2xl transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] {sessionActive
 							? 'pointer-events-none opacity-0'
@@ -474,6 +478,8 @@
 					</div>
 
 					<LocalWeather />
+					<RiverConditions />
+					<FishRunStatus />
 				</div>
 
 				<div
@@ -545,7 +551,6 @@
 							<p class="mt-2 text-center text-2xs text-red-600" role="alert">{demandError}</p>
 						{/if}
 					</div>
-					<TelemetryFooter />
 				</div>
 			</DrawerContent>
 		</Drawer>
