@@ -45,15 +45,12 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - ✓ Relay CI/CD deployment via Tailscale + GitHub Actions — v1.0
 - ✓ Systemd service management on Raspberry Pi — v1.0
 - ✓ Counterscale production pageviews (apex + www) — Phase 1 (ANLY-01, ANLY-02)
+- ✓ HLS playback reliability: HLS.js-first recovery, startup-tolerant manifest errors, 3600s signed URL TTL, dev-only stream logs, `ended_confirming` only after `viewing` — Phase 01 (STRM-01–STRM-05)
 
 ### Active
 
 <!-- Current scope — v1.2 milestone. -->
 
-- [ ] Remove destructive remount retry loop from VideoPlayer (STRM-01)
-- [ ] Implement HLS.js-native error recovery with proper stream startup state (STRM-02)
-- [ ] Extend JWT TTL and add token refresh logic (STRM-03)
-- [ ] Clean up excessive console logging in VideoPlayer (STRM-04)
 - [ ] Fix Counterscale CORS headers on Worker (CORS-01)
 - [ ] Counterscale engagement / custom events (ANLY-03, deferred to v1.x)
 
@@ -117,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-11 after Phase 3 (river conditions data) complete_
+_Last updated: 2026-04-13 after Phase 01 (v1.2 HLS playback reliability) complete_

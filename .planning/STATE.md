@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
-status: unknown
-stopped_at: Milestone v1.2 created, awaiting phase planning
-last_updated: '2026-04-13T19:03:28.289Z'
+status: Ready to execute
+stopped_at: Phase 01 complete; next: Phase 02 Counterscale CORS
+last_updated: "2026-04-13T19:06:33.852Z"
 progress:
   total_phases: 2
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 0
+  completed_plans: 2
 ---
 
 # State: Trask River Cam
@@ -18,7 +18,7 @@ progress:
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
 **Current milestone:** v1.2 — Stream Reliability & Error Handling
-**Current focus:** Phase 01 — hls-playback-reliability
+**Current focus:** Phase 02 — counterscale-cors-fix (planning)
 
 ## Milestone History
 
@@ -30,12 +30,11 @@ progress:
 
 ## Current Position
 
-Phase: 01 (hls-playback-reliability) — EXECUTING
-Plan: 1 of 2
+Phase: 02 (counterscale-cors-fix) — awaiting `/gsd-plan-phase`
 
 ## Phase Summary
 
-_No phases yet — use `/gsd-plan-phase` to plan the first phase_
+**Phase 01 (hls-playback-reliability):** complete — 2/2 plans, see `01-VERIFICATION.md`.
 
 ## Accumulated Context
 
@@ -51,7 +50,7 @@ _No phases yet — use `/gsd-plan-phase` to plan the first phase_
 - `LiveViewerCount.svelte` has console noise on every poll — clean up if touched
 - Unauthenticated demand POST has 30s throttle — sufficient for now
 - vidstack is version-sensitive — pin and test after changes
-- **[DEBUG] HLS playback reliability issues** — see `.planning/debug/hls-playback-reliability.md` for full root cause analysis
+- HLS reliability fixes shipped (Phase 01); debug write-up retained at `.planning/debug/hls-playback-reliability.md`
 
 ### TODOs
 
@@ -71,7 +70,7 @@ _No phases yet — use `/gsd-plan-phase` to plan the first phase_
 
 ### Next Session Should
 
-1. `/gsd-plan-phase` to plan the HLS reliability fix phase based on debug findings
+1. `/gsd-plan-phase 2` then `/gsd-execute-phase 2` for Counterscale CORS (CORS-01)
 
 ---
 

@@ -8,10 +8,10 @@
 
 ## Phase Overview
 
-| #   | Phase                    | Goal                                                                     | Requirements                                | Success Criteria |
-| --- | ------------------------ | ------------------------------------------------------------------------ | ------------------------------------------- | ---------------- |
-| 1   | HLS Playback Reliability | Stream starts consistently with minimal retries and clean console output | STRM-01, STRM-02, STRM-03, STRM-04, STRM-05 | 5 pending        |
-| 2   | Counterscale CORS Fix    | Analytics requests succeed without CORS errors                           | CORS-01                                     | 1 pending        |
+| #   | Phase                    | Goal                                                                     | Requirements                                | Success Criteria      |
+| --- | ------------------------ | ------------------------------------------------------------------------ | ------------------------------------------- | --------------------- |
+| 1   | HLS Playback Reliability | Stream starts consistently with minimal retries and clean console output | STRM-01, STRM-02, STRM-03, STRM-04, STRM-05 | Complete (2026-04-13) |
+| 2   | Counterscale CORS Fix    | Analytics requests succeed without CORS errors                           | CORS-01                                     | 1 pending             |
 
 ## Phase Details
 
@@ -40,12 +40,12 @@
 - vidstack is version-sensitive — pin and test after changes (carried from v1.1)
 - Consider adding a `connecting`/`buffering` visual state for users while HLS manifest is empty
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 
-- [ ] 01-01-PLAN.md — Replace remount retry loop with HLS.js-native recovery, consolidate error handlers, clean up logging
-- [ ] 01-02-PLAN.md — Extend JWT TTL to 3600s, harden page state machine (ended_confirming only from viewing)
+- [x] 01-01-PLAN.md — Replace remount retry loop with HLS.js-native recovery, consolidate error handlers, clean up logging
+- [x] 01-02-PLAN.md — Extend JWT TTL to 3600s, harden page state machine (ended_confirming only from viewing)
 
 ---
 

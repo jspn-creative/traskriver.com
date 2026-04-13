@@ -36,11 +36,11 @@ Requirements for milestone v1.2: Stream Reliability & Error Handling. Identified
 
 ### Stream Playback
 
-- [ ] **STRM-01**: VideoPlayer does not use destructive remount as its primary retry mechanism — HLS.js's built-in recovery is used for transient errors
-- [ ] **STRM-02**: Empty HLS manifests during Cloudflare Stream warmup (levelEmptyError) are handled as an expected startup condition, not as errors that trigger retries
-- [ ] **STRM-03**: JWT signed URL TTL is long enough that tokens cannot expire during normal stream startup (minimum 1 hour)
-- [ ] **STRM-04**: VideoPlayer console logging is reduced to meaningful state transitions only — no per-error spam for expected transient conditions
-- [ ] **STRM-05**: Page state machine does not enter `ended_confirming` phase due to transient HLS startup errors
+- [x] **STRM-01**: VideoPlayer does not use destructive remount as its primary retry mechanism — HLS.js's built-in recovery is used for transient errors
+- [x] **STRM-02**: Empty HLS manifests during Cloudflare Stream warmup (levelEmptyError) are handled as an expected startup condition, not as errors that trigger retries
+- [x] **STRM-03**: JWT signed URL TTL is long enough that tokens cannot expire during normal stream startup (minimum 1 hour)
+- [x] **STRM-04**: VideoPlayer console logging is reduced to meaningful state transitions only — no per-error spam for expected transient conditions
+- [x] **STRM-05**: Page state machine does not enter `ended_confirming` phase due to transient HLS startup errors
 
 ### Analytics
 
@@ -94,6 +94,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RIVR-03     | Phase 3 | Complete |
 | RIVR-04     | Phase 3 | Complete |
 | FOOT-01     | Phase 3 | Complete |
+| STRM-01     | Phase 1 | Complete |
+| STRM-02     | Phase 1 | Complete |
+| STRM-03     | Phase 1 | Complete |
+| STRM-04     | Phase 1 | Complete |
+| STRM-05     | Phase 1 | Complete |
 
 **Coverage:**
 
@@ -104,4 +109,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 
 _Requirements defined: 2026-04-10_
-_Last updated: 2026-04-11 after Phase 3 complete (FOOT-01)_
+_Last updated: 2026-04-13 after Phase 01 (v1.2 HLS reliability) — STRM-01..05_

@@ -15,7 +15,7 @@ affects: []
 tech-stack:
   added: []
   patterns:
-    - "JWT_TTL_SECONDS constant for signed manifest URLs"
+    - 'JWT_TTL_SECONDS constant for signed manifest URLs'
 
 key-files:
   created: []
@@ -24,7 +24,7 @@ key-files:
     - packages/web/src/routes/+page.svelte
 
 key-decisions:
-  - "Fatal playback loss during relay-live-but-not-playing stays in live for remount retry"
+  - 'Fatal playback loss during relay-live-but-not-playing stays in live for remount retry'
 
 patterns-established: []
 
