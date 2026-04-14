@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { defineCustomElements } from 'vidstack/elements';
 	import defaultPoster from '$lib/assets/default.jpg';
+	import posthog from 'posthog-js';
 
 	const __DEV__ = import.meta.env.DEV;
 	const MANIFEST_PROBE_INTERVAL_MS = 3_000;
@@ -324,6 +325,7 @@
 	$effect(() => {
 		const onFsChange = () => {
 			isFullscreen = !!document.fullscreenElement;
+			posthog.capture('fullscreen_toggled', { is_fullscreen: isFullscreen });
 		};
 
 		document.addEventListener('fullscreenchange', onFsChange);

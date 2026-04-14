@@ -4,7 +4,8 @@ import adapter from '@sveltejs/adapter-cloudflare';
 const config = {
 	kit: {
 		adapter: adapter({ platformProxy: { configPath: './wrangler.jsonc' } }),
-		experimental: { remoteFunctions: true }
+		experimental: { remoteFunctions: true },
+		paths: { relative: false }
 	},
 	compilerOptions: {
 		experimental: { async: true }

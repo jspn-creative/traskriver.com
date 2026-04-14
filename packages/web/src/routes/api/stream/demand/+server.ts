@@ -1,6 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 
 import type { DemandResponse } from '@traskriver/shared';
+import { createPostHogClient } from '$lib/server/posthog';
 
 const DEMAND_KEY = 'stream-demand';
 const THROTTLE_MS = 30_000;
@@ -28,6 +29,14 @@ export const POST = async ({ platform }) => {
 		const msg = e instanceof Error ? e.message : String(e);
 		console.warn(`demand kv.put failed: ${msg}`);
 	}
+
+	const posthog = createPostHogClient();
+	posthog.capture({
+		distinctId: 'server',
+		event: 'stream_demand_registered',
+		properties: { timestamp: now }
+	});
+	await posthog.flush();
 
 	return json({ ok: true });
 };

@@ -6,6 +6,7 @@ import {
 	type RelayStatusPayload,
 	type RelayStatusResponse
 } from '@traskriver/shared';
+import { createPostHogClient } from '$lib/server/posthog';
 
 const RELAY_STATUS_KEY = 'relay-status';
 
@@ -84,6 +85,14 @@ export const POST = async ({ request, platform }) => {
 		const msg = e instanceof Error ? e.message : String(e);
 		console.warn(`relay status kv.put failed: ${msg}`);
 	}
+
+	const posthog = createPostHogClient();
+	posthog.capture({
+		distinctId: 'relay',
+		event: 'relay_status_updated',
+		properties: { state: payload.state, timestamp: payload.timestamp }
+	});
+	await posthog.flush();
 
 	return json({ ok: true });
 };

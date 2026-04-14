@@ -7,6 +7,7 @@
 	import { Drawer, DrawerContent } from '$lib/components/ui/drawer';
 	import defaultJpg from '$lib/assets/default.jpg';
 	import { getStreamInfo } from './stream.remote';
+	import posthog from 'posthog-js';
 
 	let phase = $state<
 		| 'idle'
@@ -42,6 +43,17 @@
 	// Production-safe log: key lifecycle events only
 	const log = (msg: string, data?: Record<string, unknown>) =>
 		console.log(`[stream] ${msg}`, data ?? '');
+
+	// Track phase transitions for PostHog — plain var avoids reactive write-in-effect cycle
+	let _capturedPhase = 'idle';
+	$effect(() => {
+		const current = phase;
+		if (!isBrowser || current === _capturedPhase) return;
+		const from = _capturedPhase;
+		_capturedPhase = current;
+		if (current === 'ended') posthog.capture('stream_ended', { from_phase: from });
+		else if (current === 'error') posthog.capture('stream_error', { from_phase: from });
+	});
 
 	$effect(() => {
 		if (!isBrowser) return;
@@ -222,12 +234,14 @@
 		// Keep polling to detect when the relay stops (demand expired).
 		streamError = false;
 		streamBuffering = false;
+		posthog.capture('stream_viewed');
 	};
 
 	const onPlaybackBuffering = (buffering: boolean) => {
 		streamBuffering = buffering;
 		if (buffering) {
 			log('playback buffering');
+			posthog.capture('playback_buffering_started');
 		}
 	};
 
@@ -260,10 +274,12 @@
 			startingUnavailableAccumulatedMs = 0;
 			startingUnavailableSince = null;
 			polling = true;
+			posthog.capture('stream_started');
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : 'Failed to start stream';
 			log('demand registration failed', { error: msg });
 			demandError = msg;
+			posthog.capture('stream_demand_failed', { error: msg });
 		} finally {
 			demandLoading = false;
 		}
@@ -271,6 +287,7 @@
 
 	const restartStream = () => {
 		log('restarting stream');
+		posthog.capture('stream_restarted', { from_phase: phase });
 		phase = 'idle';
 		demandRegistered = false;
 		streamError = false;
