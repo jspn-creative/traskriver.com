@@ -45,9 +45,9 @@ export const GET = async ({ request, platform }) => {
 	const demandStr = await kv.get(DEMAND_KEY);
 	const now = Date.now();
 
-	const windowSeconds = parseInt(platform?.env?.DEMAND_WINDOW_SECONDS ?? '300', 10);
+	const windowSeconds = parseInt(platform?.env?.DEMAND_WINDOW_SECONDS ?? '180', 10);
 	const windowMs =
-		(Number.isFinite(windowSeconds) && windowSeconds > 0 ? windowSeconds : 300) * 1000;
+		(Number.isFinite(windowSeconds) && windowSeconds > 0 ? windowSeconds : 180) * 1000;
 
 	if (!demandStr) {
 		return json({

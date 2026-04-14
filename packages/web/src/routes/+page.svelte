@@ -136,6 +136,14 @@
 					return;
 				}
 
+				// Relay went offline during playback — stream is over.
+				if (phase === 'viewing' || phase === 'live') {
+					log('relay status stale during playback — stream ended');
+					phase = 'ended';
+					polling = false;
+					return;
+				}
+
 				if (phase === 'starting' || phase === 'unavailable') {
 					const elapsed = startingTimestamp ? Date.now() - startingTimestamp : Infinity;
 					if (elapsed >= MIN_STARTING_MS) phase = 'unavailable';
@@ -158,6 +166,12 @@
 					if (phase === 'unavailable') phase = 'starting';
 				} else if (data.state === 'stopped') {
 					log('relay stopped — stream ended');
+					phase = 'ended';
+					polling = false;
+				}
+			} else if (phase === 'viewing' || phase === 'live') {
+				if (data.state === 'idle' || data.state === 'stopped') {
+					log('relay stopped during playback — stream ended');
 					phase = 'ended';
 					polling = false;
 				}
@@ -205,7 +219,7 @@
 	const onPlaybackStart = () => {
 		log('playback started — entering viewing phase');
 		phase = 'viewing';
-		polling = false;
+		// Keep polling to detect when the relay stops (demand expired).
 		streamError = false;
 		streamBuffering = false;
 	};
