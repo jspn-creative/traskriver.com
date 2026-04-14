@@ -37,6 +37,12 @@
 	let remountTimeout: ReturnType<typeof setTimeout> | undefined;
 	let emptyManifestCount = 0;
 
+	// Track buffer stalls to detect frozen playback that needs live-edge recovery.
+	let stallCount = 0;
+	let lastStallRecoveryTime = 0;
+	const STALL_RECOVERY_COOLDOWN_MS = 15_000; // don't spam seeks
+	const STALL_THRESHOLD = 2; // seek after this many stalls in a row
+
 	$effect(() => {
 		void defineCustomElements();
 	});
@@ -94,8 +100,17 @@
 				const res = await fetchCacheBusted(masterUrl);
 				if (cancelled) return;
 
+				if (res.status === 204) {
+					// 204 = CF Stream has no active live input. Stream isn't pushing RTMP yet.
+					if (probeCount <= 3 || probeCount % 10 === 0)
+						log('waiting for stream (CF returned 204)', { probe: probeCount });
+					if (!cancelled) setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
+					return;
+				}
+
 				if (!res.ok) {
-					if (__DEV__) console.debug('[VideoPlayer] manifest probe:', res.status);
+					if (probeCount <= 3 || probeCount % 10 === 0)
+						log('manifest probe HTTP error', { probe: probeCount, status: res.status });
 					if (!cancelled) setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
 					return;
 				}
@@ -104,7 +119,12 @@
 				if (cancelled) return;
 
 				if (!text.includes('#EXTM3U')) {
-					if (__DEV__) console.debug('[VideoPlayer] manifest not valid M3U yet');
+					if (probeCount <= 3 || probeCount % 10 === 0)
+						log('manifest not valid M3U yet', {
+							probe: probeCount,
+							status: res.status,
+							bodyPreview: text.slice(0, 120)
+						});
 					if (!cancelled) setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
 					return;
 				}
@@ -120,8 +140,8 @@
 				if (text.includes('#EXT-X-STREAM-INF')) {
 					const renditionUrl = extractRenditionUrl(text, masterUrl);
 					if (!renditionUrl) {
-						if (__DEV__)
-							console.debug('[VideoPlayer] master manifest has no parseable rendition URI');
+						if (probeCount <= 3 || probeCount % 10 === 0)
+							log('master manifest has no parseable rendition URI', { probe: probeCount });
 						if (!cancelled) setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
 						return;
 					}
@@ -135,13 +155,18 @@
 							manifestReady = true;
 							return;
 						}
-						if (__DEV__)
-							console.debug('[VideoPlayer] rendition playlist exists but no segments yet');
+						if (probeCount <= 3 || probeCount % 10 === 0)
+							log('rendition exists but no segments yet', { probe: probeCount });
 					} else {
-						if (__DEV__) console.debug('[VideoPlayer] rendition probe:', rendRes.status);
+						if (probeCount <= 3 || probeCount % 10 === 0)
+							log('rendition probe failed', { probe: probeCount, status: rendRes.status });
 					}
 				} else {
-					if (__DEV__) console.debug('[VideoPlayer] manifest exists but no segments yet');
+					if (probeCount <= 3 || probeCount % 10 === 0)
+						log('manifest exists but unrecognized format', {
+							probe: probeCount,
+							bodyPreview: text.slice(0, 120)
+						});
 				}
 			} catch (err) {
 				// Log the actual error to help diagnose silent probe failures
@@ -166,7 +191,7 @@
 		const onProviderChange = (e: any) => {
 			const provider = e.detail;
 			if (provider?.type === 'hls') {
-				log('HLS provider attached');
+				log('HLS provider attached (hls.js)');
 				provider.config = {
 					...provider.config,
 					fragLoadingTimeOut: 20000,
@@ -184,11 +209,49 @@
 						}
 					}
 				};
+			} else {
+				log('provider attached', { type: provider?.type ?? 'unknown' });
+			}
+		};
+
+		// Track media element lifecycle events for visibility into the
+		// gap between provider attach and playback start.
+		const onCanPlay = () => log('canplay fired');
+		const onWaiting = () => log('waiting (buffering)');
+		const onStalled = () => log('media stalled');
+		const onSuspend = () => {
+			if (__DEV__) console.debug('[VideoPlayer] media suspended');
+		};
+		const onMediaError = () => {
+			// Catches native <video> errors (Safari native HLS, or any provider)
+			try {
+				const video = el.querySelector('video') as HTMLVideoElement | null;
+				const err = video?.error;
+				if (err) {
+					log('native media error', { code: err.code, message: err.message });
+					hasError = true;
+					isPlaying = false;
+					onError?.();
+				}
+			} catch {
+				log('native media error (could not read details)');
 			}
 		};
 
 		el.addEventListener('provider-change', onProviderChange);
-		return () => el.removeEventListener('provider-change', onProviderChange);
+		el.addEventListener('can-play', onCanPlay);
+		el.addEventListener('waiting', onWaiting);
+		el.addEventListener('stalled', onStalled);
+		el.addEventListener('suspend', onSuspend);
+		el.addEventListener('error', onMediaError);
+		return () => {
+			el.removeEventListener('provider-change', onProviderChange);
+			el.removeEventListener('can-play', onCanPlay);
+			el.removeEventListener('waiting', onWaiting);
+			el.removeEventListener('stalled', onStalled);
+			el.removeEventListener('suspend', onSuspend);
+			el.removeEventListener('error', onMediaError);
+		};
 	});
 
 	$effect(() => {
@@ -221,7 +284,32 @@
 			}
 
 			if (!isFatal) {
-				if (__DEV__) console.debug('[VideoPlayer] non-fatal HLS error:', errorDetails);
+				if (errorDetails === 'bufferStalledError') {
+					stallCount += 1;
+					const now = Date.now();
+					if (
+						stallCount >= STALL_THRESHOLD &&
+						now - lastStallRecoveryTime > STALL_RECOVERY_COOLDOWN_MS &&
+						player
+					) {
+						log('buffer stalled — seeking to live edge', { stalls: stallCount });
+						lastStallRecoveryTime = now;
+						stallCount = 0;
+						try {
+							const el = player as any;
+							const duration = el.duration;
+							if (Number.isFinite(duration) && duration > 0) {
+								el.currentTime = duration;
+							}
+						} catch {
+							// non-critical
+						}
+					} else if (__DEV__) {
+						console.debug('[VideoPlayer] non-fatal HLS error:', errorDetails, `(×${stallCount})`);
+					}
+				} else {
+					if (__DEV__) console.debug('[VideoPlayer] non-fatal HLS error:', errorDetails);
+				}
 				return;
 			}
 
@@ -251,6 +339,7 @@
 		log('playback started');
 		isPlaying = true;
 		hasError = false;
+		stallCount = 0;
 
 		// Seek to the live edge so the viewer isn't stuck on stale buffer.
 		if (player) {

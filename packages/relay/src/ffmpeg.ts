@@ -4,6 +4,11 @@ const STDERR_LINE_CAP = 30;
 const STDERR_CHAR_CAP = 4096;
 const SIGKILL_MS = 10_000;
 
+/** How often to check ffmpeg stderr progress (indicates active transcoding). */
+const HEALTH_CHECK_INTERVAL_MS = 15_000;
+/** If no stderr progress for this long, consider ffmpeg stalled/disconnected. */
+const HEALTH_STALL_TIMEOUT_MS = 30_000;
+
 type ExitCallback = (code: number | null, signal: string | null) => void;
 
 export class FfmpegManager {
@@ -12,7 +17,10 @@ export class FfmpegManager {
 	private stderrLines: string[] = [];
 	private stderrTask: Promise<void> | null = null;
 	private killFallbackTimer: ReturnType<typeof setTimeout> | null = null;
+	private healthTimer: ReturnType<typeof setInterval> | null = null;
 	private intentionalStop = false;
+	/** Timestamp of the last stderr line received from ffmpeg. */
+	private lastStderrActivity = 0;
 
 	constructor(private config: { rtspUrl: string; streamUrl: string }) {}
 
@@ -27,7 +35,33 @@ export class FfmpegManager {
 		}
 	}
 
+	private clearHealthTimer() {
+		if (this.healthTimer) {
+			clearInterval(this.healthTimer);
+			this.healthTimer = null;
+		}
+	}
+
+	private startHealthMonitor() {
+		this.lastStderrActivity = Date.now();
+		this.clearHealthTimer();
+		this.healthTimer = setInterval(() => {
+			if (!this.isRunning()) {
+				this.clearHealthTimer();
+				return;
+			}
+			const silentMs = Date.now() - this.lastStderrActivity;
+			if (silentMs > HEALTH_STALL_TIMEOUT_MS) {
+				log.warn(`ffmpeg stalled: no stderr output for ${Math.round(silentMs / 1000)}s — killing`);
+				this.clearHealthTimer();
+				// Kill ffmpeg — the exit handler will fire and state machine will handle recovery
+				this.process?.kill('SIGKILL');
+			}
+		}, HEALTH_CHECK_INTERVAL_MS);
+	}
+
 	private pushStderrLine(line: string) {
+		this.lastStderrActivity = Date.now();
 		if (process.env.RELAY_FFMPEG_VERBOSE === '1') {
 			log.debug(`ffmpeg stderr: ${line}`);
 		}
@@ -112,14 +146,23 @@ export class FfmpegManager {
 			const subprocess = Bun.spawn(
 				[
 					'ffmpeg',
+					// Generate proper timestamps for the RTSP source.
+					'-fflags',
+					'+genpts',
 					'-rtsp_transport',
 					'tcp',
 					'-i',
 					this.config.rtspUrl,
+					// Copy video as-is (no re-encoding). The RTSP source must be
+					// ≤1080p for CF Stream to accept it. If the source is larger,
+					// change the RTSP URL to use the camera's sub-stream or lower
+					// the camera resolution in its settings.
 					'-c:v',
 					'copy',
 					'-c:a',
 					'aac',
+					'-b:a',
+					'128k',
 					'-f',
 					'flv',
 					this.config.streamUrl
@@ -137,6 +180,7 @@ export class FfmpegManager {
 			}
 
 			this.attachExitHandler(subprocess);
+			this.startHealthMonitor();
 			log.info(`ffmpeg started (pid: ${subprocess.pid})`);
 			return true;
 		} catch (err) {
@@ -149,6 +193,7 @@ export class FfmpegManager {
 	}
 
 	async stop() {
+		this.clearHealthTimer();
 		const proc = this.process;
 		if (!proc) {
 			return;
