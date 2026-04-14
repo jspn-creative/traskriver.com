@@ -5,6 +5,10 @@
 	const __DEV__ = import.meta.env.DEV;
 	const MANIFEST_PROBE_INTERVAL_MS = 3_000;
 
+	// Production-safe log: key lifecycle events only (not noisy probes/retries)
+	const log = (msg: string, data?: Record<string, unknown>) =>
+		console.log(`[VideoPlayer] ${msg}`, data ?? '');
+
 	let {
 		liveSrc,
 		poster = defaultPoster,
@@ -51,6 +55,7 @@
 		if (manifestReady) return;
 
 		let cancelled = false;
+		let probeCount = 0;
 
 		/** Fetch a URL with cache-busting. */
 		const fetchCacheBusted = (url: string) => {
@@ -80,7 +85,10 @@
 			return null;
 		};
 
+		log('manifest probe started');
+
 		const probe = async () => {
+			probeCount += 1;
 			try {
 				const masterUrl = liveSrc;
 				const res = await fetchCacheBusted(masterUrl);
@@ -96,14 +104,14 @@
 				if (cancelled) return;
 
 				if (!text.includes('#EXTM3U')) {
-					if (__DEV__) console.debug('[VideoPlayer] manifest not ready yet');
+					if (__DEV__) console.debug('[VideoPlayer] manifest not valid M3U yet');
 					if (!cancelled) setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
 					return;
 				}
 
 				// Single-level manifest (has segments directly) — ready.
 				if (text.includes('#EXTINF')) {
-					if (__DEV__) console.debug('[VideoPlayer] manifest ready — mounting player');
+					log('manifest ready (single-level)', { probes: probeCount });
 					manifestReady = true;
 					return;
 				}
@@ -123,7 +131,7 @@
 					if (rendRes.ok) {
 						const rendText = await rendRes.text();
 						if (rendText.includes('#EXTINF')) {
-							if (__DEV__) console.debug('[VideoPlayer] manifest ready — mounting player');
+							log('manifest ready (multi-level)', { probes: probeCount });
 							manifestReady = true;
 							return;
 						}
@@ -135,8 +143,10 @@
 				} else {
 					if (__DEV__) console.debug('[VideoPlayer] manifest exists but no segments yet');
 				}
-			} catch {
-				if (__DEV__) console.debug('[VideoPlayer] manifest probe failed');
+			} catch (err) {
+				// Log the actual error to help diagnose silent probe failures
+				if (probeCount <= 3 || probeCount % 10 === 0)
+					log('manifest probe failed', { probe: probeCount, error: String(err) });
 			}
 			if (!cancelled) {
 				setTimeout(probe, MANIFEST_PROBE_INTERVAL_MS);
@@ -156,7 +166,7 @@
 		const onProviderChange = (e: any) => {
 			const provider = e.detail;
 			if (provider?.type === 'hls') {
-				if (__DEV__) console.debug('[VideoPlayer] configuring HLS provider');
+				log('HLS provider attached');
 				provider.config = {
 					...provider.config,
 					fragLoadingTimeOut: 20000,
@@ -215,7 +225,7 @@
 				return;
 			}
 
-			console.warn('[VideoPlayer] fatal HLS error:', errorDetails);
+			log('fatal HLS error', { details: errorDetails });
 			hasError = true;
 			isPlaying = false;
 			onError?.();
@@ -238,6 +248,7 @@
 
 	const onLivePlaying = () => {
 		if (isPlaying) return; // already reported
+		log('playback started');
 		isPlaying = true;
 		hasError = false;
 
@@ -265,7 +276,7 @@
 		}
 
 		remountTimeout = setTimeout(() => {
-			if (__DEV__) console.debug('[VideoPlayer] last-resort remount after fatal error');
+			log('remounting after fatal error', { key: playerKey + 1 });
 			playerKey += 1;
 			hasError = false;
 		}, 10_000);

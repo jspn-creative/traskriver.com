@@ -34,8 +34,13 @@
 	const POLL_INTERVAL_MS = 3_000;
 	const STARTING_TIMEOUT_MS = 60_000;
 	const MIN_STARTING_MS = 6_000;
+
 	const isBrowser = typeof window !== 'undefined';
 	const __DEV__ = import.meta.env.DEV;
+
+	// Production-safe log: key lifecycle events only
+	const log = (msg: string, data?: Record<string, unknown>) =>
+		console.log(`[stream] ${msg}`, data ?? '');
 
 	$effect(() => {
 		if (!isBrowser) return;
@@ -78,13 +83,15 @@
 				? 'Starting stream…'
 				: phase === 'unavailable'
 					? 'Try starting stream'
-					: phase === 'live' || phase === 'viewing'
-						? 'Streaming'
-						: phase === 'ended' || phase === 'ended_confirming'
-							? 'Stream ended'
-							: phase === 'error'
-								? 'Stream error'
-								: 'Start stream'
+					: phase === 'live'
+						? 'Connecting…'
+						: phase === 'viewing'
+							? 'Streaming'
+							: phase === 'ended' || phase === 'ended_confirming'
+								? 'Stream ended'
+								: phase === 'error'
+									? 'Stream error'
+									: 'Start stream'
 	);
 	const prefetchRelayStatus = async () => {
 		try {
@@ -143,20 +150,23 @@
 
 			if (phase === 'starting' || phase === 'unavailable') {
 				if (data.state === 'live') {
+					log('relay live — transitioning to live phase');
 					phase = 'live';
 					streamError = false;
 				} else if (data.state === 'idle' || data.state === 'starting') {
 					if (phase === 'unavailable') phase = 'starting';
 				} else if (data.state === 'stopped') {
-					// Relay "stopped" maps to user-facing "ended".
+					log('relay stopped — stream ended');
 					phase = 'ended';
 					polling = false;
 				}
 			} else if (phase === 'ended_confirming') {
 				if (data.state === 'idle' || data.state === 'stopped') {
+					log('relay confirmed ended');
 					phase = 'ended';
 					polling = false;
 				} else if (data.state === 'live') {
+					log('relay still live — re-entering live phase');
 					phase = 'live';
 					streamError = false;
 				}
@@ -192,7 +202,7 @@
 	});
 
 	const onPlaybackStart = () => {
-		if (__DEV__) console.debug('[page] playback started');
+		log('playback started — entering viewing phase');
 		phase = 'viewing';
 		polling = false;
 		streamError = false;
@@ -202,11 +212,11 @@
 		streamError = true;
 
 		if (phase === 'viewing') {
-			if (__DEV__) console.debug('[page] playback lost during viewing — confirming stream status');
+			log('playback lost during viewing — confirming stream status');
 			phase = 'ended_confirming';
 			polling = true;
 		} else if (phase === 'live') {
-			if (__DEV__) console.debug('[page] HLS fatal error during startup — staying in live phase');
+			log('HLS error during startup — staying in live phase for retry');
 		}
 	};
 
@@ -214,10 +224,12 @@
 		demandLoading = true;
 		demandError = null;
 		try {
+			log('registering demand');
 			const res = await fetch('/api/stream/demand', { method: 'POST' });
 			if (!res.ok) {
 				throw new Error('Failed to start stream');
 			}
+			log('demand registered — starting polling');
 			demandRegistered = true;
 			phase = 'starting';
 			streamError = false;
@@ -226,14 +238,16 @@
 			startingUnavailableSince = null;
 			polling = true;
 		} catch (e) {
-			demandError = e instanceof Error ? e.message : 'Failed to start stream';
+			const msg = e instanceof Error ? e.message : 'Failed to start stream';
+			log('demand registration failed', { error: msg });
+			demandError = msg;
 		} finally {
 			demandLoading = false;
 		}
 	};
 
 	const restartStream = () => {
-		if (__DEV__) console.debug('[page] restarting stream');
+		log('restarting stream');
 		phase = 'idle';
 		demandRegistered = false;
 		streamError = false;
@@ -266,7 +280,7 @@
 		onmousemove={sessionActive ? resetHideTimer : undefined}
 	>
 		{#if demandRegistered}
-			<svelte:boundary>
+			<svelte:boundary onerror={(e) => log('stream info failed', { error: String(e) })}>
 				{#snippet pending()}
 					<div class="absolute inset-0 z-0 flex items-center justify-center">
 						<p class="animate-pulse text-sm text-secondary">Starting stream…</p>
@@ -274,14 +288,14 @@
 				{/snippet}
 				{#snippet failed(error, reset)}
 					<div
-						class="absolute inset-0 z-0 flex flex-col items-center justify-center gap-4 px-6 text-center font-body"
+						class="absolute inset-0 z-40 flex flex-col items-center justify-center gap-4 px-6 text-center font-body"
 					>
-						<p class="text-sm text-secondary">
+						<p class="text-sm text-light drop-shadow-md">
 							{error instanceof Error ? error.message : 'Could not load stream configuration.'}
 						</p>
 						<button
 							onclick={() => {
-								if (__DEV__) console.debug('[page] retry — refreshing stream info');
+								log('retry — refreshing stream info');
 								void getStreamInfo().refresh();
 								reset();
 							}}
@@ -505,14 +519,15 @@
 							class="relative w-full overflow-hidden rounded-sm py-[18px] text-xs font-medium tracking-ui text-light transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-light focus-visible:outline-none {buttonDisabled
 								? 'cursor-not-allowed shadow-inner'
 								: 'cursor-pointer bg-primary hover:bg-primary/90 active:scale-[0.98]'} {isStarting ||
-							demandLoading
+							demandLoading ||
+							phase === 'live'
 								? 'bg-secondary/90'
-								: phase === 'live' || phase === 'viewing'
+								: phase === 'viewing'
 									? 'bg-emerald-700/80'
 									: 'bg-primary'}"
 						>
 							<div class="relative flex items-center justify-center gap-2">
-								{#if isStarting || demandLoading}
+								{#if isStarting || demandLoading || phase === 'live'}
 									<svg
 										class="h-4 w-4 animate-spin text-white/70"
 										xmlns="http://www.w3.org/2000/svg"
@@ -533,7 +548,7 @@
 											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 										></path>
 									</svg>
-								{:else if phase === 'live' || phase === 'viewing'}
+								{:else if phase === 'viewing'}
 									<svg
 										class="h-4 w-4 text-white"
 										fill="none"

@@ -16,6 +16,9 @@ StartLimitIntervalSec=300
 
 EnvironmentFile=/opt/river-relay/.env
 
+# Enable verbose ffmpeg stderr logging (set to 0 or remove to disable)
+Environment=RELAY_FFMPEG_VERBOSE=1
+
 # Security hardening (per D-17)
 NoNewPrivileges=true
 ProtectSystem=strict
