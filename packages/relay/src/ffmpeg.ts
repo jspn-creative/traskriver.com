@@ -146,17 +146,24 @@ export class FfmpegManager {
 			const subprocess = Bun.spawn(
 				[
 					'ffmpeg',
-					// Generate proper timestamps for the RTSP source.
+					// Wall-clock timestamps + genpts + discard corrupt packets.
+					// Fixes "Timestamps are unset" FLV muxer warning and avoids
+					// feeding corrupt frames into the output stream.
+					'-use_wallclock_as_timestamps',
+					'1',
 					'-fflags',
-					'+genpts',
+					'+genpts+discardcorrupt',
 					'-rtsp_transport',
 					'tcp',
+					// 4MB RTSP receive buffer — prevents overflow on Pi 3 when
+					// the muxer briefly falls behind the camera's send rate.
+					'-buffer_size',
+					'4194304',
 					'-i',
 					this.config.rtspUrl,
-					// Copy video as-is (no re-encoding). The RTSP source must be
-					// ≤1080p for CF Stream to accept it. If the source is larger,
-					// change the RTSP URL to use the camera's sub-stream or lower
-					// the camera resolution in its settings.
+					// Copy video as-is (no re-encoding). The RTSP source should
+					// be configured to ≤1080p, ≤10fps, CBR ≤2Mbps for reliable
+					// passthrough on low-power hardware.
 					'-c:v',
 					'copy',
 					'-c:a',

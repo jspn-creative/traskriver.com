@@ -15,7 +15,8 @@
 		class: className,
 		sessionActive = false,
 		onPlaying,
-		onError
+		onError,
+		onBuffering
 	} = $props<{
 		liveSrc: string;
 		poster?: string;
@@ -23,6 +24,7 @@
 		sessionActive?: boolean;
 		onPlaying?: () => void;
 		onError?: () => void;
+		onBuffering?: (buffering: boolean) => void;
 	}>();
 
 	let container: HTMLDivElement | undefined = $state();
@@ -216,9 +218,18 @@
 
 		// Track media element lifecycle events for visibility into the
 		// gap between provider attach and playback start.
-		const onCanPlay = () => log('canplay fired');
-		const onWaiting = () => log('waiting (buffering)');
-		const onStalled = () => log('media stalled');
+		const onCanPlay = () => {
+			log('canplay fired');
+			onBuffering?.(false);
+		};
+		const onWaiting = () => {
+			log('waiting (buffering)');
+			onBuffering?.(true);
+		};
+		const onStalled = () => {
+			log('media stalled');
+			onBuffering?.(true);
+		};
 		const onSuspend = () => {
 			if (__DEV__) console.debug('[VideoPlayer] media suspended');
 		};
@@ -335,6 +346,7 @@
 	const fsLabel = $derived(isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
 
 	const onLivePlaying = () => {
+		onBuffering?.(false);
 		if (isPlaying) return; // already reported
 		log('playback started');
 		isPlaying = true;

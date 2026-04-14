@@ -19,6 +19,7 @@
 		| 'error'
 	>('idle');
 	let streamError = $state(false);
+	let streamBuffering = $state(false);
 	let demandRegistered = $state(false);
 	let demandLoading = $state(false);
 	let demandError = $state<string | null>(null);
@@ -206,6 +207,14 @@
 		phase = 'viewing';
 		polling = false;
 		streamError = false;
+		streamBuffering = false;
+	};
+
+	const onPlaybackBuffering = (buffering: boolean) => {
+		streamBuffering = buffering;
+		if (buffering) {
+			log('playback buffering');
+		}
 	};
 
 	const onPlaybackError = () => {
@@ -317,6 +326,7 @@
 							{sessionActive}
 							onPlaying={onPlaybackStart}
 							onError={onPlaybackError}
+							onBuffering={onPlaybackBuffering}
 						/>
 					{:else}
 						<img src={defaultJpg} alt="" class="h-full w-full object-cover" />
@@ -412,11 +422,13 @@
 					? 'border-primary/10 bg-primary/40 text-light drop-shadow-md'
 					: 'border-secondary/10 bg-secondary/5 text-light/80'}"
 			>
-				<div
-					class="h-1.5 w-1.5 rounded-full shadow-sm {streamError || phase === 'error'
-						? 'bg-red-500'
-						: phase === 'viewing'
-							? 'animate-pulse bg-green-500'
+			<div
+				class="h-1.5 w-1.5 rounded-full shadow-sm {streamError || phase === 'error'
+					? 'bg-red-500'
+					: phase === 'viewing' && !streamBuffering
+						? 'animate-pulse bg-green-500'
+						: phase === 'viewing' && streamBuffering
+							? 'animate-pulse bg-amber-500'
 							: phase === 'unavailable'
 								? 'bg-secondary/50'
 								: phase === 'starting' || phase === 'live'
@@ -424,11 +436,13 @@
 									: phase === 'ended' || phase === 'ended_confirming'
 										? 'bg-secondary'
 										: 'bg-amber-500'}"
-				></div>
-				{streamError || phase === 'error'
-					? 'Error'
-					: phase === 'viewing'
-						? 'Live'
+			></div>
+			{streamError || phase === 'error'
+				? 'Error'
+				: phase === 'viewing' && !streamBuffering
+					? 'Live'
+					: phase === 'viewing' && streamBuffering
+						? 'Buffering'
 						: phase === 'unavailable'
 							? 'Offline'
 							: phase === 'live'
