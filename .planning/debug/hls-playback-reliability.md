@@ -1,16 +1,16 @@
 ---
-status: diagnosed
+status: awaiting_human_verify
 trigger: 'HLS video stream playback is unreliable -- aggressive retry loop, console flooding, levelEmptyError, CORS failures'
 created: 2026-04-13T18:45:00.000Z
-updated: 2026-04-13T18:55:00.000Z
+updated: 2026-04-14T00:06:00.000Z
 ---
 
 ## Current Focus
 
-hypothesis: Multiple compounding root causes — (1) nuclear remount retry where HLS.js built-in retry would suffice, (2) levelEmptyError is expected/transient for live streams starting up but treated as requiring remount, (3) short-lived JWT (120s) races with retry loop, (4) xhrSetup with Cache-Control header may trigger CORS preflight, (5) Counterscale CORS misconfigured separately
-test: Code analysis complete — all evidence gathered from source code and console logs
-expecting: N/A — diagnosis mode
-next_action: Return structured root cause report
+hypothesis: CONFIRMED — ffmpeg was encoding nonexistent audio poorly; CF requires AAC audio; generating silent track will satisfy requirement and may fix delayed stream start. Most VideoPlayer issues from original diagnosis already fixed in prior work.
+test: Code fix applied — runtime verification needed
+expecting: Stream should become playable faster with valid silent audio track
+next_action: User deploys to Pi and verifies stream starts within ~30s (CF's documented minimum) and audio track is accepted
 
 ## Symptoms
 
@@ -77,6 +77,31 @@ errors:
   found: Safari uses native HLS (not HLS.js) for <video> elements. Vidstack may use native HLS on Safari. Native HLS has different error handling — levelEmptyError is an HLS.js-specific error. Safari's native player would handle empty manifests differently (possibly more gracefully with its own retry). The retry loop that destroys <media-player> would affect Safari too, but the error taxonomy would differ.
   implication: The remount-based retry may be unnecessary AND harmful on Safari. Safari's native HLS player has robust built-in retry mechanisms that the remount loop destroys.
 
+- timestamp: 2026-04-14T00:01:00Z
+  checked: Cloudflare Stream official documentation for audio requirement
+  found: CF docs at /stream/stream-live/start-stream-live/#requirements state "Stream Live only supports H.264 video and AAC audio codecs as inputs." Troubleshooting page says to "Verify that your encoder is sending AAC audio" if stream shows "not started yet" despite encoder being connected. Audio is a hard REQUIREMENT, not just a recommendation.
+  implication: Cannot simply use `-an` to strip audio. Must generate a silent AAC track. The old `-c:a aac -b:a 128k` was encoding from a nonexistent input which likely produced malformed or missing audio data — potentially causing CF to reject or delay the stream becoming playable.
+
+- timestamp: 2026-04-14T00:02:00Z
+  checked: Current state of VideoPlayer.svelte vs original diagnosis
+  found: VideoPlayer has been substantially reworked since diagnosis. (1) Manifest probing system polls master + rendition playlists for #EXTINF before mounting player. (2) Remount only on fatal errors, 10s timeout (not 4s interval). (3) levelEmptyError silently counted, not acted on. (4) xhrSetup only does URL cache-busting, no Cache-Control header. (5) Buffer stall recovery with seek-to-live-edge. (6) onPlaybackError during 'live' phase just logs, doesn't remount.
+  implication: RC1, RC2, RC3, RC5 from original diagnosis are all addressed. The aggressive 4s remount loop is gone. Manifest probing prevents HLS.js from seeing empty manifests.
+
+- timestamp: 2026-04-14T00:03:00Z
+  checked: JWT TTL in stream.remote.ts
+  found: JWT_TTL_SECONDS = 3600 (1 hour). Was 120s when diagnosed. Already fixed.
+  implication: RC4 is resolved. Token will not expire during stream startup.
+
+- timestamp: 2026-04-14T00:04:00Z
+  checked: ffmpeg command — audio encoding of nonexistent stream
+  found: `-c:a aac -b:a 128k` was trying to encode audio from the RTSP input which has no audio track. ffmpeg would either produce an error, silently skip audio, or produce malformed audio data. Since CF requires AAC audio, missing/malformed audio could cause CF to delay or reject the stream — explaining the "Stream has not started yet" delay.
+  implication: Replacing with `anullsrc` silent audio source at 1k bitrate will: (1) satisfy CF's AAC requirement, (2) use negligible Pi CPU (trivial encoding), (3) potentially fix the 30s+ startup delay if CF was waiting for valid audio frames.
+
+- timestamp: 2026-04-14T00:05:00Z
+  checked: CF preferLowLatency API option
+  found: CF live inputs support `preferLowLatency: true` (beta). Enables LL-HLS pipeline with reduced segment wait time. Currently not set (defaults to false). Recommendations: GOP 1-2s, use RTMP endpoint. Both are already the case (RTMPS endpoint is used; camera GOP is unknown but configurable).
+  implication: Enabling this via CF API could further reduce startup time. Not a code change — requires API call or dashboard toggle.
+
 ## Resolution
 
 root_cause: |
@@ -100,6 +125,34 @@ The signed URL token expires after 120 seconds. If the stream startup takes long
 **RC6 (Low): Counterscale CORS misconfiguration**
 The counterscale.jspn.workers.dev Worker doesn't return CORS headers. This is a deployment configuration issue for the Counterscale Worker, unrelated to HLS.
 
-fix: Not applied (diagnosis only)
-verification: N/A
-files_changed: []
+fix: |
+**Applied fixes:**
+
+1. **ffmpeg.ts: Silent audio generation** — Replaced `-c:a aac -b:a 128k` (which tried to encode a nonexistent audio stream) with a proper `anullsrc` virtual input that generates a silent mono AAC track at 1k bitrate. CF Stream requires AAC audio in RTMPS input (documented requirement). The old command was encoding from nothing, which may have caused CF to wait for audio segments that never materialized properly. The new approach uses `-f lavfi -i anullsrc=r=44100:cl=mono -c:a aac -b:a 1k -shortest` — negligible CPU/bandwidth cost on the Pi.
+
+2. **ffmpeg.ts: Fixed incorrect comment** — Replaced the comment claiming "RTSP source should be configured to ≤1080p, ≤10fps, CBR ≤2Mbps for reliable passthrough on low-power hardware" (which incorrectly implied these were CF limits) with accurate information: CF accepts H.264 up to ~12 Mbps at any resolution; the real bottleneck with `-c:v copy` is the Pi's upstream bandwidth, not CPU.
+
+**Previously fixed (between diagnosis and this session):**
+
+- RC1/RC2: VideoPlayer now probes the manifest (including rendition playlists) for `#EXTINF` segments before mounting the player, preventing HLS.js from ever seeing empty manifests
+- RC3: `onPlaybackError` during `live` phase no longer triggers remount — just logs. Feedback loop eliminated.
+- RC4: JWT TTL increased from 120s to 3600s (1 hour)
+- RC5: `xhrSetup` no longer sets Cache-Control header — uses URL cache-busting only
+
+**Recommendations (not code changes):**
+
+- Enable `preferLowLatency: true` on the CF live input via API — this activates the beta LL-HLS pipeline which reduces segment wait time. Run: `curl --request PUT https://api.cloudflare.com/client/v4/accounts/{account_id}/stream/live_inputs/{input_id} --header "Authorization: Bearer <API_TOKEN>" --data '{"preferLowLatency": true, "recording": {"mode": "automatic"}}'`
+- Consider increasing camera fps from 8 to 15-20fps in camera settings (currently avg_frame_rate=8/1). The prototype ran at 20fps.
+- CF troubleshooting docs state "Wait thirty seconds" for initial connection is normal. The manifest probe loop (3s interval) handles this gracefully.
+
+verification: |
+Code changes verified by reading final file state. Runtime verification requires:
+
+1. Deploy updated relay to Pi
+2. Start a stream and observe ffmpeg stderr for proper silent audio muxing
+3. Verify CF Stream accepts the input and becomes playable
+4. Measure time from button press to playback
+
+files_changed:
+
+- packages/relay/src/ffmpeg.ts

@@ -39,11 +39,8 @@
 	let remountTimeout: ReturnType<typeof setTimeout> | undefined;
 	let emptyManifestCount = 0;
 
-	// Track buffer stalls to detect frozen playback that needs live-edge recovery.
+	// Stall tracking (for logging only — HLS.js handles recovery via config)
 	let stallCount = 0;
-	let lastStallRecoveryTime = 0;
-	const STALL_RECOVERY_COOLDOWN_MS = 15_000; // don't spam seeks
-	const STALL_THRESHOLD = 2; // seek after this many stalls in a row
 
 	$effect(() => {
 		void defineCustomElements();
@@ -199,8 +196,16 @@
 					fragLoadingTimeOut: 20000,
 					manifestLoadingTimeOut: 20000,
 					levelLoadingTimeOut: 20000,
+					// Live edge targeting: stay 3 segments behind live edge.
 					liveSyncDurationCount: 3,
-					liveMaxLatencyDurationCount: 10,
+					// Auto-jump to live edge if >5 segments behind.
+					liveMaxLatencyDurationCount: 5,
+					// Speed up playback to 1.5x to catch up to live edge
+					// instead of stalling. HLS.js handles this natively.
+					maxLiveSyncPlaybackRate: 1.5,
+					// Don't keep played data — frees memory on constrained
+					// streams and avoids stale buffer issues.
+					backBufferLength: 10,
 					// Cache-bust m3u8 requests via URL query param (not a request header)
 					// to avoid stale empty-manifest responses without triggering CORS preflight.
 					xhrSetup(xhr: XMLHttpRequest, url: string) {
@@ -297,29 +302,11 @@
 			if (!isFatal) {
 				if (errorDetails === 'bufferStalledError') {
 					stallCount += 1;
-					const now = Date.now();
-					if (
-						stallCount >= STALL_THRESHOLD &&
-						now - lastStallRecoveryTime > STALL_RECOVERY_COOLDOWN_MS &&
-						player
-					) {
-						log('buffer stalled — seeking to live edge', { stalls: stallCount });
-						lastStallRecoveryTime = now;
-						stallCount = 0;
-						try {
-							const el = player as any;
-							const duration = el.duration;
-							if (Number.isFinite(duration) && duration > 0) {
-								el.currentTime = duration;
-							}
-						} catch {
-							// non-critical
-						}
-					} else if (__DEV__) {
-						console.debug('[VideoPlayer] non-fatal HLS error:', errorDetails, `(×${stallCount})`);
-					}
-				} else {
-					if (__DEV__) console.debug('[VideoPlayer] non-fatal HLS error:', errorDetails);
+					// HLS.js handles live-edge recovery via maxLiveSyncPlaybackRate
+					// and liveMaxLatencyDurationCount — no manual seek needed.
+					if (stallCount === 1 || stallCount % 5 === 0) log('buffer stall', { stalls: stallCount });
+				} else if (__DEV__) {
+					console.debug('[VideoPlayer] non-fatal HLS error:', errorDetails);
 				}
 				return;
 			}

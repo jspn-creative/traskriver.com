@@ -6,8 +6,10 @@ const SIGKILL_MS = 10_000;
 
 /** How often to check ffmpeg stderr progress (indicates active transcoding). */
 const HEALTH_CHECK_INTERVAL_MS = 15_000;
-/** If no stderr progress for this long, consider ffmpeg stalled/disconnected. */
-const HEALTH_STALL_TIMEOUT_MS = 30_000;
+/** If no stderr progress for this long, consider ffmpeg stalled/disconnected.
+ *  At near-realtime speed (~1.03x over WiFi), ffmpeg progress output is
+ *  infrequent. 320s matches the demand window to avoid premature kills. */
+const HEALTH_STALL_TIMEOUT_MS = 320_000;
 
 type ExitCallback = (code: number | null, signal: string | null) => void;
 
@@ -146,30 +148,26 @@ export class FfmpegManager {
 			const subprocess = Bun.spawn(
 				[
 					'ffmpeg',
-					// Wall-clock timestamps + genpts + discard corrupt packets.
-					// Fixes "Timestamps are unset" FLV muxer warning and avoids
-					// feeding corrupt frames into the output stream.
+					// Use wall-clock time for packet timestamps and generate
+					// PTS where missing. RTSP sources often emit packets with
+					// unset PTS — without these flags the FLV muxer warns on
+					// every frame and CPU usage spikes from timestamp recovery.
 					'-use_wallclock_as_timestamps',
 					'1',
 					'-fflags',
-					'+genpts+discardcorrupt',
+					'+genpts',
 					'-rtsp_transport',
 					'tcp',
-					// 4MB RTSP receive buffer — prevents overflow on Pi 3 when
-					// the muxer briefly falls behind the camera's send rate.
-					'-buffer_size',
-					'4194304',
 					'-i',
 					this.config.rtspUrl,
-					// Copy video as-is (no re-encoding). The RTSP source should
-					// be configured to ≤1080p, ≤10fps, CBR ≤2Mbps for reliable
-					// passthrough on low-power hardware.
+					// Pass video and audio through as-is — no re-encoding.
+					// The camera must output H.264 video + AAC audio (CF Stream
+					// requirement). Cloudflare accepts up to ~12 Mbps, any
+					// resolution; the practical limit is Pi upstream bandwidth.
 					'-c:v',
 					'copy',
 					'-c:a',
-					'aac',
-					'-b:a',
-					'128k',
+					'copy',
 					'-f',
 					'flv',
 					this.config.streamUrl

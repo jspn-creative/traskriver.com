@@ -422,36 +422,36 @@
 					? 'border-primary/10 bg-primary/40 text-light drop-shadow-md'
 					: 'border-secondary/10 bg-secondary/5 text-light/80'}"
 			>
-			<div
-				class="h-1.5 w-1.5 rounded-full shadow-sm {streamError || phase === 'error'
-					? 'bg-red-500'
+				<div
+					class="h-1.5 w-1.5 rounded-full shadow-sm {streamError || phase === 'error'
+						? 'bg-red-500'
+						: phase === 'viewing' && !streamBuffering
+							? 'animate-pulse bg-green-500'
+							: phase === 'viewing' && streamBuffering
+								? 'animate-pulse bg-amber-500'
+								: phase === 'unavailable'
+									? 'bg-secondary/50'
+									: phase === 'starting' || phase === 'live'
+										? 'animate-pulse bg-amber-500'
+										: phase === 'ended' || phase === 'ended_confirming'
+											? 'bg-secondary'
+											: 'bg-amber-500'}"
+				></div>
+				{streamError || phase === 'error'
+					? 'Error'
 					: phase === 'viewing' && !streamBuffering
-						? 'animate-pulse bg-green-500'
+						? 'Live'
 						: phase === 'viewing' && streamBuffering
-							? 'animate-pulse bg-amber-500'
+							? 'Buffering'
 							: phase === 'unavailable'
-								? 'bg-secondary/50'
-								: phase === 'starting' || phase === 'live'
-									? 'animate-pulse bg-amber-500'
-									: phase === 'ended' || phase === 'ended_confirming'
-										? 'bg-secondary'
-										: 'bg-amber-500'}"
-			></div>
-			{streamError || phase === 'error'
-				? 'Error'
-				: phase === 'viewing' && !streamBuffering
-					? 'Live'
-					: phase === 'viewing' && streamBuffering
-						? 'Buffering'
-						: phase === 'unavailable'
-							? 'Offline'
-							: phase === 'live'
-								? 'Connecting'
-								: phase === 'starting'
-									? 'Starting'
-									: phase === 'ended' || phase === 'ended_confirming'
-										? 'Ended'
-										: 'Standby'}
+								? 'Offline'
+								: phase === 'live'
+									? 'Connecting'
+									: phase === 'starting'
+										? 'Starting'
+										: phase === 'ended' || phase === 'ended_confirming'
+											? 'Ended'
+											: 'Standby'}
 			</div>
 		</header>
 
