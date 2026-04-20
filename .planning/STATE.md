@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: milestone
-status: completed
-stopped_at: Phase 1 context gathered
-last_updated: '2026-04-20T12:16:04.290Z'
+milestone: v1.2
+milestone_name: Self-Hosted Stream
+status: ready-to-plan
+stopped_at: Roadmap created — Phase 5 ready to plan
+last_updated: '2026-04-20T00:00:00.000Z'
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
-  percent: 100
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # State: Trask River Cam
@@ -18,49 +18,40 @@ progress:
 ## Project Reference
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
-**Current milestone:** v1.1 — Analytics & User-Ready Polish
-**Current focus:** Phase 1 — Analytics Integration
+**Current milestone:** v1.2 — Self-Hosted Stream
+**Current focus:** Phase 5 — `packages/stream` Skeleton
 
 ## Current Position
 
-**Phase:** 1 of 3 — Analytics Integration
-**Plan:** Not yet planned
-**Status:** v1.1 milestone complete
-**Progress:** ░░░░░░░░░░ 0%
+**Phase:** 5 of 9 — `packages/stream` Skeleton
+**Plan:** — (plans TBD)
+**Status:** Ready to plan
+**Last activity:** 2026-04-20 — Roadmap for v1.2 defined (phases 5-9)
 
-## Phase Summary
-
-| Phase                         | Status      | Plans |
-| ----------------------------- | ----------- | ----- |
-| 1. Analytics Integration      | **Current** | TBD   |
-| 2. Sidebar & Content Overhaul | Not started | TBD   |
-| 3. River Conditions Data      | Not started | TBD   |
-
-## Performance Metrics
-
-| Metric                 | Value |
-| ---------------------- | ----- |
-| Plans completed        | 0     |
-| Plans failed           | 0     |
-| Phases completed       | 0/3   |
-| Requirements delivered | 0/11  |
+Progress: [░░░░░░░░░░] 0%
 
 ## Accumulated Context
 
-### Decisions Made
-
-- _None yet_
-
 ### Carried Forward
 
-- Monolithic `+page.svelte` (~480 lines) identified as tech debt — consider extracting during UI overhaul
-- `LiveViewerCount.svelte` has console noise on every poll — clean up if touched
-- Unauthenticated demand POST has 30s throttle — sufficient for now
-- vidstack is version-sensitive — pin and test after changes
+- Monolithic `+page.svelte` (~480 lines) will largely collapse in Phase 9
+- vidstack is version-sensitive — pin and test on swap
+- River Conditions Data deferred to v1.3 — see BACKLOG.md
 
-### TODOs
+### Milestone v1.2 Intent
 
-- _None yet_
+- Replace Cloudflare Stream with self-hosted always-on `packages/stream` Node service on DigitalOcean droplet
+- Pull RTSP directly via DDNS + public port-forward; **delete** `packages/relay` entirely (no cold fallback)
+- Public HLS behind Cloudflare (orange-cloud default; grey-cloud documented fallback)
+- Ships on a branch; merges when web deployment works against new backend — no cutover/parallel-run/observation/decommission phases
+- CI/CD for stream service is user-owned and out of scope
+- Node HTTP library (Fastify / Hono / node:http / Elysia) decided during Phase 5 planning
+
+### Recent Decisions
+
+- **v1.2 scope:** branch-based delivery, no parallel-run or cutover window (app not in active use)
+- **v1.2 scope:** delete `packages/relay` (not retire-in-place); no cold-fallback strategy
+- **v1.2 scope:** orange-cloud default; no ToS P0 gate; grey-cloud is execution-time fallback
 
 ### Blockers
 
@@ -70,15 +61,14 @@ progress:
 
 ### Last Session
 
-- **Date:** 2026-04-10
-- **Activity:** Roadmap created — 3 phases, 11 requirements mapped
-- **Stopped at:** Phase 1 context gathered
+- **Date:** 2026-04-20
+- **Activity:** ROADMAP.md written with 5 phases covering all 23 v1.2 requirements
 
 ### Next Session Should
 
-1. Run `/gsd-plan-phase 1` to plan Analytics Integration
-2. Phase 1 is decoupled from all UI work — can start immediately
+1. `/gsd-plan-phase 5` — plan the `packages/stream` skeleton
+2. Decide Node HTTP library (Fastify / Hono / node:http / Elysia) during Phase 5 planning
 
 ---
 
-_Last updated: 2026-04-10_
+_Last updated: 2026-04-20_
