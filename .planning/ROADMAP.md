@@ -55,7 +55,12 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 3. Boot validates env via zod; missing required vars fail fast with a clear error.
 4. Pino JSON logs emit to stdout; dev uses `pino-pretty`; process listens on a placeholder `/health` endpoint returning `{ status: "starting" }`.
 5. Node HTTP library choice recorded in PLAN (Fastify / Hono / node:http / Elysia) with rationale.
-   **Plans**: TBD
+
+**Plans:** 3 plans
+
+- [ ] 05-01-PLAN.md — Scaffold `packages/stream/` (package.json, tsconfig, .gitignore, README) + wire into monorepo workspaces + turbo outputs
+- [ ] 05-02-PLAN.md — Author src files: zod config, Pino logger, Hono `/health` app, boot + SIGTERM/SIGINT lifecycle
+- [ ] 05-03-PLAN.md — Build, `node --check dist/index.js`, smoke-boot `/health`, fail-fast check, `bun run check`, commit phase
 
 ### Phase 6: MediaMTX Supervisor + RTSP Ingest
 
