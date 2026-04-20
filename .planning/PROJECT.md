@@ -39,6 +39,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 
 <!-- Shipped and confirmed valuable — v1.0 capabilities. -->
 
+- ✓ `packages/stream` skeleton (Node 22 ESM, zod, Pino, Hono `/health`) — STRM-01 — Phase 5 / v1.2
 - ✓ On-demand stream start via browser demand → relay → ffmpeg → Cloudflare Stream — v1.0
 - ✓ HLS video playback with error recovery and stream state phases — v1.0
 - ✓ Relay state machine with status reporting to KV — v1.0
@@ -142,4 +143,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-20 — milestone v1.2 Self-Hosted Stream started_
+_Last updated: 2026-04-20 — Phase 5 (`packages/stream` skeleton) complete_

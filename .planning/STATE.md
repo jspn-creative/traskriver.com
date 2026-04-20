@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
-status: unknown
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-04-20T23:45:11.438Z"
+status: ready-to-plan
+stopped_at: Phase 5 complete — packages/stream skeleton green (`Completed 05-03-PLAN.md`)
+last_updated: '2026-04-20T23:48:17.232Z'
 progress:
   total_phases: 5
   completed_phases: 1
@@ -19,7 +19,7 @@ progress:
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
 **Current milestone:** v1.2 — Self-Hosted Stream
-**Current focus:** Phase 06 — next (Phase 5 complete)
+**Current focus:** Phase 6 — MediaMTX supervisor + RTSP ingest (plan next)
 
 ## Current Position
 
