@@ -61,9 +61,9 @@ Verification-only Tasks 1–2 introduced no code changes (no commits).
 
 1. **Task 1: Build and node --check the emit** — verification only (no commit)
 2. **Task 2: Smoke-boot + shutdown + fail-fast** — verification only (no commit; script run under **bash** — see Deviations)
-3. **Task 3: Prettier + repo-wide check + phase close** — see git history for `docs(05-03):` commits
+3. **Task 3: Prettier + repo-wide check + phase close** — `c4791a8` (summaries + `05-01` Prettier), `dab0ced` (STATE + ROADMAP)
 
-**Plan metadata:** use `git log --oneline --grep=05-03` for docs commits closing this plan.
+**Plan metadata:** `c4791a8`, `dab0ced`
 
 ## Task 1 — Build / emit / node --check
 
