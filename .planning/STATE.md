@@ -3,12 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
 status: unknown
-last_updated: '2026-04-20T23:40:24.612Z'
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-04-20T23:45:11.438Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
+  percent: 20
 ---
 
 # State: Trask River Cam
@@ -17,12 +19,14 @@ progress:
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
 **Current milestone:** v1.2 — Self-Hosted Stream
-**Current focus:** Phase 05 — packages-stream-skeleton
+**Current focus:** Phase 06 — next (Phase 5 complete)
 
 ## Current Position
 
-Phase: 05 (packages-stream-skeleton) — EXECUTING
-Plan: 3 of 3 next (05-01 + 05-02 complete; SUMMARY: `05-02-SUMMARY.md`)
+Phase: 05 (packages-stream-skeleton) — **COMPLETE**
+Plan: 3 of 3 done — SUMMARY: `05-03-SUMMARY.md`, rollup: `05-SUMMARY.md`
+
+**Stopped at:** Phase 5 complete — packages/stream skeleton green (`Completed 05-03-PLAN.md`)
 
 ## Accumulated Context
 
@@ -39,7 +43,7 @@ Plan: 3 of 3 next (05-01 + 05-02 complete; SUMMARY: `05-02-SUMMARY.md`)
 - Public HLS behind Cloudflare (orange-cloud default; grey-cloud documented fallback)
 - Ships on a branch; merges when web deployment works against new backend — no cutover/parallel-run/observation/decommission phases
 - CI/CD for stream service is user-owned and out of scope
-- Node HTTP library (Fastify / Hono / node:http / Elysia) decided during Phase 5 planning
+- Node HTTP library: **Hono** + `@hono/node-server`
 
 ### Recent Decisions
 
@@ -57,11 +61,11 @@ Plan: 3 of 3 next (05-01 + 05-02 complete; SUMMARY: `05-02-SUMMARY.md`)
 ### Last Session
 
 - **Date:** 2026-04-20
-- **Activity:** Executed `05-02-PLAN.md` — `packages/stream/src/*` (`d9142e5`, `1c229be`, `30f07ef`)
+- **Activity:** Executed `05-03-PLAN.md` — verification (build, `node --check`, smoke, fail-fast, `bun check`), SUMMARY + STATE/ROADMAP
 
 ### Next Session Should
 
-1. Execute `05-03-PLAN.md` — build, `node --check dist/index.js`, smoke `/health`, fail-fast, `bun check`
+1. Plan or execute Phase 6 — MediaMTX supervisor + RTSP ingest (per ROADMAP)
 
 ---
 

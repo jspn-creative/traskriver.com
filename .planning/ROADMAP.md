@@ -19,9 +19,9 @@
 - `packages/relay` is **deleted** (not retired-in-place); no cold-fallback strategy.
 - Cloudflare zone is orange-cloud by default; grey-cloud documented as fallback if ToS is enforced (not a planning gate).
 - CGNAT detection is an execution-time abort trigger (re-scope), not a phase.
-- Node HTTP library (Fastify / Hono / node:http / Elysia) is **TBD** — decided during Phase 5 planning.
+- Node HTTP library: **Hono** + `@hono/node-server` (locked Phase 5 — see `05-CONTEXT.md`).
 
-- [ ] **Phase 5: `packages/stream` Skeleton** — Bootstrap new Node 22 ESM package with zod config, Pino logger, and placeholder `/health`.
+- [x] **Phase 5: `packages/stream` Skeleton** — Bootstrap new Node 22 ESM package with zod config, Pino logger, and placeholder `/health`.
 - [ ] **Phase 6: MediaMTX Supervisor + RTSP Ingest** — Spawn/backoff supervisor, stall watchdog, codec guard, H.264 passthrough HLS config.
 - [ ] **Phase 7: `/health` Endpoint + Shared-Types Purge** — Full `/health` payload bound to ops-only surface; strip relay/demand/JWT types from `packages/shared`.
 - [ ] **Phase 8: VPS + DNS + Camera Infrastructure** — DO droplet systemd deploy, TLS, Cloudflare DNS, router port-forward, camera H.264/DDNS/CVE check.
@@ -54,13 +54,13 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 2. `bun run build --filter=stream` succeeds from a clean clone and `node --check dist/index.js` passes.
 3. Boot validates env via zod; missing required vars fail fast with a clear error.
 4. Pino JSON logs emit to stdout; dev uses `pino-pretty`; process listens on a placeholder `/health` endpoint returning `{ status: "starting" }`.
-5. Node HTTP library choice recorded in PLAN (Fastify / Hono / node:http / Elysia) with rationale.
+5. Node HTTP library choice recorded (Hono + `@hono/node-server` — see `05-CONTEXT.md`).
 
 **Plans:** 3 plans
 
 - [x] 05-01-PLAN.md — Scaffold `packages/stream/` (package.json, tsconfig, .gitignore, README) + wire into monorepo workspaces + turbo outputs _(complete 2026-04-20)_
 - [x] 05-02-PLAN.md — Author src files: zod config, Pino logger, Hono `/health` app, boot + SIGTERM/SIGINT lifecycle _(complete 2026-04-20)_
-- [ ] 05-03-PLAN.md — Build, `node --check dist/index.js`, smoke-boot `/health`, fail-fast check, `bun run check`, commit phase
+- [x] 05-03-PLAN.md — Build, `node --check dist/index.js`, smoke-boot `/health`, fail-fast check, `bun run check`, commit phase _(complete 2026-04-20)_
 
 ### Phase 6: MediaMTX Supervisor + RTSP Ingest
 
@@ -129,7 +129,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 | 3. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
 | 4. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
 | v1.1 phases                          | v1.1      | —              | Complete    | 2026-04-20 |
-| 5. `packages/stream` Skeleton        | v1.2      | 1/3            | In progress | -          |
+| 5. `packages/stream` Skeleton        | v1.2      | 3/3            | Complete    | 2026-04-20 |
 | 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 0/TBD          | Not started | -          |
 | 7. `/health` + Shared-Types Purge    | v1.2      | 0/TBD          | Not started | -          |
 | 8. VPS + DNS + Camera Infra          | v1.2      | 0/TBD          | Not started | -          |
@@ -141,4 +141,4 @@ See `.planning/BACKLOG.md` for deferred work.
 
 ---
 
-_Roadmap updated: 2026-04-20 — v1.2 phases 5-9 defined_
+_Roadmap updated: 2026-04-20 — Phase 5 complete; v1.2 phases 6-9 next_
