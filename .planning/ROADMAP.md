@@ -58,7 +58,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 
 **Plans:** 3 plans
 
-- [ ] 05-01-PLAN.md — Scaffold `packages/stream/` (package.json, tsconfig, .gitignore, README) + wire into monorepo workspaces + turbo outputs
+- [x] 05-01-PLAN.md — Scaffold `packages/stream/` (package.json, tsconfig, .gitignore, README) + wire into monorepo workspaces + turbo outputs _(complete 2026-04-20)_
 - [ ] 05-02-PLAN.md — Author src files: zod config, Pino logger, Hono `/health` app, boot + SIGTERM/SIGINT lifecycle
 - [ ] 05-03-PLAN.md — Build, `node --check dist/index.js`, smoke-boot `/health`, fail-fast check, `bun run check`, commit phase
 
@@ -129,7 +129,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 | 3. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
 | 4. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
 | v1.1 phases                          | v1.1      | —              | Complete    | 2026-04-20 |
-| 5. `packages/stream` Skeleton        | v1.2      | 0/TBD          | Not started | -          |
+| 5. `packages/stream` Skeleton        | v1.2      | 1/3            | In progress | -          |
 | 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 0/TBD          | Not started | -          |
 | 7. `/health` + Shared-Types Purge    | v1.2      | 0/TBD          | Not started | -          |
 | 8. VPS + DNS + Camera Infra          | v1.2      | 0/TBD          | Not started | -          |

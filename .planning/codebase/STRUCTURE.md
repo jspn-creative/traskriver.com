@@ -15,6 +15,10 @@ traskriver/
 │   │   ├── package.json      # @traskriver/shared — types + constants only
 │   │   ├── index.ts          # Public exports (DemandResponse, RelayConfig, etc.)
 │   │   └── tsconfig.json
+│   ├── stream/
+│   │   ├── package.json      # @traskriver/stream — Node 22 ESM (Hono, Pino, zod); src added in Phase 5.2+
+│   │   ├── tsconfig.json
+│   │   └── README.md
 │   ├── web/
 │   │   ├── package.json      # @traskriver/web — SvelteKit + Vite + Wrangler
 │   │   ├── svelte.config.js  # adapter-cloudflare, remoteFunctions, runes

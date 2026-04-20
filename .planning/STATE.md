@@ -2,15 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
-status: ready-to-plan
-stopped_at: Roadmap created — Phase 5 ready to plan
-last_updated: '2026-04-20T00:00:00.000Z'
+status: unknown
+last_updated: "2026-04-20T23:40:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
 ---
 
 # State: Trask River Cam
@@ -19,16 +17,12 @@ progress:
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
 **Current milestone:** v1.2 — Self-Hosted Stream
-**Current focus:** Phase 5 — `packages/stream` Skeleton
+**Current focus:** Phase 05 — packages-stream-skeleton
 
 ## Current Position
 
-**Phase:** 5 of 9 — `packages/stream` Skeleton
-**Plan:** — (plans TBD)
-**Status:** Ready to plan
-**Last activity:** 2026-04-20 — Roadmap for v1.2 defined (phases 5-9)
-
-Progress: [░░░░░░░░░░] 0%
+Phase: 05 (packages-stream-skeleton) — EXECUTING
+Plan: 2 of 3 next (05-01 complete; SUMMARY: `05-01-SUMMARY.md`)
 
 ## Accumulated Context
 
@@ -49,6 +43,7 @@ Progress: [░░░░░░░░░░] 0%
 
 ### Recent Decisions
 
+- **Phase 5 HTTP stack:** Hono + `@hono/node-server` (see `05-CONTEXT.md`; scaffold deps in `packages/stream/package.json`)
 - **v1.2 scope:** branch-based delivery, no parallel-run or cutover window (app not in active use)
 - **v1.2 scope:** delete `packages/relay` (not retire-in-place); no cold-fallback strategy
 - **v1.2 scope:** orange-cloud default; no ToS P0 gate; grey-cloud is execution-time fallback
@@ -62,12 +57,12 @@ Progress: [░░░░░░░░░░] 0%
 ### Last Session
 
 - **Date:** 2026-04-20
-- **Activity:** ROADMAP.md written with 5 phases covering all 23 v1.2 requirements
+- **Activity:** Executed `05-01-PLAN.md` — `packages/stream` scaffold + workspace wiring (`d0f69fb`, `59de666`)
 
 ### Next Session Should
 
-1. `/gsd-plan-phase 5` — plan the `packages/stream` skeleton
-2. Decide Node HTTP library (Fastify / Hono / node:http / Elysia) during Phase 5 planning
+1. Execute `05-02-PLAN.md` — `src/` (zod config, Pino, Hono `/health`, boot + signals)
+2. `bun run --filter=@traskriver/stream check` after `src/` exists (full `tsc --noEmit`)
 
 ---
 
