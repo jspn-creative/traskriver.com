@@ -59,7 +59,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 **Plans:** 3 plans
 
 - [x] 05-01-PLAN.md — Scaffold `packages/stream/` (package.json, tsconfig, .gitignore, README) + wire into monorepo workspaces + turbo outputs _(complete 2026-04-20)_
-- [ ] 05-02-PLAN.md — Author src files: zod config, Pino logger, Hono `/health` app, boot + SIGTERM/SIGINT lifecycle
+- [x] 05-02-PLAN.md — Author src files: zod config, Pino logger, Hono `/health` app, boot + SIGTERM/SIGINT lifecycle _(complete 2026-04-20)_
 - [ ] 05-03-PLAN.md — Build, `node --check dist/index.js`, smoke-boot `/health`, fail-fast check, `bun run check`, commit phase
 
 ### Phase 6: MediaMTX Supervisor + RTSP Ingest

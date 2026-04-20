@@ -16,9 +16,14 @@ traskriver/
 │   │   ├── index.ts          # Public exports (DemandResponse, RelayConfig, etc.)
 │   │   └── tsconfig.json
 │   ├── stream/
-│   │   ├── package.json      # @traskriver/stream — Node 22 ESM (Hono, Pino, zod); src added in Phase 5.2+
+│   │   ├── package.json      # @traskriver/stream — Node 22 ESM (Hono, Pino, zod)
 │   │   ├── tsconfig.json
-│   │   └── README.md
+│   │   ├── README.md
+│   │   └── src/
+│   │       ├── index.ts      # boot: serve + SIGTERM/SIGINT
+│   │       ├── config.ts     # zod env
+│   │       ├── logger.ts     # Pino factory
+│   │       └── server.ts     # Hono + /health
 │   ├── web/
 │   │   ├── package.json      # @traskriver/web — SvelteKit + Vite + Wrangler
 │   │   ├── svelte.config.js  # adapter-cloudflare, remoteFunctions, runes

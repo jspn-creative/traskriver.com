@@ -6,7 +6,7 @@
 
 ### Stream Service (`packages/stream`)
 
-- [ ] **STRM-01**: A new `packages/stream` Node 22 package is created with ESM, zod-validated config, Pino structured logging, and a `/health` HTTP endpoint (HTTP library choice deferred to phase planning — Fastify placeholder, alternatives to be evaluated).
+- [x] **STRM-01**: A new `packages/stream` Node 22 package is created with ESM, zod-validated config, Pino structured logging, and a `/health` HTTP endpoint (HTTP library choice deferred to phase planning — Fastify placeholder, alternatives to be evaluated).
 - [ ] **STRM-02**: The service supervises a MediaMTX child process, spawning/respawning it with exponential backoff (1→30s cap, reset on 60s clean uptime) and graceful shutdown (SIGTERM→10s→SIGKILL).
 - [ ] **STRM-03**: The service pulls RTSP from the Reolink RLC-510WA (main stream) continuously, 24/7, with automatic reconnection on camera disconnect.
 - [ ] **STRM-04**: A stall watchdog (60–90s threshold) detects stuck MediaMTX via `bytesReceived` + `ready: true` from MediaMTX's API and triggers a supervised restart.
@@ -60,31 +60,31 @@ Deferred to v1.3 or later:
 
 ## Traceability
 
-| Requirement | Phase   | Status  |
-| ----------- | ------- | ------- |
-| STRM-01     | Phase 5 | Pending |
-| STRM-02     | Phase 6 | Pending |
-| STRM-03     | Phase 6 | Pending |
-| STRM-04     | Phase 6 | Pending |
-| STRM-05     | Phase 6 | Pending |
-| STRM-06     | Phase 6 | Pending |
-| STRM-07     | Phase 6 | Pending |
-| STRM-08     | Phase 7 | Pending |
-| INFRA-01    | Phase 8 | Pending |
-| INFRA-02    | Phase 8 | Pending |
-| INFRA-03    | Phase 8 | Pending |
-| INFRA-04    | Phase 8 | Pending |
-| INFRA-05    | Phase 8 | Pending |
-| INFRA-06    | Phase 8 | Pending |
-| WEB-01      | Phase 9 | Pending |
-| WEB-02      | Phase 9 | Pending |
-| WEB-03      | Phase 9 | Pending |
-| WEB-04      | Phase 9 | Pending |
-| CLEAN-01    | Phase 9 | Pending |
-| CLEAN-02    | Phase 9 | Pending |
-| CLEAN-03    | Phase 9 | Pending |
-| CLEAN-04    | Phase 7 | Pending |
-| CLEAN-05    | Phase 9 | Pending |
+| Requirement | Phase   | Status   |
+| ----------- | ------- | -------- |
+| STRM-01     | Phase 5 | Complete |
+| STRM-02     | Phase 6 | Pending  |
+| STRM-03     | Phase 6 | Pending  |
+| STRM-04     | Phase 6 | Pending  |
+| STRM-05     | Phase 6 | Pending  |
+| STRM-06     | Phase 6 | Pending  |
+| STRM-07     | Phase 6 | Pending  |
+| STRM-08     | Phase 7 | Pending  |
+| INFRA-01    | Phase 8 | Pending  |
+| INFRA-02    | Phase 8 | Pending  |
+| INFRA-03    | Phase 8 | Pending  |
+| INFRA-04    | Phase 8 | Pending  |
+| INFRA-05    | Phase 8 | Pending  |
+| INFRA-06    | Phase 8 | Pending  |
+| WEB-01      | Phase 9 | Pending  |
+| WEB-02      | Phase 9 | Pending  |
+| WEB-03      | Phase 9 | Pending  |
+| WEB-04      | Phase 9 | Pending  |
+| CLEAN-01    | Phase 9 | Pending  |
+| CLEAN-02    | Phase 9 | Pending  |
+| CLEAN-03    | Phase 9 | Pending  |
+| CLEAN-04    | Phase 7 | Pending  |
+| CLEAN-05    | Phase 9 | Pending  |
 
 **Coverage:** 23/23 requirements mapped ✓ · No orphans · No duplicates
 

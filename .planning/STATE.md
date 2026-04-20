@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
 status: unknown
-last_updated: "2026-04-20T23:40:00.000Z"
+last_updated: '2026-04-20T23:40:24.612Z'
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # State: Trask River Cam
@@ -22,7 +22,7 @@ progress:
 ## Current Position
 
 Phase: 05 (packages-stream-skeleton) — EXECUTING
-Plan: 2 of 3 next (05-01 complete; SUMMARY: `05-01-SUMMARY.md`)
+Plan: 3 of 3 next (05-01 + 05-02 complete; SUMMARY: `05-02-SUMMARY.md`)
 
 ## Accumulated Context
 
@@ -57,12 +57,11 @@ Plan: 2 of 3 next (05-01 complete; SUMMARY: `05-01-SUMMARY.md`)
 ### Last Session
 
 - **Date:** 2026-04-20
-- **Activity:** Executed `05-01-PLAN.md` — `packages/stream` scaffold + workspace wiring (`d0f69fb`, `59de666`)
+- **Activity:** Executed `05-02-PLAN.md` — `packages/stream/src/*` (`d9142e5`, `1c229be`, `30f07ef`)
 
 ### Next Session Should
 
-1. Execute `05-02-PLAN.md` — `src/` (zod config, Pino, Hono `/health`, boot + signals)
-2. `bun run --filter=@traskriver/stream check` after `src/` exists (full `tsc --noEmit`)
+1. Execute `05-03-PLAN.md` — build, `node --check dist/index.js`, smoke `/health`, fail-fast, `bun check`
 
 ---
 
