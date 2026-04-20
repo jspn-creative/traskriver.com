@@ -8,16 +8,28 @@ A live-streaming web app for a river camera on the Trask River in Tillamook, OR.
 
 Users can see the Trask River live, on-demand, from anywhere — the stream starts when they want it and shows real conditions.
 
-## Current Milestone: v1.1 Analytics & User-Ready Polish
+## Current Milestone: v1.2 River Conditions Data
 
-**Goal:** Add usage analytics via Counterscale, overhaul sidebar content for anglers, and add river/fishing context data so the app is ready to share with actual users.
+**Goal:** Add river conditions display (flow, temperature, sunrise/sunset, fish runs) with freshness indicators.
 
 **Target features:**
 
-- Counterscale analytics with custom engagement events
-- Sidebar content overhaul (branding, description, always-visible weather + start button)
-- River conditions footer (sunrise/sunset, USGS flow/temp, seasonal fish run status)
-- Copy and content cleanup for angler audience
+- USGS gauge data for flow and temperature
+- Sunrise/sunset times from Open-Meteo
+- Seasonal fish run status
+- Freshness indicators for all data
+
+## Previous Milestone: v1.1 Analytics & User-Ready Polish (SHIPPED 2026-04-20)
+
+**Delivered:**
+
+- PostHog analytics (replaced Counterscale)
+- Sidebar content overhaul with branding, weather, and stream controls
+- Copy cleanup for angler audience
+
+**Not delivered (deferred to backlog):**
+
+- River conditions data Phase 3 moved to BACKLOG.md
 
 ## Requirements
 
@@ -37,12 +49,17 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 
 ### Active
 
-<!-- Current scope — v1.1 milestone. -->
+<!-- Current scope — v1.2 milestone. -->
 
-- [ ] Counterscale analytics integration (unique visitors, engagement events)
-- [ ] Sidebar content overhaul (branding, description, always-visible weather + controls)
 - [ ] River conditions footer (sunrise/sunset, USGS flow/temp, fish run status)
-- [ ] Copy and content cleanup for angler audience
+
+### Validated
+
+<!-- Shipped in v1.1 -->
+
+- ✓ PostHog analytics (unique visitors, pageviews) — v1.1
+- ✓ Sidebar content overhaul (branding, description, always-visible weather + controls) — v1.1
+- ✓ Copy and content cleanup for angler audience — v1.1
 
 ### Out of Scope
 
@@ -59,7 +76,7 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 - **Deployment:** SvelteKit on Cloudflare Workers (web), Bun on Raspberry Pi (relay)
 - **Video pipeline:** RTSP camera → ffmpeg → RTMPS → Cloudflare Stream → HLS
 - **State coordination:** Cloudflare KV for demand signals and relay status
-- **Analytics:** Counterscale deployed at `https://counterscale.jspn.workers.dev/` (not yet integrated)
+- **Analytics:** PostHog at `https://app.posthog.com/` (integrated via @posthog/sveltekit)
 - **Data sources:** USGS gauges for live river data; fish run status will be static seasonal content
 - **Audience:** Primarily anglers checking the Trask River before fishing trips
 - **Monorepo:** `packages/web`, `packages/relay`, `packages/shared` with Turbo + Bun workspaces
@@ -73,15 +90,16 @@ Users can see the Trask River live, on-demand, from anywhere — the stream star
 
 ## Key Decisions
 
-| Decision                          | Rationale                                                                 | Outcome   |
-| --------------------------------- | ------------------------------------------------------------------------- | --------- |
-| Cloudflare Stream for video CDN   | Low-latency HLS with global edge, simple JWT signing                      | ✓ Good    |
-| KV for demand/status coordination | Lightweight, no database needed for two keys                              | ✓ Good    |
-| On-demand streaming (not 24/7)    | Save bandwidth and compute on Pi; stream only when someone wants to watch | ✓ Good    |
-| Bun for relay runtime             | Fast startup, good subprocess management, runs well on Pi                 | ✓ Good    |
-| Counterscale for analytics        | Privacy-friendly, self-hosted on Workers, lightweight                     | — Pending |
-| USGS API for river data           | Free, reliable public data for Trask River gauge                          | — Pending |
-| Static fish run table             | Seasonal patterns are predictable; avoids complex data sourcing           | — Pending |
+| Decision                          | Rationale                                                                 | Outcome    |
+| --------------------------------- | ------------------------------------------------------------------------- | ---------- |
+| Cloudflare Stream for video CDN   | Low-latency HLS with global edge, simple JWT signing                      | ✓ Good     |
+| KV for demand/status coordination | Lightweight, no database needed for two keys                              | ✓ Good     |
+| On-demand streaming (not 24/7)    | Save bandwidth and compute on Pi; stream only when someone wants to watch | ✓ Good     |
+| Bun for relay runtime             | Fast startup, good subprocess management, runs well on Pi                 | ✓ Good     |
+| PostHog for analytics             | Better features, easier integration, free tier generous                   | ✓ Good     |
+| Counterscale for analytics        | Replaced by PostHog                                                       | — Replaced |
+| USGS API for river data           | Free, reliable public data for Trask River gauge                          | — Pending  |
+| Static fish run table             | Seasonal patterns are predictable; avoids complex data sourcing           | — Pending  |
 
 ## Evolution
 
@@ -104,4 +122,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-10 after milestone v1.1 started_
+_Last updated: 2026-04-20 after milestone v1.1 complete_

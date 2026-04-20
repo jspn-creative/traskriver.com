@@ -1,5 +1,5 @@
 ---
-status: awaiting_human_verify
+status: closed
 trigger: 'HLS video stream playback is unreliable -- aggressive retry loop, console flooding, levelEmptyError, CORS failures'
 created: 2026-04-13T18:45:00.000Z
 updated: 2026-04-14T00:06:00.000Z

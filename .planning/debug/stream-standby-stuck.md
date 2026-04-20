@@ -1,5 +1,5 @@
 ---
-status: awaiting_human_verify
+status: closed
 trigger: 'Web UI stuck on "connecting" with streamStandby: true even though relay reports shouldStream=true and is live'
 created: 2026-04-13T22:00:00.000Z
 updated: 2026-04-13T23:00:00.000Z

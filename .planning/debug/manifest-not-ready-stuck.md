@@ -1,5 +1,5 @@
 ---
-status: awaiting_human_verify
+status: closed
 trigger: 'manifest-not-ready-stuck: Relay says live but VideoPlayer stuck on "manifest not ready — waiting" forever'
 created: 2026-04-13T00:00:00Z
 updated: 2026-04-13T00:02:00Z
