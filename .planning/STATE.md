@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
-status: defining-requirements
-stopped_at: Milestone v1.2 started — research queued
+status: ready-to-plan
+stopped_at: Roadmap created — Phase 5 ready to plan
 last_updated: '2026-04-20T00:00:00.000Z'
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,30 +19,39 @@ progress:
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
 **Current milestone:** v1.2 — Self-Hosted Stream
-**Current focus:** Defining requirements
+**Current focus:** Phase 5 — `packages/stream` Skeleton
 
 ## Current Position
 
-**Phase:** Not started (defining requirements)
-**Plan:** —
-**Status:** Defining requirements
-**Last activity:** 2026-04-20 — Milestone v1.2 started
+**Phase:** 5 of 9 — `packages/stream` Skeleton
+**Plan:** — (plans TBD)
+**Status:** Ready to plan
+**Last activity:** 2026-04-20 — Roadmap for v1.2 defined (phases 5-9)
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Accumulated Context
 
 ### Carried Forward
 
-- Monolithic `+page.svelte` (~480 lines) identified as tech debt — consider extracting during stream migration
-- `LiveViewerCount.svelte` has console noise on every poll — clean up if touched
-- vidstack is version-sensitive — pin and test after changes
+- Monolithic `+page.svelte` (~480 lines) will largely collapse in Phase 9
+- vidstack is version-sensitive — pin and test on swap
 - River Conditions Data deferred to v1.3 — see BACKLOG.md
 
 ### Milestone v1.2 Intent
 
-- Replace Cloudflare Stream with self-hosted always-on `packages/stream` Node service on VPS
-- Pull RTSP directly from camera via DDNS + port forward; retire Pi relay from active path
-- Serve public HLS behind Cloudflare CDN; drop JWT signing
-- CI/CD and VPS provisioning are user-owned and out of GSD scope
+- Replace Cloudflare Stream with self-hosted always-on `packages/stream` Node service on DigitalOcean droplet
+- Pull RTSP directly via DDNS + public port-forward; **delete** `packages/relay` entirely (no cold fallback)
+- Public HLS behind Cloudflare (orange-cloud default; grey-cloud documented fallback)
+- Ships on a branch; merges when web deployment works against new backend — no cutover/parallel-run/observation/decommission phases
+- CI/CD for stream service is user-owned and out of scope
+- Node HTTP library (Fastify / Hono / node:http / Elysia) decided during Phase 5 planning
+
+### Recent Decisions
+
+- **v1.2 scope:** branch-based delivery, no parallel-run or cutover window (app not in active use)
+- **v1.2 scope:** delete `packages/relay` (not retire-in-place); no cold-fallback strategy
+- **v1.2 scope:** orange-cloud default; no ToS P0 gate; grey-cloud is execution-time fallback
 
 ### Blockers
 
@@ -53,12 +62,12 @@ progress:
 ### Last Session
 
 - **Date:** 2026-04-20
-- **Activity:** Milestone v1.2 kicked off — scope confirmed, research queued
+- **Activity:** ROADMAP.md written with 5 phases covering all 23 v1.2 requirements
 
 ### Next Session Should
 
-1. Review research SUMMARY.md
-2. Finalize requirements and roadmap
+1. `/gsd-plan-phase 5` — plan the `packages/stream` skeleton
+2. Decide Node HTTP library (Fastify / Hono / node:http / Elysia) during Phase 5 planning
 
 ---
 

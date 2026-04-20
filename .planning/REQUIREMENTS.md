@@ -60,7 +60,33 @@ Deferred to v1.3 or later:
 
 ## Traceability
 
-_To be filled by the roadmapper._
+| Requirement | Phase   | Status  |
+| ----------- | ------- | ------- |
+| STRM-01     | Phase 5 | Pending |
+| STRM-02     | Phase 6 | Pending |
+| STRM-03     | Phase 6 | Pending |
+| STRM-04     | Phase 6 | Pending |
+| STRM-05     | Phase 6 | Pending |
+| STRM-06     | Phase 6 | Pending |
+| STRM-07     | Phase 6 | Pending |
+| STRM-08     | Phase 7 | Pending |
+| INFRA-01    | Phase 8 | Pending |
+| INFRA-02    | Phase 8 | Pending |
+| INFRA-03    | Phase 8 | Pending |
+| INFRA-04    | Phase 8 | Pending |
+| INFRA-05    | Phase 8 | Pending |
+| INFRA-06    | Phase 8 | Pending |
+| WEB-01      | Phase 9 | Pending |
+| WEB-02      | Phase 9 | Pending |
+| WEB-03      | Phase 9 | Pending |
+| WEB-04      | Phase 9 | Pending |
+| CLEAN-01    | Phase 9 | Pending |
+| CLEAN-02    | Phase 9 | Pending |
+| CLEAN-03    | Phase 9 | Pending |
+| CLEAN-04    | Phase 7 | Pending |
+| CLEAN-05    | Phase 9 | Pending |
+
+**Coverage:** 23/23 requirements mapped ✓ · No orphans · No duplicates
 
 ---
 
