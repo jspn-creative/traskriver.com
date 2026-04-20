@@ -8,16 +8,16 @@ requires:
   - phase: —
     provides: —
 provides:
-  - "`@traskriver/stream` workspace with manifest, Node-target tsconfig, README, gitignore"
-  - "Root workspaces + turbo `build.outputs` entry for `packages/stream/dist/**`"
+  - '`@traskriver/stream` workspace with manifest, Node-target tsconfig, README, gitignore'
+  - 'Root workspaces + turbo `build.outputs` entry for `packages/stream/dist/**`'
 affects:
   - 05-02-packages-stream-skeleton
   - 05-03-packages-stream-skeleton
 
 tech-stack:
-  added: "hono ^4.12.14, @hono/node-server ^1.19.14, pino ^10.3.1, zod ^4.3.6, pino-pretty ^13.1.3, @types/node ^25.6.0 (stream pkg devDep), typescript ^5.8.0 (stream pkg)"
+  added: 'hono ^4.12.14, @hono/node-server ^1.19.14, pino ^10.3.1, zod ^4.3.6, pino-pretty ^13.1.3, @types/node ^25.6.0 (stream pkg devDep), typescript ^5.8.0 (stream pkg)'
   patterns:
-    - "Stream `check` script skips `tsc` until `src/` exists so turbo check passes on skeleton-only tree"
+    - 'Stream `check` script skips `tsc` until `src/` exists so turbo check passes on skeleton-only tree'
 
 key-files:
   created:
@@ -31,10 +31,10 @@ key-files:
     - bun.lock
 
 key-decisions:
-  - "Gate `check` with `test ! -d src || tsc --noEmit` because bare `tsc --noEmit` errors with TS18003 when `include` matches no files (Plan 02 adds `src/`)."
+  - 'Gate `check` with `test ! -d src || tsc --noEmit` because bare `tsc --noEmit` errors with TS18003 when `include` matches no files (Plan 02 adds `src/`).'
 
 patterns-established:
-  - "Workspace package `@traskriver/stream` with Node 22 ESM + `nodenext` tsconfig flags for strip-types + tsc emit parity."
+  - 'Workspace package `@traskriver/stream` with Node 22 ESM + `nodenext` tsconfig flags for strip-types + tsc emit parity.'
 
 requirements-completed: [STRM-01]
 
@@ -117,9 +117,9 @@ None - no external service configuration required.
 
 ---
 
-*Phase: 05-packages-stream-skeleton*
+_Phase: 05-packages-stream-skeleton_
 
-*Completed: 2026-04-20*
+_Completed: 2026-04-20_
 
 ## Self-Check: PASSED
 
