@@ -94,6 +94,8 @@ Send SIGTERM; register `once('exit')` to resolve and clear a 10s timer; if timer
 
 1. **Task 1: Author supervisor.ts (full class)** — `98c3934` (feat)
 
+**Plan metadata:** `daef7d2` (docs: complete plan)
+
 ## Files Created/Modified
 
 - `packages/stream/src/supervisor.ts` — `Supervisor` with `start`, `shutdown`, `getStatus`
