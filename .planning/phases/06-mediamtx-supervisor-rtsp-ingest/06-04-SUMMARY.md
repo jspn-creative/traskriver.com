@@ -58,9 +58,9 @@ completed: 2026-04-20
 ## Task Commits
 
 1. **Task 1: Build, parse-check, and bun check** — `6872fc6` (chore, empty — gates only)
-2. **Task 2: Write 06-SUMMARY.md, update STATE + ROADMAP, commit phase** — (feat, pending at commit time)
+2. **Task 2: Write 06-SUMMARY.md, update STATE + ROADMAP, commit phase** — `df1aa6a` (feat)
 
-**Plan metadata:** (final docs commit hash recorded after `gsd-tools commit`)
+**Plan metadata:** see final `docs(06-04)` commit after gsd-tools
 
 ## Files Created/Modified
 
@@ -91,9 +91,12 @@ None.
 
 ---
 
-## Self-Check: PENDING
+## Self-Check: PASSED
 
-(Run after commits: verify files on disk and commit hashes.)
+- `[ -f .planning/phases/06-mediamtx-supervisor-rtsp-ingest/06-SUMMARY.md ]` — FOUND
+- `[ -f .planning/phases/06-mediamtx-supervisor-rtsp-ingest/06-04-SUMMARY.md ]` — FOUND
+- `git log --oneline --all | grep -q 6872fc6` — FOUND
+- `git log --oneline --all | grep -q df1aa6a` — FOUND
 
 ---
 *Phase: 06-mediamtx-supervisor-rtsp-ingest*
