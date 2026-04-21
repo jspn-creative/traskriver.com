@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
-current_phase: 06
-current_phase_name: mediamtx-supervisor-rtsp-ingest
-current_plan: 4
-status: executing
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-04-21T01:28:53.043Z"
-last_activity: 2026-04-21
+current_phase: 07
+current_phase_name: health-endpoint-shared-types-purge
+current_plan: 1
+status: ready
+stopped_at: Phase 6 complete
+last_updated: "2026-04-20T12:00:00.000Z"
+last_activity: 2026-04-20
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
   completed_plans: 7
   percent: 100
@@ -23,19 +23,21 @@ progress:
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
 **Current milestone:** v1.2 — Self-Hosted Stream
-**Current focus:** Phase 06 — mediamtx-supervisor-rtsp-ingest
+**Current focus:** Phase 07 — health endpoint + shared-types purge (next)
 
 ## Current Position
 
-**Current Phase:** 06
-**Current Phase Name:** mediamtx-supervisor-rtsp-ingest
-**Current Plan:** 4
-**Total Plans in Phase:** 4
-**Status:** Ready to execute
-**Progress:** [██████████] 100%
-**Last Activity:** 2026-04-21
+**Phase 6 closure:** Plan 4 of 4 done — SUMMARY: `06-04-SUMMARY.md`, rollup: `06-SUMMARY.md`
 
-Phase: 06 (mediamtx-supervisor-rtsp-ingest) — EXECUTING
+**Current Phase:** 07
+**Current Phase Name:** health-endpoint-shared-types-purge
+**Current Plan:** 1
+**Total Plans in Phase:** TBD
+**Status:** Ready to plan
+**Progress:** [██████████] 100%
+**Last Activity:** 2026-04-20
+
+Phase: 06 (mediamtx-supervisor-rtsp-ingest) — **COMPLETE**
 
 ## Accumulated Context
 
@@ -56,6 +58,7 @@ Phase: 06 (mediamtx-supervisor-rtsp-ingest) — EXECUTING
 
 ### Recent Decisions
 
+- **Phase 6 supervisor:** backoff 1→30s, stall 75s, codec guard fatal on non-H264; static gates green (`06-04-SUMMARY.md`, rollup `06-SUMMARY.md`)
 - **Phase 5 HTTP stack:** Hono + `@hono/node-server` (see `05-CONTEXT.md`; scaffold deps in `packages/stream/package.json`)
 - **v1.2 scope:** branch-based delivery, no parallel-run or cutover window (app not in active use)
 - **v1.2 scope:** delete `packages/relay` (not retire-in-place); no cold-fallback strategy
@@ -72,14 +75,14 @@ Phase: 06 (mediamtx-supervisor-rtsp-ingest) — EXECUTING
 
 ### Last Session
 
-- **Date:** 2026-04-21
-- **Activity:** Executed `06-03-PLAN.md` — `createApp(getStatus)`, Supervisor boot/shutdown order, SUMMARY + STATE/ROADMAP
+- **Date:** 2026-04-20
+- **Activity:** Executed `06-04-PLAN.md` (build/check/SUMMARY/STATE/ROADMAP); Plan: 4 of 4 done — SUMMARY: `06-04-SUMMARY.md`, rollup: `06-SUMMARY.md`
 
 ### Next Session Should
 
-1. Execute Phase 6 Plan 04 — verification (`build`, `node --check`, `bun check`, phase summary) per ROADMAP
+1. Plan or execute Phase 7 — `/health` payload expansion + shared-types purge
 
-**Stopped At:** Completed 06-03-PLAN.md
+**Stopped At:** Phase 6 complete
 
 ---
 
@@ -90,3 +93,4 @@ Phase: 06 (mediamtx-supervisor-rtsp-ingest) — EXECUTING
 | Phase 06 P01 | 12m | 3 tasks | 5 files |
 | Phase 06-mediamtx-supervisor-rtsp-ingest P02 | 5m | 1 tasks | 1 files |
 | Phase 06-mediamtx-supervisor-rtsp-ingest P03 | 1m | 2 tasks | 2 files |
+| Phase 06-mediamtx-supervisor-rtsp-ingest P04 | 10m | 2 tasks | 4 files |
