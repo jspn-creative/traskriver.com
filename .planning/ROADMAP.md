@@ -74,7 +74,13 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 3. If MediaMTX's API reports a non-`H264` ingest codec, the supervisor refuses to enter `ready` and logs `FATAL: camera codec is {actual}, expected H264`.
 4. `curl http://localhost:8888/trask/index.m3u8` returns a manifest with 2s segment duration and 6-segment window. (Cache-Control rewriting to `public, max-age=1` on `.m3u8` and `public, max-age=86400, immutable` on `.ts` is handled by the Phase 8 reverse proxy — MediaMTX's built-in HLS server cannot emit these headers directly.)
 5. HLS segments are written to `HLS_DIR` (defaulting to `/run/stream/hls`, which becomes tmpfs in Phase 8 via `RuntimeDirectory=stream`) and served by MediaMTX's HTTP origin port, not by the Node HTTP server. `hlsAlwaysRemux: yes` keeps the muxer running so first-viewer latency after a restart stays low.
-   **Plans**: TBD
+
+**Plans:** 4 plans
+
+- [ ] 06-01-PLAN.md — Foundation modules: extend zod schema (5 env keys), add Pino RTSP_URL redaction, create mediamtx-config.ts (literal yaml template, hlsAlwaysRemux: yes, rtspTransport: tcp), create mediamtx-api.ts (native fetch + AbortSignal.timeout)
+- [ ] 06-02-PLAN.md — Supervisor core: class with state machine, child_process.spawn, exponential backoff (1→30s, reset on 60s clean), SIGTERM→10s→SIGKILL, codec guard, stall watchdog (5s poll, 75s threshold)
+- [ ] 06-03-PLAN.md — Wiring: createApp accepts getStatus accessor; index.ts boot integrates Supervisor (construct→app→serve→start), shutdown reverses order (supervisor first, then HTTP)
+- [ ] 06-04-PLAN.md — Verify: `bun run build --filter=stream`, `node --check dist/*.js`, `bun check`, write 06-SUMMARY.md, advance STATE/ROADMAP, commit phase
 
 ### Phase 7: `/health` Endpoint + Shared-Types Purge
 
@@ -131,7 +137,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 | 4. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
 | v1.1 phases                          | v1.1      | —              | Complete    | 2026-04-20 |
 | 5. `packages/stream` Skeleton        | v1.2      | 3/3            | Complete    | 2026-04-20 |
-| 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 0/TBD          | Not started | -          |
+| 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 0/4            | Not started | -          |
 | 7. `/health` + Shared-Types Purge    | v1.2      | 0/TBD          | Not started | -          |
 | 8. VPS + DNS + Camera Infra          | v1.2      | 0/TBD          | Not started | -          |
 | 9. Web Swap + Full Cleanup           | v1.2      | 0/TBD          | Not started | -          |
