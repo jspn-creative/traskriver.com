@@ -8,11 +8,11 @@
 
 - [x] **STRM-01**: A new `packages/stream` Node 22 package is created with ESM, zod-validated config, Pino structured logging, and a `/health` HTTP endpoint (HTTP library choice deferred to phase planning — Fastify placeholder, alternatives to be evaluated).
 - [ ] **STRM-02**: The service supervises a MediaMTX child process, spawning/respawning it with exponential backoff (1→30s cap, reset on 60s clean uptime) and graceful shutdown (SIGTERM→10s→SIGKILL).
-- [ ] **STRM-03**: The service pulls RTSP from the Reolink RLC-510WA (main stream) continuously, 24/7, with automatic reconnection on camera disconnect.
-- [ ] **STRM-04**: A stall watchdog (60–90s threshold) detects stuck MediaMTX via `bytesReceived` + `ready: true` from MediaMTX's API and triggers a supervised restart.
-- [ ] **STRM-05**: A codec guard refuses to enter `ready` state unless the ingest track codec is `H264` (H.265 fails fast with a clear error).
-- [ ] **STRM-06**: MediaMTX is configured for H.264 passthrough (no transcode), 2s segments, 2s closed GOP, 6-segment playlist window, `EXT-X-DISCONTINUITY` on muxer restart.
-- [ ] **STRM-07**: HLS files are written to the runtime directory (`HLS_DIR`, defaulting to `/run/stream/hls` — tmpfs via `RuntimeDirectory=stream` in Phase 8) and served by MediaMTX on its HTTP origin port. `hlsAlwaysRemux: yes` keeps the muxer warm between viewers.
+- [x] **STRM-03**: The service pulls RTSP from the Reolink RLC-510WA (main stream) continuously, 24/7, with automatic reconnection on camera disconnect.
+- [x] **STRM-04**: A stall watchdog (60–90s threshold) detects stuck MediaMTX via `bytesReceived` + `ready: true` from MediaMTX's API and triggers a supervised restart.
+- [x] **STRM-05**: A codec guard refuses to enter `ready` state unless the ingest track codec is `H264` (H.265 fails fast with a clear error).
+- [x] **STRM-06**: MediaMTX is configured for H.264 passthrough (no transcode), 2s segments, 2s closed GOP, 6-segment playlist window, `EXT-X-DISCONTINUITY` on muxer restart.
+- [x] **STRM-07**: HLS files are written to the runtime directory (`HLS_DIR`, defaulting to `/run/stream/hls` — tmpfs via `RuntimeDirectory=stream` in Phase 8) and served by MediaMTX on its HTTP origin port. `hlsAlwaysRemux: yes` keeps the muxer warm between viewers.
 - [ ] **STRM-08**: `/health` returns `{ status, rtspConnected, codec, lastSegmentWrittenAgoMs, restartsLast1h, uptimeMs }` and is bound to an ops-only interface (not the public HLS hostname).
 
 ### Deployment & Infrastructure (VPS + DNS + Camera)
@@ -64,11 +64,11 @@ Deferred to v1.3 or later:
 | ----------- | ------- | -------- |
 | STRM-01     | Phase 5 | Complete |
 | STRM-02     | Phase 6 | Pending  |
-| STRM-03     | Phase 6 | Pending  |
-| STRM-04     | Phase 6 | Pending  |
-| STRM-05     | Phase 6 | Pending  |
-| STRM-06     | Phase 6 | Pending  |
-| STRM-07     | Phase 6 | Pending  |
+| STRM-03     | Phase 6 | Complete |
+| STRM-04     | Phase 6 | Complete |
+| STRM-05     | Phase 6 | Complete |
+| STRM-06     | Phase 6 | Complete |
+| STRM-07     | Phase 6 | Complete |
 | STRM-08     | Phase 7 | Pending  |
 | INFRA-01    | Phase 8 | Pending  |
 | INFRA-02    | Phase 8 | Pending  |
