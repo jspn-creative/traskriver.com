@@ -7,7 +7,7 @@
 ### Stream Service (`packages/stream`)
 
 - [x] **STRM-01**: A new `packages/stream` Node 22 package is created with ESM, zod-validated config, Pino structured logging, and a `/health` HTTP endpoint (HTTP library choice deferred to phase planning — Fastify placeholder, alternatives to be evaluated).
-- [ ] **STRM-02**: The service supervises a MediaMTX child process, spawning/respawning it with exponential backoff (1→30s cap, reset on 60s clean uptime) and graceful shutdown (SIGTERM→10s→SIGKILL).
+- [x] **STRM-02**: The service supervises a MediaMTX child process, spawning/respawning it with exponential backoff (1→30s cap, reset on 60s clean uptime) and graceful shutdown (SIGTERM→10s→SIGKILL).
 - [x] **STRM-03**: The service pulls RTSP from the Reolink RLC-510WA (main stream) continuously, 24/7, with automatic reconnection on camera disconnect.
 - [x] **STRM-04**: A stall watchdog (60–90s threshold) detects stuck MediaMTX via `bytesReceived` + `ready: true` from MediaMTX's API and triggers a supervised restart.
 - [x] **STRM-05**: A codec guard refuses to enter `ready` state unless the ingest track codec is `H264` (H.265 fails fast with a clear error).
@@ -63,7 +63,7 @@ Deferred to v1.3 or later:
 | Requirement | Phase   | Status   |
 | ----------- | ------- | -------- |
 | STRM-01     | Phase 5 | Complete |
-| STRM-02     | Phase 6 | Pending  |
+| STRM-02     | Phase 6 | Complete |
 | STRM-03     | Phase 6 | Complete |
 | STRM-04     | Phase 6 | Complete |
 | STRM-05     | Phase 6 | Complete |

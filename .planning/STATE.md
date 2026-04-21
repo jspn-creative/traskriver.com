@@ -4,17 +4,17 @@ milestone: v1.2
 milestone_name: Self-Hosted Stream
 current_phase: 06
 current_phase_name: mediamtx-supervisor-rtsp-ingest
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-04-21T01:22:06.176Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-04-21T01:25:59.448Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
-  percent: 71
+  completed_plans: 6
+  percent: 86
 ---
 
 # State: Trask River Cam
@@ -29,10 +29,10 @@ progress:
 
 **Current Phase:** 06
 **Current Phase Name:** mediamtx-supervisor-rtsp-ingest
-**Current Plan:** 2
+**Current Plan:** 3
 **Total Plans in Phase:** 4
 **Status:** Ready to execute
-**Progress:** [███████░░░] 71%
+**Progress:** [█████████░] 86%
 **Last Activity:** 2026-04-21
 
 Phase: 06 (mediamtx-supervisor-rtsp-ingest) — EXECUTING
@@ -61,6 +61,7 @@ Phase: 06 (mediamtx-supervisor-rtsp-ingest) — EXECUTING
 - **v1.2 scope:** delete `packages/relay` (not retire-in-place); no cold-fallback strategy
 - **v1.2 scope:** orange-cloud default; no ToS P0 gate; grey-cloud is execution-time fallback
 - **[Phase 06] Plan 01:** Foundation modules — zod Phase 6 keys, Pino RTSP redaction, `buildMediamtxYaml`, `getPathInfo` (`06-01-SUMMARY.md`)
+- **[Phase 06] Plan 02:** `Supervisor` in `packages/stream/src/supervisor.ts` — spawn/backoff/poll/codec guard/stall watchdog; constructor uses explicit fields for `erasableSyntaxOnly` (`06-02-SUMMARY.md`)
 
 ### Blockers
 
@@ -75,9 +76,9 @@ Phase: 06 (mediamtx-supervisor-rtsp-ingest) — EXECUTING
 
 ### Next Session Should
 
-1. Execute Phase 6 Plan 02 — supervisor core (spawn, backoff, watchdog) per ROADMAP
+1. Execute Phase 6 Plan 03 — wire `Supervisor` into Hono `createApp` per ROADMAP
 
-**Stopped At:** Completed 06-01-PLAN.md
+**Stopped At:** Completed 06-02-PLAN.md
 
 ---
 
@@ -86,3 +87,4 @@ Phase: 06 (mediamtx-supervisor-rtsp-ingest) — EXECUTING
 | Run | Duration | Tasks | Files |
 | --- | --- | --- | --- |
 | Phase 06 P01 | 12m | 3 tasks | 5 files |
+| Phase 06-mediamtx-supervisor-rtsp-ingest P02 | 5m | 1 tasks | 1 files |
