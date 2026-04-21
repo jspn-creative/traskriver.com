@@ -64,16 +64,16 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 
 ### Phase 6: MediaMTX Supervisor + RTSP Ingest
 
-**Goal**: The Node supervisor spawns MediaMTX, keeps the RTSP→HLS pipeline alive 24/7 with correct backoff, detects stalls, guards codec, and serves H.264 passthrough HLS on tmpfs with correct cache headers.
+**Goal**: The Node supervisor spawns MediaMTX, keeps the RTSP→HLS pipeline alive 24/7 with correct backoff, detects stalls, guards codec, and serves H.264 passthrough HLS on tmpfs. MediaMTX serves HLS on its own HTTP origin port; cache-header rewriting is deferred to Phase 8 (reverse proxy).
 **Depends on**: Phase 5
 **Requirements**: STRM-02, STRM-03, STRM-04, STRM-05, STRM-06, STRM-07
 **Success Criteria** (what must be TRUE):
 
 1. `kill -9 $(pgrep mediamtx)` on a running stream service triggers supervisor restart with exponential backoff (1→30s cap, reset on 60s clean uptime); SIGTERM shutdown escalates to SIGKILL after 10s.
-2. Unplugging the camera for ≥90s flips the supervisor out of `ready` and triggers a supervised restart; reconnect resumes video with `EXT-X-DISCONTINUITY` in the manifest.
+2. Unplugging the camera for ≥90s flips the supervisor out of `ready` and triggers a supervised restart; reconnect resumes video with a fresh HLS manifest (new random segment prefix + `EXT-X-MEDIA-SEQUENCE:0`) that hls.js/vidstack handles as a discontinuity. (MediaMTX destroys + recreates the muxer rather than emitting a literal `#EXT-X-DISCONTINUITY` tag; functionally equivalent for playback clients.)
 3. If MediaMTX's API reports a non-`H264` ingest codec, the supervisor refuses to enter `ready` and logs `FATAL: camera codec is {actual}, expected H264`.
-4. `curl http://localhost:8888/trask/index.m3u8` returns a manifest with 2s segment duration, 6-segment window, `EXT-X-DISCONTINUITY` on muxer restart, `Cache-Control: public, max-age=1` on `.m3u8` and `public, max-age=86400, immutable` on `.ts`.
-5. HLS segments are written under `RuntimeDirectory=stream` (tmpfs) and served by MediaMTX's HTTP origin port, not by the Node HTTP server.
+4. `curl http://localhost:8888/trask/index.m3u8` returns a manifest with 2s segment duration and 6-segment window. (Cache-Control rewriting to `public, max-age=1` on `.m3u8` and `public, max-age=86400, immutable` on `.ts` is handled by the Phase 8 reverse proxy — MediaMTX's built-in HLS server cannot emit these headers directly.)
+5. HLS segments are written to `HLS_DIR` (defaulting to `/run/stream/hls`, which becomes tmpfs in Phase 8 via `RuntimeDirectory=stream`) and served by MediaMTX's HTTP origin port, not by the Node HTTP server. `hlsAlwaysRemux: yes` keeps the muxer running so first-viewer latency after a restart stays low.
    **Plans**: TBD
 
 ### Phase 7: `/health` Endpoint + Shared-Types Purge
@@ -92,16 +92,17 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 
 ### Phase 8: VPS + DNS + Camera Infrastructure
 
-**Goal**: The DigitalOcean droplet runs `packages/stream` under systemd with TLS and log retention; Cloudflare DNS resolves `stream.traskriver.com` to it; the home router forwards only RTSP; the camera is hardened and producing H.264.
+**Goal**: The DigitalOcean droplet runs `packages/stream` under systemd with TLS, cache-header rewriting, and log retention; Cloudflare DNS resolves `stream.traskriver.com` to it; the home router forwards only RTSP; the camera is hardened and producing H.264.
 **Depends on**: Phase 5 (needs a deployable package) · code-path independent of Phase 6/7 — can progress in parallel with them
 **Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05, INFRA-06
 **Success Criteria** (what must be TRUE):
 
 1. `systemctl status stream` on the droplet shows `active (running)` with `Restart=always`, `MemoryMax`, `LimitNOFILE`, `RuntimeDirectory=stream`, and `StartLimitBurst` tuned; journald retention capped near 500M.
 2. `dig stream.traskriver.com` returns Cloudflare-proxied (orange-cloud) A record; `curl -I https://stream.traskriver.com/...` returns valid Let's Encrypt TLS with auto-renewal timer armed on the droplet.
-3. External scan from the VPS (`nmap -p 554 cam.ddns.example`) returns `open`; other ports (80, 443, 8000, 37777) return `filtered`/`closed`; UPnP disabled on router.
-4. Camera DDNS hostname resolves to home WAN; camera produces H.264 at 2s closed GOP, 3–6 Mbps CBR; a dedicated RTSP-only user (20+ char password, distinct from admin) is configured.
-5. `FIRMWARE.md` records current camera model + firmware version + date, with CVE pre-flight checked against CVE-2021-33044/45, CVE-2025-31700/31701, CVE-2025-65857, CVE-2025-66176/66177.
+3. OpenLiteSpeed (already on the droplet) fronts MediaMTX's HLS origin port with `Cache-Control: public, max-age=1` on `.m3u8` responses and `Cache-Control: public, max-age=86400, immutable` on `.ts` responses. (Caddy is a documented fallback if OLS config proves impractical.)
+4. External scan from the VPS (`nmap -p 554 cam.ddns.example`) returns `open`; other ports (80, 443, 8000, 37777) return `filtered`/`closed`; UPnP disabled on router.
+5. Camera DDNS hostname resolves to home WAN; camera produces H.264 at 2s closed GOP, 3–6 Mbps CBR; a dedicated RTSP-only user (20+ char password, distinct from admin) is configured.
+6. `FIRMWARE.md` records current camera model + firmware version + date, with CVE pre-flight checked against CVE-2021-33044/45, CVE-2025-31700/31701, CVE-2025-65857, CVE-2025-66176/66177.
    **Plans**: TBD
 
 ### Phase 9: Web Swap + Full Cleanup

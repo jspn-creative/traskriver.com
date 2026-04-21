@@ -19,10 +19,10 @@ Out of scope for Phase 6: full `/health` payload (Phase 7), ops-only binding for
 
 - **Binary resolution:** `MEDIAMTX_BIN` env (default `mediamtx`) → assume on PATH. Phase 6 is code-only; binary placement, pinning, and checksum are Phase 8 infra concerns. No vendored binary in repo, no tarball download at boot.
 - **Config file: generated dynamically at boot.** Zod env is the single source of truth; supervisor writes `${HLS_DIR}/../mediamtx.yml` (or a supervisor-owned temp path) on spawn, passes it as `mediamtx <path>`. Segment duration, GOP, playlist window, cache headers are literals in the generator — they're locked by success criteria and must not drift from env.
-- **Config shape (passthrough HLS):** single path `trask` with `source: ${RTSP_URL}`, `sourceOnDemand: no` (always pulling), `sourceProtocol: tcp` (reliable over the public net), HLS enabled globally with `hlsSegmentDuration: 2s`, `hlsSegmentCount: 6`, `hlsVariant: mpegts` (H.264 passthrough), `hlsDirectory: ${HLS_DIR}`, API enabled on `${MEDIAMTX_API_PORT}`, HLS HTTP origin on `${MEDIAMTX_HLS_PORT}`. No RTMP, no SRT, no WebRTC, no recordings.
+- **Config shape (passthrough HLS — MediaMTX v1.17.x syntax, per 06-RESEARCH):** single path `trask` with `source: ${RTSP_URL}`, `sourceOnDemand: no` (always pulling), `rtspTransport: tcp` (reliable over the public net — note: `sourceProtocol` is the obsolete key, v1.17 renamed it to `rtspTransport` as a per-path option). HLS enabled globally with `hls: yes`, `hlsAddress: :${MEDIAMTX_HLS_PORT}`, `hlsSegmentDuration: 2s`, `hlsSegmentCount: 6`, `hlsVariant: mpegts` (H.264 passthrough), `hlsDirectory: ${HLS_DIR}`, **`hlsAlwaysRemux: yes`** (keeps muxer warm so first-viewer latency after a restart stays low). API enabled on `${MEDIAMTX_API_PORT}` (`api: yes`, `apiAddress: :${MEDIAMTX_API_PORT}`). No RTMP, no SRT, no WebRTC, no recordings. Pin MediaMTX v1.17.1 (released 2026-03-31) — gives the `tracks2` API field and stable config schema.
 - **Child I/O:** MediaMTX stdout+stderr captured by `child_process.spawn` with `stdio: ['ignore', 'pipe', 'pipe']`. Each stream line-buffered and forwarded to `log.child({ component: 'mediamtx' })` at `info` (stdout) / `warn` (stderr). No file logging; journald picks it up from the Node process's stdout in Phase 8.
 - **Spawn API:** Node `child_process.spawn` (not `exec`, not `execa`). Zero extra deps. Detached: **no** — child dies with parent.
-- **Cache headers are MediaMTX's job,** not Hono's. Success criterion #4 is verified against the MediaMTX HLS origin port directly (`curl -I http://localhost:8888/trask/index.m3u8`). MediaMTX's built-in HLS server emits the required `Cache-Control` values natively.
+- **Cache headers are NOT MediaMTX's job (scope shift after research).** MediaMTX's `gohlslib` hardcodes `.m3u8: no-cache` and `.ts: max-age=3600` with no config override. Cache-header rewriting (`public, max-age=1` on `.m3u8`, `public, max-age=86400, immutable` on `.ts`) is deferred to Phase 8's reverse proxy (OpenLiteSpeed primary, Caddy fallback). Phase 6 criterion #4 was amended in ROADMAP to drop the cache-header clause; Phase 6 only validates manifest structure (2s segment duration, 6-segment window). MediaMTX's built-in HLS server on `${MEDIAMTX_HLS_PORT}` serves bytes directly in Phase 6; Phase 8 puts OLS in front to terminate TLS and rewrite headers.
 
 ### Backoff + Lifecycle
 
@@ -41,7 +41,7 @@ Out of scope for Phase 6: full `/health` payload (Phase 7), ops-only binding for
 
 ### Codec Guard
 
-- **Check once: at first transition to `ready`.** Supervisor queries MediaMTX API for the ingest track codec; if it's not `H264`, log `FATAL: camera codec is {actual}, expected H264` and **exit the process non-zero** (systemd won't restart-loop it: rely on `StartLimitBurst` in Phase 8 to eventually stop trying).
+- **Check once: at first transition to `ready`.** Supervisor queries MediaMTX API for the ingest track codec via `GET /v3/paths/get/trask` (use `tracks2` array from v1.17+ — each entry has `type`, e.g. `"H264"` / `"H265"`). Compare with strict equality: `codec === 'H264'` (PascalCase; per research against `internal/formatlabel/label.go`). If not `H264`, log `FATAL: camera codec is {actual}, expected H264` and **exit the process non-zero** (systemd won't restart-loop it: rely on `StartLimitBurst` in Phase 8 to eventually stop trying).
 - **No periodic re-check.** Camera reconfiguration mid-flight is not a supported scenario — operator must change camera config, then restart the service.
 - **No retry, no loop, no persistent `codec_mismatch` state machine entry.** Fatal is fatal. The `codec_mismatch` HealthStatus value stays in the enum for Phase 7's `/health` payload but Phase 6 exits before `/health` can observe it — any caller reading `/health` during the brief window just sees `starting`. That's fine.
 
@@ -206,8 +206,9 @@ None — no pending todos matched this phase.
 
 - Full `/health` payload (`rtspConnected`, `codec`, `lastSegmentWrittenAgoMs`, `restartsLast1h`, `uptimeMs`) and ops-only binding — **Phase 7** (supervisor will track this state in Phase 6, but not expose it)
 - systemd unit, `RuntimeDirectory=stream` tmpfs mount, TLS, journald retention tuning — **Phase 8**
-- MediaMTX binary provisioning (apt / tarball / checksum) — **Phase 8**
+- MediaMTX binary provisioning (apt / tarball v1.17.1 / checksum) — **Phase 8**
 - DNS (`stream.traskriver.com`, orange-cloud proxy), Let's Encrypt cert + auto-renew — **Phase 8**
+- **HLS cache-header rewriting** (OpenLiteSpeed primary, Caddy fallback; rewrites `.m3u8` → `Cache-Control: public, max-age=1` and `.ts` → `public, max-age=86400, immutable`) — **Phase 8** (MediaMTX cannot emit these natively)
 - Camera DDNS, RTSP-user account, port-forward, CVE pre-flight, `FIRMWARE.md` — **Phase 8**
 - Web client swap to new HLS URL, state-machine collapse, `degraded` overlay UX — **Phase 9**
 - Relay/demand/JWT deletion, shared-types purge, wrangler binding cleanup — **Phases 7 & 9**
