@@ -15,11 +15,5 @@ declare module '$env/static/public' {
 }
 
 declare namespace App {
-	interface Platform {
-		env: {
-			RIVER_KV: KVNamespace;
-			RELAY_API_TOKEN: string;
-			DEMAND_WINDOW_SECONDS?: string;
-		};
-	}
+	// Platform env bindings removed — no KV or relay secrets needed.
 }

@@ -12,13 +12,5 @@
 	"preview_urls": true,
 	"observability": {
 		"enabled": true
-	},
-	"kv_namespaces": [
-		{
-			"binding": "RIVER_KV",
-			"id": "5136b9c45e1f4c30942dbca49afe70ca",
-			"preview_id": "5136b9c45e1f4c30942dbca49afe70ca",
-			"remote": true
-		}
-	]
+	}
 }
