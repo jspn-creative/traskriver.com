@@ -10,7 +10,11 @@ const log = rootLog.child({ component: 'server' });
 
 const supervisor = new Supervisor(config, rootLog.child({ component: 'supervisor' }));
 
-const app = createApp({ getStatus: () => supervisor.getStatus() });
+const opsHosts: ReadonlySet<string> = new Set(config.OPS_HOSTS);
+const app = createApp({
+	getHealth: () => supervisor.getHealthSnapshot(),
+	opsHosts
+});
 
 const server = serve({ fetch: app.fetch, port: config.PORT, hostname: '0.0.0.0' }, (info) =>
 	log.info({ port: info.port }, 'stream service listening')

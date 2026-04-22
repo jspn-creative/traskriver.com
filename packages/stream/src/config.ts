@@ -8,7 +8,16 @@ export const ConfigSchema = z.object({
 	MEDIAMTX_API_PORT: z.coerce.number().int().positive().default(9997),
 	MEDIAMTX_HLS_PORT: z.coerce.number().int().positive().default(8888),
 	HLS_DIR: z.string().default('/run/stream/hls'),
-	MEDIAMTX_BIN: z.string().default('mediamtx')
+	MEDIAMTX_BIN: z.string().default('mediamtx'),
+	OPS_HOSTS: z
+		.string()
+		.default('localhost,127.0.0.1')
+		.transform((s) =>
+			s
+				.split(',')
+				.map((x) => x.trim().toLowerCase())
+				.filter(Boolean)
+		)
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
