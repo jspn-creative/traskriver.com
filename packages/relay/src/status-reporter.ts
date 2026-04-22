@@ -1,4 +1,4 @@
-import type { RelayStatusPayload } from '@traskriver/shared';
+import type { RelayStatusPayload } from './types.ts';
 import { log } from './logger';
 
 export class StatusReporter {

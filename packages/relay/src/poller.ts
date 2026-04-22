@@ -1,4 +1,4 @@
-import type { DemandResponse } from '@traskriver/shared';
+import type { DemandResponse } from './types.ts';
 import { log } from './logger';
 
 export interface PollResult {

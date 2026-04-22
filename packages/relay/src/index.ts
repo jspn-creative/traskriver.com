@@ -1,4 +1,4 @@
-import { RelayConfig } from '@traskriver/shared';
+import type { RelayConfig } from './types.ts';
 import { DemandPoller } from './poller';
 import { FfmpegManager } from './ffmpeg';
 import { startHealthServer } from './health-server';

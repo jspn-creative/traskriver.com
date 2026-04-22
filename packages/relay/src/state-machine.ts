@@ -1,4 +1,4 @@
-import type { RelayInternalState } from '@traskriver/shared';
+import type { RelayInternalState } from './types.ts';
 import { log } from './logger';
 
 export interface TransitionEvent {
