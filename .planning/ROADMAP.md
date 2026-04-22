@@ -113,23 +113,27 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 3. Page state machine has exactly four states (`connecting`, `viewing`, `degraded`, `error`); no start button, no demand POST, no relay-status polling, no `LiveViewerCount`.
 4. Branch shows `packages/relay` deleted (including its GitHub Actions workflow + Tailscale CI docs); `routes/stream.remote.ts`, `routes/api/stream/demand/`, `routes/api/relay/status/`, `routes/api/test-kv/`, `lib/components/LiveViewerCount.svelte`, sidebar start button all deleted; `wrangler.jsonc` has no CF Stream bindings and `RIVER_KV` is removed if unused.
 5. `turbo.json`, root `package.json`, tsconfig paths reflect the removed `packages/relay` and added `packages/stream`; `bun check` + `bun lint` pass repo-wide.
-   **Plans**: TBD
+   **Plans:** 3 plans
+
+- [ ] 08-01-PLAN.md — Rewrite VideoPlayer.svelte + +page.svelte: direct HLS playback, 4-state machine, MEDIA_SEQUENCE stall detection, PostHog events
+- [ ] 08-02-PLAN.md — Delete dead relay/demand/JWT/CF Stream files, clean wrangler.jsonc/app.d.ts/.dev.vars bindings
+- [ ] 08-03-PLAN.md — Delete packages/relay + workflow, clean workspace refs, verify bun check + bun lint
 
 ## Progress
 
 **Execution Order:** Phases execute in numeric order: 5 → 6 → 7 → 8
 
-| Phase                                | Milestone | Plans Complete | Status      | Completed  |
-| ------------------------------------ | --------- | -------------- | ----------- | ---------- |
-| 1. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
-| 2. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
-| 3. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
-| 4. MVP Pipeline                      | v1.0      | —              | Complete    | 2026-04-13 |
-| v1.1 phases                          | v1.1      | —              | Complete    | 2026-04-20 |
-| 5. `packages/stream` Skeleton        | v1.2      | 3/3            | Complete    | 2026-04-20 |
-| 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 4/4            | Complete    | 2026-04-20 |
-| 7. `/health` + Shared-Types Purge    | v1.2      | 4/4            | Complete    | 2026-04-22 |
-| 8. Web Swap + Full Cleanup           | v1.2      | 0/TBD          | Not started | -          |
+| Phase                                | Milestone | Plans Complete | Status   | Completed  |
+| ------------------------------------ | --------- | -------------- | -------- | ---------- |
+| 1. MVP Pipeline                      | v1.0      | —              | Complete | 2026-04-13 |
+| 2. MVP Pipeline                      | v1.0      | —              | Complete | 2026-04-13 |
+| 3. MVP Pipeline                      | v1.0      | —              | Complete | 2026-04-13 |
+| 4. MVP Pipeline                      | v1.0      | —              | Complete | 2026-04-13 |
+| v1.1 phases                          | v1.1      | —              | Complete | 2026-04-20 |
+| 5. `packages/stream` Skeleton        | v1.2      | 3/3            | Complete | 2026-04-20 |
+| 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 4/4            | Complete | 2026-04-20 |
+| 7. `/health` + Shared-Types Purge    | v1.2      | 4/4            | Complete | 2026-04-22 |
+| 8. Web Swap + Full Cleanup           | v1.2      | 0/3            | Planned  | -          |
 
 ## Backlog
 
