@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
 status: unknown
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-22T21:15:29.404Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-04-22T21:18:52.126Z"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 14
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # State: Trask River Cam
@@ -23,7 +23,7 @@ progress:
 ## Current Position
 
 Phase: 08 (web-swap-full-cleanup) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Accumulated Context
 
@@ -44,6 +44,8 @@ Plan: 2 of 3
 
 ### Recent Decisions
 
+- **[Phase 08] Plan 02:** Deleted all remaining relay-era web routes/helpers/types and removed worker KV/relay env bindings.
+- **[Phase 08] Plan 02:** `hooks.server.ts` now constructs `PostHog` client directly after removing `$lib/server/posthog`.
 - **[Phase 08] Plan 01:** Web playback now mounts `VideoPlayer` unconditionally and reads `env.PUBLIC_STREAM_HLS_URL` directly (no demand/relay/JWT path).
 - **[Phase 08] Plan 01:** Degraded/recovered state is driven by HLS `LEVEL_LOADED` media-sequence progression checks (~30s stall threshold).
 - **Phase 6 supervisor:** backoff 1→30s, stall 75s, codec guard fatal on non-H264; static gates green (`06-04-SUMMARY.md`, rollup `06-SUMMARY.md`)
@@ -71,9 +73,9 @@ Plan: 2 of 3
 
 ### Next Session Should
 
-1. Execute `08-02-PLAN.md` to continue relay-era cleanup across API/routes/config surfaces.
+1. Execute `08-03-PLAN.md` to complete final phase cleanup and closure.
 
-**Stopped At:** Completed 08-01-PLAN.md
+**Stopped At:** Completed 08-02-PLAN.md
 
 ---
 
@@ -89,3 +91,4 @@ Plan: 2 of 3
 | Phase 07 P01                                    | 5m       | 3 tasks | 11 files |
 | Phase 07-health-endpoint-shared-types-purge P04 | 3m       | 2 tasks | 6 files  |
 | Phase 08 P01 | 6 min | 2 tasks | 4 files |
+| Phase 08 P02 | 1m | 2 tasks | 11 files |
