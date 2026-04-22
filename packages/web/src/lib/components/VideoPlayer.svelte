@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Hls from 'hls.js';
 	import { defineCustomElements } from 'vidstack/elements';
 	import defaultPoster from '$lib/assets/default.jpg';
 
@@ -85,11 +84,12 @@
 				}
 			}, 5_000);
 
-			hls.on(Hls.Events.LEVEL_LOADED, onLevelLoaded);
+			const LEVEL_LOADED = provider.library?.Events?.LEVEL_LOADED ?? 'hlsLevelLoaded';
+			hls.on(LEVEL_LOADED, onLevelLoaded);
 			teardownHls?.();
 			teardownHls = () => {
 				clearInterval(stallCheck);
-				hls.off(Hls.Events.LEVEL_LOADED, onLevelLoaded);
+				hls.off(LEVEL_LOADED, onLevelLoaded);
 			};
 		};
 
