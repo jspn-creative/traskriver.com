@@ -13,7 +13,7 @@
 - [x] **STRM-05**: A codec guard refuses to enter `ready` state unless the ingest track codec is `H264` (H.265 fails fast with a clear error).
 - [x] **STRM-06**: MediaMTX is configured for H.264 passthrough (no transcode), 2s segments, 2s closed GOP, 6-segment playlist window, `EXT-X-DISCONTINUITY` on muxer restart.
 - [x] **STRM-07**: HLS files are written to the runtime directory (`HLS_DIR`, defaulting to `/run/stream/hls` — tmpfs via `RuntimeDirectory=stream` in Phase 8) and served by MediaMTX on its HTTP origin port. `hlsAlwaysRemux: yes` keeps the muxer warm between viewers.
-- [ ] **STRM-08**: `/health` returns `{ status, rtspConnected, codec, lastSegmentWrittenAgoMs, restartsLast1h, uptimeMs }` and is bound to an ops-only interface (not the public HLS hostname).
+- [x] **STRM-08**: `/health` returns `{ status, rtspConnected, codec, lastSegmentWrittenAgoMs, restartsLast1h, uptimeMs }` and is bound to an ops-only interface (not the public HLS hostname).
 
 ### Deployment & Infrastructure (VPS + DNS + Camera)
 
@@ -36,7 +36,7 @@
 - [ ] **CLEAN-01**: Deleted: `packages/web/src/routes/stream.remote.ts`, `routes/api/stream/demand/`, `routes/api/relay/status/`, `routes/api/test-kv/`, `lib/components/LiveViewerCount.svelte`, sidebar stream start button.
 - [ ] **CLEAN-02**: Deleted: Cloudflare Stream env bindings and secrets from `wrangler.jsonc`; `RIVER_KV` binding removed if no remaining consumers.
 - [ ] **CLEAN-03**: Deleted: the entire `packages/relay` package and its GitHub Actions workflow + Tailscale CI documentation.
-- [ ] **CLEAN-04**: Deleted: all relay/demand/JWT/status types from `packages/shared`; root `index.ts` left clean.
+- [x] **CLEAN-04**: Deleted: all relay/demand/JWT/status types from `packages/shared`; root `index.ts` left clean.
 - [ ] **CLEAN-05**: Workspace references (`turbo.json`, root `package.json`, tsconfig paths) updated to reflect removed `packages/relay` and added `packages/stream`.
 
 ## Future Requirements (Deferred)
@@ -69,7 +69,7 @@ Deferred to v1.3 or later:
 | STRM-05     | Phase 6 | Complete |
 | STRM-06     | Phase 6 | Complete |
 | STRM-07     | Phase 6 | Complete |
-| STRM-08     | Phase 7 | Pending  |
+| STRM-08     | Phase 7 | Complete |
 | INFRA-01    | Phase 8 | Pending  |
 | INFRA-02    | Phase 8 | Pending  |
 | INFRA-03    | Phase 8 | Pending  |
@@ -83,7 +83,7 @@ Deferred to v1.3 or later:
 | CLEAN-01    | Phase 9 | Pending  |
 | CLEAN-02    | Phase 9 | Pending  |
 | CLEAN-03    | Phase 9 | Pending  |
-| CLEAN-04    | Phase 7 | Pending  |
+| CLEAN-04    | Phase 7 | Complete |
 | CLEAN-05    | Phase 9 | Pending  |
 
 **Coverage:** 23/23 requirements mapped ✓ · No orphans · No duplicates
