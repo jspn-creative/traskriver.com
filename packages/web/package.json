@@ -15,8 +15,7 @@
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
 		"gen": "wrangler types",
-		"push-stream": "bun run ../../scripts/push-stream.ts",
-		"setup-signing": "bun run scripts/setup-signing.ts"
+		"push-stream": "bun run ../../scripts/push-stream.ts"
 	},
 	"devDependencies": {
 		"@lucide/svelte": "^0.577.0",

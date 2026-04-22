@@ -19,7 +19,8 @@
 	let hideTimer: ReturnType<typeof setTimeout>;
 	const pageLoadTime = Date.now();
 
-	const log = (msg: string, data?: Record<string, unknown>) => console.log(`[stream] ${msg}`, data ?? '');
+	const log = (msg: string, data?: Record<string, unknown>) =>
+		console.log(`[stream] ${msg}`, data ?? '');
 
 	const sessionActive = $derived(phase === 'viewing' || phase === 'degraded');
 	const sidebarWidth = $derived(phase === 'viewing' ? '300px' : '420px');
@@ -151,7 +152,8 @@
 					fill="none"
 					viewBox="0 0 24 24"
 				>
-					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+					></circle>
 					<path
 						class="opacity-75"
 						fill="currentColor"
@@ -161,14 +163,17 @@
 				<p class="animate-pulse text-sm text-light drop-shadow-md">Connecting...</p>
 			</div>
 		{:else if phase === 'degraded'}
-			<div class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
+			<div
+				class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm"
+			>
 				<svg
 					class="mb-3 h-6 w-6 animate-spin text-white/70"
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"
 					viewBox="0 0 24 24"
 				>
-					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+					></circle>
 					<path
 						class="opacity-75"
 						fill="currentColor"
