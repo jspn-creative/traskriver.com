@@ -77,8 +77,8 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 
 **Plans:** 4 plans
 
-- [x] 06-01-PLAN.md — Foundation modules: extend zod schema (5 env keys), add Pino RTSP_URL redaction, create mediamtx-config.ts (literal yaml template, hlsAlwaysRemux: yes, rtspTransport: tcp), create mediamtx-api.ts (native fetch + AbortSignal.timeout) _(complete 2026-04-21)_
-- [x] 06-02-PLAN.md — Supervisor core: class with state machine, child_process.spawn, exponential backoff (1→30s, reset on 60s clean), SIGTERM→10s→SIGKILL, codec guard, stall watchdog (5s poll, 75s threshold) _(complete 2026-04-21)_
+- [x] 06-01-PLAN.md — Foundation modules: extend zod schema (5 env keys), add Pino RTSP*URL redaction, create mediamtx-config.ts (literal yaml template, hlsAlwaysRemux: yes, rtspTransport: tcp), create mediamtx-api.ts (native fetch + AbortSignal.timeout) *(complete 2026-04-21)\_
+- [x] 06-02-PLAN.md — Supervisor core: class with state machine, child*process.spawn, exponential backoff (1→30s, reset on 60s clean), SIGTERM→10s→SIGKILL, codec guard, stall watchdog (5s poll, 75s threshold) *(complete 2026-04-21)\_
 - [x] 06-03-PLAN.md — Wiring: createApp accepts getStatus accessor; index.ts boot integrates Supervisor (construct→app→serve→start), shutdown reverses order (supervisor first, then HTTP) _(complete 2026-04-21)_
 - [x] 06-04-PLAN.md — Verify: `bun run build --filter=@traskriver/stream`, `node --check dist/*.js`, `bun check`, write 06-SUMMARY.md, advance STATE/ROADMAP, commit phase _(complete 2026-04-20)_
 
@@ -94,7 +94,12 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 3. Codec guard transitions surface in `/health` (e.g. `status: "codec_mismatch"` when non-H.264 detected).
 4. `packages/shared` root `index.ts` no longer exports any relay/demand/JWT types; `RelayState`, `DemandResponse`, `RelayStatusPayload`, `RELAY_STATUS_*`, `RelayConfig`, etc. are removed.
 5. `bun check` passes repo-wide after the shared-types purge (no orphaned imports).
-   **Plans**: TBD
+
+**Plans:** 3 plans
+
+- [ ] 07-01-PLAN.md — Shared-types purge: re-home relay/web types, empty `packages/shared/index.ts`, repo-wide `bun check` green (CLEAN-04)
+- [ ] 07-02-PLAN.md — Supervisor extension: `HealthSnapshot` type, `getHealthSnapshot()`, rolling 1h restart counter, `SegmentWatcher`, non-exiting `codecMismatch` state (STRM-08)
+- [ ] 07-03-PLAN.md — HTTP wiring: `OPS_HOSTS` zod config, `createApp({ getHealth, opsHosts })` with Host-gate 404 middleware, `index.ts` wiring, build verify (STRM-08)
 
 ### Phase 8: VPS + DNS + Camera Infrastructure
 
