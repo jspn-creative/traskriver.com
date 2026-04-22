@@ -24,7 +24,7 @@
 - [x] **Phase 5: `packages/stream` Skeleton** — Bootstrap new Node 22 ESM package with zod config, Pino logger, and placeholder `/health`.
 - [x] **Phase 6: MediaMTX Supervisor + RTSP Ingest** — Spawn/backoff supervisor, stall watchdog, codec guard, H.264 passthrough HLS config.
 - [x] **Phase 7: `/health` Endpoint + Shared-Types Purge** — Full `/health` payload bound to ops-only surface; strip relay/demand/JWT types from `packages/shared`.
-- [ ] **Phase 8: Web Swap + Full Cleanup** — Point `VideoPlayer` at new HLS URL, collapse state machine, delete `packages/relay`, stream/demand/KV routes, CF Stream bindings, workspace refs.
+- [x] **Phase 8: Web Swap + Full Cleanup** — Point `VideoPlayer` at new HLS URL, collapse state machine, delete `packages/relay`, stream/demand/KV routes, CF Stream bindings, workspace refs.
 
 ## Phase Details
 
@@ -115,9 +115,9 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 5. `turbo.json`, root `package.json`, tsconfig paths reflect the removed `packages/relay` and added `packages/stream`; `bun check` + `bun lint` pass repo-wide.
    **Plans:** 3 plans
 
-- [ ] 08-01-PLAN.md — Rewrite VideoPlayer.svelte + +page.svelte: direct HLS playback, 4-state machine, MEDIA_SEQUENCE stall detection, PostHog events
-- [ ] 08-02-PLAN.md — Delete dead relay/demand/JWT/CF Stream files, clean wrangler.jsonc/app.d.ts/.dev.vars bindings
-- [ ] 08-03-PLAN.md — Delete packages/relay + workflow, clean workspace refs, verify bun check + bun lint
+- [x] 08-01-PLAN.md — Rewrite VideoPlayer.svelte + +page.svelte: direct HLS playback, 4-state machine, MEDIA_SEQUENCE stall detection, PostHog events _(complete 2026-04-22)_
+- [x] 08-02-PLAN.md — Delete dead relay/demand/JWT/CF Stream files, clean wrangler.jsonc/app.d.ts/.dev.vars bindings _(complete 2026-04-22)_
+- [x] 08-03-PLAN.md — Delete packages/relay + workflow, clean workspace refs, verify bun check + bun lint _(complete 2026-04-22)_
 
 ## Progress
 
@@ -133,7 +133,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 | 5. `packages/stream` Skeleton        | v1.2      | 3/3            | Complete | 2026-04-20 |
 | 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 4/4            | Complete | 2026-04-20 |
 | 7. `/health` + Shared-Types Purge    | v1.2      | 4/4            | Complete | 2026-04-22 |
-| 8. Web Swap + Full Cleanup           | v1.2      | 0/3            | Planned  | -          |
+| 8. Web Swap + Full Cleanup           | v1.2      | 3/3            | Complete | 2026-04-22 |
 
 ## Backlog
 

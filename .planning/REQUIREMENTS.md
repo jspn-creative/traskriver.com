@@ -26,9 +26,9 @@
 
 - [x] **CLEAN-01**: Deleted: `packages/web/src/routes/stream.remote.ts`, `routes/api/stream/demand/`, `routes/api/relay/status/`, `routes/api/test-kv/`, `lib/components/LiveViewerCount.svelte`, sidebar stream start button.
 - [x] **CLEAN-02**: Deleted: Cloudflare Stream env bindings and secrets from `wrangler.jsonc`; `RIVER_KV` binding removed if no remaining consumers.
-- [ ] **CLEAN-03**: Deleted: the entire `packages/relay` package and its GitHub Actions workflow + Tailscale CI documentation.
+- [x] **CLEAN-03**: Deleted: the entire `packages/relay` package and its GitHub Actions workflow + Tailscale CI documentation.
 - [x] **CLEAN-04**: Deleted: all relay/demand/JWT/status types from `packages/shared`; root `index.ts` left clean.
-- [ ] **CLEAN-05**: Workspace references (`turbo.json`, root `package.json`, tsconfig paths) updated to reflect removed `packages/relay` and added `packages/stream`.
+- [x] **CLEAN-05**: Workspace references (`turbo.json`, root `package.json`, tsconfig paths) updated to reflect removed `packages/relay` and added `packages/stream`.
 
 ## Future Requirements (Deferred)
 
@@ -79,9 +79,9 @@ Deferred to v1.3 or later:
 | WEB-04      | Phase 8 | Complete |
 | CLEAN-01    | Phase 8 | Complete |
 | CLEAN-02    | Phase 8 | Complete |
-| CLEAN-03    | Phase 8 | Pending  |
+| CLEAN-03    | Phase 8 | Complete |
 | CLEAN-04    | Phase 7 | Complete |
-| CLEAN-05    | Phase 8 | Pending  |
+| CLEAN-05    | Phase 8 | Complete |
 
 **Coverage:** 23/23 requirements mapped ✓ · No orphans · No duplicates
 

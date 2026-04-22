@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
-status: unknown
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-04-22T21:18:52.126Z"
+status: complete
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-04-22T21:23:43.638Z"
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 14
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # State: Trask River Cam
@@ -22,8 +22,8 @@ progress:
 
 ## Current Position
 
-Phase: 08 (web-swap-full-cleanup) — EXECUTING
-Plan: 3 of 3
+Phase: 08 (web-swap-full-cleanup) — COMPLETE
+Plan: 3 of 3 (complete)
 
 ## Accumulated Context
 
@@ -44,6 +44,8 @@ Plan: 3 of 3
 
 ### Recent Decisions
 
+- **[Phase 08] Plan 03:** Deleted `packages/relay` + relay deploy workflow and removed relay workspace/scripts from root `package.json`.
+- **[Phase 08] Plan 03:** Removed stale `packages/web/scripts/setup-signing.ts` and script entry after final orphan-reference scan.
 - **[Phase 08] Plan 02:** Deleted all remaining relay-era web routes/helpers/types and removed worker KV/relay env bindings.
 - **[Phase 08] Plan 02:** `hooks.server.ts` now constructs `PostHog` client directly after removing `$lib/server/posthog`.
 - **[Phase 08] Plan 01:** Web playback now mounts `VideoPlayer` unconditionally and reads `env.PUBLIC_STREAM_HLS_URL` directly (no demand/relay/JWT path).
@@ -69,13 +71,13 @@ Plan: 3 of 3
 ### Last Session
 
 - **Date:** 2026-04-22
-- **Activity:** Executed Phase 07 plans (`07-01` through `07-04`) and verified phase completion (`bun check` green; summaries for all four plans present)
+- **Activity:** Executed `08-03-PLAN.md`, deleted relay package/workflow, cleaned workspaces, and verified `bun check` + `bun lint` green.
 
 ### Next Session Should
 
-1. Execute `08-03-PLAN.md` to complete final phase cleanup and closure.
+1. Run milestone v1.2 closeout (`/gsd-complete-milestone`) now that Phase 08 is complete.
 
-**Stopped At:** Completed 08-02-PLAN.md
+**Stopped At:** Completed 08-03-PLAN.md
 
 ---
 
@@ -92,3 +94,4 @@ Plan: 3 of 3
 | Phase 07-health-endpoint-shared-types-purge P04 | 3m       | 2 tasks | 6 files  |
 | Phase 08 P01 | 6 min | 2 tasks | 4 files |
 | Phase 08 P02 | 1m | 2 tasks | 11 files |
+| Phase 08-web-swap-full-cleanup P03 | 3m | 3 tasks | 28 files |
