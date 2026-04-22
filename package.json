@@ -26,7 +26,7 @@
 		"check:web": "bun run --cwd packages/web check",
 		"check:relay": "bun run --cwd packages/relay check",
 		"check:stream": "bun run --cwd packages/stream check",
-		"start:stream": "bun run --cwd packages/stream start",
+		"start:stream": "bun run --env-file=.env --cwd packages/stream start",
 		"lint": "bun run --cwd packages/web lint",
 		"format": "bunx prettier --write .",
 		"gen": "bun run --cwd packages/web gen"
