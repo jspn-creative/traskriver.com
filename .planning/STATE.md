@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
-status: unknown
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-04-22T14:25:42.727Z"
+status: executing
+stopped_at: Completed 07-04-PLAN.md
+last_updated: '2026-04-22T18:48:43.581Z'
 progress:
   total_phases: 5
-  completed_phases: 2
-  total_plans: 10
+  completed_phases: 3
+  total_plans: 11
   completed_plans: 11
 ---
 
@@ -18,12 +18,12 @@ progress:
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
 **Current milestone:** v1.2 — Self-Hosted Stream
-**Current focus:** Phase 07 — health-endpoint-shared-types-purge
+**Current focus:** Phase 08 — vps-dns-camera-infrastructure
 
 ## Current Position
 
-Phase: 07 (health-endpoint-shared-types-purge) — EXECUTING
-Plan: 1 of 3
+Phase: 08 (vps-dns-camera-infrastructure) — NEXT
+Plan: 0 of TBD
 
 ## Accumulated Context
 
@@ -52,6 +52,8 @@ Plan: 1 of 3
 - **[Phase 06] Plan 01:** Foundation modules — zod Phase 6 keys, Pino RTSP redaction, `buildMediamtxYaml`, `getPathInfo` (`06-01-SUMMARY.md`)
 - **[Phase 06] Plan 02:** `Supervisor` in `packages/stream/src/supervisor.ts` — spawn/backoff/poll/codec guard/stall watchdog; constructor uses explicit fields for `erasableSyntaxOnly` (`06-02-SUMMARY.md`)
 - **[Phase 06] Plan 03:** `createApp({ getStatus })` + index boot/shutdown wiring — no health singleton; supervisor teardown before `server.close` (`06-03-SUMMARY.md`)
+- **[Phase 07] Plans 01-04:** `packages/shared` is now intentionally empty (`export {}`) and relay/web shared contracts are localized to owning packages (`07-01-SUMMARY.md`, `07-04-SUMMARY.md`)
+- **[Phase 07] Plans 02-03:** `/health` is host-gated via `OPS_HOSTS` and wired to `Supervisor.getHealthSnapshot()` including codec mismatch visibility (`07-02-SUMMARY.md`, `07-03-SUMMARY.md`)
 
 ### Blockers
 
@@ -61,24 +63,25 @@ Plan: 1 of 3
 
 ### Last Session
 
-- **Date:** 2026-04-20
-- **Activity:** Executed `06-04-PLAN.md` (build/check/SUMMARY/STATE/ROADMAP); Plan: 4 of 4 done — SUMMARY: `06-04-SUMMARY.md`, rollup: `06-SUMMARY.md`
+- **Date:** 2026-04-22
+- **Activity:** Executed Phase 07 plans (`07-01` through `07-04`) and verified phase completion (`bun check` green; summaries for all four plans present)
 
 ### Next Session Should
 
-1. Plan or execute Phase 7 — `/health` payload expansion + shared-types purge
+1. Plan and execute Phase 8 — VPS/DNS/camera infrastructure hardening and deployment wiring
 
-**Stopped At:** Completed 07-01-PLAN.md
+**Stopped At:** Completed 07-04-PLAN.md
 
 ---
 
 ## Performance Metrics
 
-| Run                                          | Duration | Tasks   | Files   |
-| -------------------------------------------- | -------- | ------- | ------- |
-| Phase 06 P01                                 | 12m      | 3 tasks | 5 files |
-| Phase 06-mediamtx-supervisor-rtsp-ingest P02 | 5m       | 1 tasks | 1 files |
-| Phase 06-mediamtx-supervisor-rtsp-ingest P03 | 1m       | 2 tasks | 2 files |
-| Phase 06-mediamtx-supervisor-rtsp-ingest P04 | 10m      | 2 tasks | 4 files |
-| Phase 07-health-endpoint-shared-types-purge P02 | 6m | 2 tasks | 2 files |
-| Phase 07 P01 | 5m | 3 tasks | 11 files |
+| Run                                             | Duration | Tasks   | Files    |
+| ----------------------------------------------- | -------- | ------- | -------- |
+| Phase 06 P01                                    | 12m      | 3 tasks | 5 files  |
+| Phase 06-mediamtx-supervisor-rtsp-ingest P02    | 5m       | 1 tasks | 1 files  |
+| Phase 06-mediamtx-supervisor-rtsp-ingest P03    | 1m       | 2 tasks | 2 files  |
+| Phase 06-mediamtx-supervisor-rtsp-ingest P04    | 10m      | 2 tasks | 4 files  |
+| Phase 07-health-endpoint-shared-types-purge P02 | 6m       | 2 tasks | 2 files  |
+| Phase 07 P01                                    | 5m       | 3 tasks | 11 files |
+| Phase 07-health-endpoint-shared-types-purge P04 | 3m       | 2 tasks | 6 files  |

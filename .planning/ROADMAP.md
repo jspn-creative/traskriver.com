@@ -23,7 +23,7 @@
 
 - [x] **Phase 5: `packages/stream` Skeleton** — Bootstrap new Node 22 ESM package with zod config, Pino logger, and placeholder `/health`.
 - [x] **Phase 6: MediaMTX Supervisor + RTSP Ingest** — Spawn/backoff supervisor, stall watchdog, codec guard, H.264 passthrough HLS config.
-- [ ] **Phase 7: `/health` Endpoint + Shared-Types Purge** — Full `/health` payload bound to ops-only surface; strip relay/demand/JWT types from `packages/shared`.
+- [x] **Phase 7: `/health` Endpoint + Shared-Types Purge** — Full `/health` payload bound to ops-only surface; strip relay/demand/JWT types from `packages/shared`.
 - [ ] **Phase 8: VPS + DNS + Camera Infrastructure** — DO droplet systemd deploy, TLS, Cloudflare DNS, router port-forward, camera H.264/DDNS/CVE check.
 - [ ] **Phase 9: Web Swap + Full Cleanup** — Point `VideoPlayer` at new HLS URL, collapse state machine, delete `packages/relay`, stream/demand/KV routes, CF Stream bindings, workspace refs.
 
@@ -95,11 +95,12 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 4. `packages/shared` root `index.ts` no longer exports any relay/demand/JWT types; `RelayState`, `DemandResponse`, `RelayStatusPayload`, `RELAY_STATUS_*`, `RelayConfig`, etc. are removed.
 5. `bun check` passes repo-wide after the shared-types purge (no orphaned imports).
 
-**Plans:** 3 plans
+**Plans:** 4 plans
 
-- [ ] 07-01-PLAN.md — Shared-types purge: re-home relay/web types, empty `packages/shared/index.ts`, repo-wide `bun check` green (CLEAN-04)
-- [ ] 07-02-PLAN.md — Supervisor extension: `HealthSnapshot` type, `getHealthSnapshot()`, rolling 1h restart counter, `SegmentWatcher`, non-exiting `codecMismatch` state (STRM-08)
-- [ ] 07-03-PLAN.md — HTTP wiring: `OPS_HOSTS` zod config, `createApp({ getHealth, opsHosts })` with Host-gate 404 middleware, `index.ts` wiring, build verify (STRM-08)
+- [x] 07-01-PLAN.md — Shared-types purge part 1: re-home relay types + relay import migration (CLEAN-04) _(complete 2026-04-22)_
+- [x] 07-02-PLAN.md — Supervisor extension: `HealthSnapshot` type, `getHealthSnapshot()`, rolling 1h restart counter, `SegmentWatcher`, non-exiting `codecMismatch` state (STRM-08) _(complete 2026-04-22)_
+- [x] 07-03-PLAN.md — HTTP wiring: `OPS_HOSTS` zod config, `createApp({ getHealth, opsHosts })` with Host-gate 404 middleware, `index.ts` wiring, build verify (STRM-08) _(complete 2026-04-22)_
+- [x] 07-04-PLAN.md — Shared-types purge part 2: re-home web types, empty `packages/shared/index.ts`, final `bun check` (CLEAN-04) _(complete 2026-04-22)_
 
 ### Phase 8: VPS + DNS + Camera Infrastructure
 
@@ -143,7 +144,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 | v1.1 phases                          | v1.1      | —              | Complete    | 2026-04-20 |
 | 5. `packages/stream` Skeleton        | v1.2      | 3/3            | Complete    | 2026-04-20 |
 | 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 4/4            | Complete    | 2026-04-20 |
-| 7. `/health` + Shared-Types Purge    | v1.2      | 0/TBD          | Not started | -          |
+| 7. `/health` + Shared-Types Purge    | v1.2      | 4/4            | Complete    | 2026-04-22 |
 | 8. VPS + DNS + Camera Infra          | v1.2      | 0/TBD          | Not started | -          |
 | 9. Web Swap + Full Cleanup           | v1.2      | 0/TBD          | Not started | -          |
 
@@ -153,4 +154,4 @@ See `.planning/BACKLOG.md` for deferred work.
 
 ---
 
-_Roadmap updated: 2026-04-20 — Phase 6 complete; Phase 7 next_
+_Roadmap updated: 2026-04-22 — Phase 7 complete; Phase 8 next_
