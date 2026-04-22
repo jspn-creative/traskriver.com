@@ -7,6 +7,7 @@ import type { Config } from './config.ts';
 import type { HealthStatus } from './server.ts';
 import { buildMediamtxYaml } from './mediamtx-config.ts';
 import { getPathInfo } from './mediamtx-api.ts';
+import { SegmentWatcher } from './segment-watcher.ts';
 
 const POLL_INTERVAL_MS = 5_000;
 const STALL_THRESHOLD_POLLS = 15;
@@ -17,6 +18,16 @@ const SIGTERM_GRACE_MS = 10_000;
 const CODEC_EXPECTED = 'H264' as const;
 const PATH_NAME = 'trask';
 const POLL_TIMEOUT_MS = 2_000;
+const RESTART_WINDOW_MS = 3_600_000;
+
+export interface HealthSnapshot {
+	status: HealthStatus;
+	rtspConnected: boolean;
+	codec: string | null;
+	lastSegmentWrittenAgoMs: number | null;
+	restartsLast1h: number;
+	uptimeMs: number;
+}
 
 type State =
 	| { kind: 'idle' }
@@ -30,17 +41,22 @@ type State =
 	  }
 	| { kind: 'stalled' }
 	| { kind: 'shuttingDown' }
+	| { kind: 'codecMismatch'; codec: string }
 	| { kind: 'fatal' };
 
 export class Supervisor {
 	private readonly cfg: Config;
 	private readonly log: Logger;
+	private readonly bootAt: number = Date.now();
+	private readonly restartTimestamps: number[] = [];
 	private state: State = { kind: 'idle' };
 	private child: ChildProcess | null = null;
 	private backoffMs = BACKOFF_INITIAL_MS;
 	private restartTimer: NodeJS.Timeout | null = null;
 	private pollTimer: NodeJS.Timeout | null = null;
 	private intentionalStop = false;
+	private lastCodec: string | null = null;
+	private segmentWatcher: SegmentWatcher | null = null;
 
 	constructor(cfg: Config, log: Logger) {
 		this.cfg = cfg;
@@ -51,6 +67,8 @@ export class Supervisor {
 		switch (this.state.kind) {
 			case 'ready':
 				return 'ready';
+			case 'codecMismatch':
+				return 'codec_mismatch';
 			case 'stalled':
 			case 'shuttingDown':
 			case 'fatal':
@@ -60,8 +78,34 @@ export class Supervisor {
 		}
 	}
 
+	getHealthSnapshot(): HealthSnapshot {
+		const now = Date.now();
+		this.pruneRestartWindow(now);
+		const lastWrite = this.segmentWatcher?.getLastWriteAt() ?? null;
+		return {
+			status: this.getStatus(),
+			rtspConnected: this.state.kind === 'ready',
+			codec: this.lastCodec,
+			lastSegmentWrittenAgoMs: lastWrite === null ? null : now - lastWrite,
+			restartsLast1h: this.restartTimestamps.length,
+			uptimeMs: now - this.bootAt
+		};
+	}
+
+	private pruneRestartWindow(now: number) {
+		const cutoff = now - RESTART_WINDOW_MS;
+		while (this.restartTimestamps.length > 0 && this.restartTimestamps[0]! < cutoff) {
+			this.restartTimestamps.shift();
+		}
+	}
+
 	async start() {
 		await this.spawnChild();
+		this.segmentWatcher = new SegmentWatcher(
+			this.cfg.HLS_DIR,
+			this.log.child({ component: 'segmentWatcher' })
+		);
+		this.segmentWatcher.start();
 		this.startPolling();
 	}
 
@@ -69,6 +113,7 @@ export class Supervisor {
 		this.intentionalStop = true;
 		this.state = { kind: 'shuttingDown' };
 		this.stopPolling();
+		this.segmentWatcher?.stop();
 		if (this.restartTimer) {
 			clearTimeout(this.restartTimer);
 			this.restartTimer = null;
@@ -108,6 +153,7 @@ export class Supervisor {
 			this.log.warn({ code, signal }, 'mediamtx exited');
 			this.child = null;
 			if (this.intentionalStop || this.state.kind === 'shuttingDown') return;
+			if (this.state.kind === 'codecMismatch') return;
 			this.scheduleRestart();
 		});
 
@@ -115,6 +161,7 @@ export class Supervisor {
 	}
 
 	private scheduleRestart() {
+		this.restartTimestamps.push(Date.now());
 		const delay = this.backoffMs;
 		this.state = { kind: 'spawning' };
 		this.log.warn({ backoffMs: delay }, 'scheduling mediamtx restart');
@@ -152,9 +199,13 @@ export class Supervisor {
 					{ expected: CODEC_EXPECTED, actual: info.codec },
 					`FATAL: camera codec is ${info.codec}, expected ${CODEC_EXPECTED}`
 				);
-				this.state = { kind: 'fatal' };
-				process.exit(1);
+				this.lastCodec = info.codec ?? null;
+				this.state = { kind: 'codecMismatch', codec: info.codec ?? 'unknown' };
+				this.stopPolling();
+				void this.killChild();
+				return;
 			}
+			this.lastCodec = info.codec;
 			this.state = {
 				kind: 'ready',
 				readyAt: Date.now(),
@@ -189,7 +240,8 @@ export class Supervisor {
 						'stall detected; restarting mediamtx'
 					);
 					this.state = { kind: 'stalled' };
-					void this.killChild().then(() => this.scheduleRestart());
+					// single canonical restart path via child 'exit' handler (see Phase 7 07-RESEARCH Pitfall 4)
+					void this.killChild();
 					return;
 				}
 			} else {
