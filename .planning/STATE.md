@@ -18,11 +18,11 @@ progress:
 
 **Core value:** Users can see the Trask River live, on-demand, from anywhere
 **Current milestone:** v1.2 — Self-Hosted Stream
-**Current focus:** Phase 08 — vps-dns-camera-infrastructure
+**Current focus:** Phase 08 — web-swap-full-cleanup
 
 ## Current Position
 
-Phase: 08 (vps-dns-camera-infrastructure) — NEXT
+Phase: 08 (web-swap-full-cleanup) — NEXT
 Plan: 0 of TBD
 
 ## Accumulated Context
@@ -54,6 +54,7 @@ Plan: 0 of TBD
 - **[Phase 06] Plan 03:** `createApp({ getStatus })` + index boot/shutdown wiring — no health singleton; supervisor teardown before `server.close` (`06-03-SUMMARY.md`)
 - **[Phase 07] Plans 01-04:** `packages/shared` is now intentionally empty (`export {}`) and relay/web shared contracts are localized to owning packages (`07-01-SUMMARY.md`, `07-04-SUMMARY.md`)
 - **[Phase 07] Plans 02-03:** `/health` is host-gated via `OPS_HOSTS` and wired to `Supervisor.getHealthSnapshot()` including codec mismatch visibility (`07-02-SUMMARY.md`, `07-03-SUMMARY.md`)
+- **Roadmap pivot:** Old Phase 8 (VPS/DNS/Camera infra) deferred to v1.3; old Phase 9 (web swap + cleanup) promoted to Phase 8 as final v1.2 phase. Stream service already running on VPS.
 
 ### Blockers
 
@@ -68,7 +69,7 @@ Plan: 0 of TBD
 
 ### Next Session Should
 
-1. Plan and execute Phase 8 — VPS/DNS/camera infrastructure hardening and deployment wiring
+1. Plan and execute Phase 8 — Web swap (point VideoPlayer at self-hosted HLS) + full cleanup (delete relay, demand, JWT, CF Stream paths)
 
 **Stopped At:** Completed 07-04-PLAN.md
 

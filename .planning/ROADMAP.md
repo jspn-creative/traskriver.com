@@ -4,8 +4,8 @@
 
 - ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-04-13)
 - ✅ **v1.1 Analytics & User-Ready Polish** — (shipped 2026-04-20)
-- 🚧 **v1.2 Self-Hosted Stream** — Phases 5-9 (in progress)
-- 📋 **v1.3 River Conditions Data** — (backlog)
+- 🚧 **v1.2 Self-Hosted Stream** — Phases 5-8 (in progress)
+- 📋 **v1.3 Infra Hardening + River Conditions** — (backlog)
 
 ## Phases
 
@@ -24,8 +24,7 @@
 - [x] **Phase 5: `packages/stream` Skeleton** — Bootstrap new Node 22 ESM package with zod config, Pino logger, and placeholder `/health`.
 - [x] **Phase 6: MediaMTX Supervisor + RTSP Ingest** — Spawn/backoff supervisor, stall watchdog, codec guard, H.264 passthrough HLS config.
 - [x] **Phase 7: `/health` Endpoint + Shared-Types Purge** — Full `/health` payload bound to ops-only surface; strip relay/demand/JWT types from `packages/shared`.
-- [ ] **Phase 8: VPS + DNS + Camera Infrastructure** — DO droplet systemd deploy, TLS, Cloudflare DNS, router port-forward, camera H.264/DDNS/CVE check.
-- [ ] **Phase 9: Web Swap + Full Cleanup** — Point `VideoPlayer` at new HLS URL, collapse state machine, delete `packages/relay`, stream/demand/KV routes, CF Stream bindings, workspace refs.
+- [ ] **Phase 8: Web Swap + Full Cleanup** — Point `VideoPlayer` at new HLS URL, collapse state machine, delete `packages/relay`, stream/demand/KV routes, CF Stream bindings, workspace refs.
 
 ## Phase Details
 
@@ -64,7 +63,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 
 ### Phase 6: MediaMTX Supervisor + RTSP Ingest
 
-**Goal**: The Node supervisor spawns MediaMTX, keeps the RTSP→HLS pipeline alive 24/7 with correct backoff, detects stalls, guards codec, and serves H.264 passthrough HLS on tmpfs. MediaMTX serves HLS on its own HTTP origin port; cache-header rewriting is deferred to Phase 8 (reverse proxy).
+**Goal**: The Node supervisor spawns MediaMTX, keeps the RTSP→HLS pipeline alive 24/7 with correct backoff, detects stalls, guards codec, and serves H.264 passthrough HLS on tmpfs. MediaMTX serves HLS on its own HTTP origin port; cache-header rewriting is deferred to infra hardening (v1.3).
 **Depends on**: Phase 5
 **Requirements**: STRM-02, STRM-03, STRM-04, STRM-05, STRM-06, STRM-07
 **Success Criteria** (what must be TRUE):
@@ -102,25 +101,10 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 - [x] 07-03-PLAN.md — HTTP wiring: `OPS_HOSTS` zod config, `createApp({ getHealth, opsHosts })` with Host-gate 404 middleware, `index.ts` wiring, build verify (STRM-08) _(complete 2026-04-22)_
 - [x] 07-04-PLAN.md — Shared-types purge part 2: re-home web types, empty `packages/shared/index.ts`, final `bun check` (CLEAN-04) _(complete 2026-04-22)_
 
-### Phase 8: VPS + DNS + Camera Infrastructure
-
-**Goal**: The DigitalOcean droplet runs `packages/stream` under systemd with TLS, cache-header rewriting, and log retention; Cloudflare DNS resolves `stream.traskriver.com` to it; the home router forwards only RTSP; the camera is hardened and producing H.264.
-**Depends on**: Phase 5 (needs a deployable package) · code-path independent of Phase 6/7 — can progress in parallel with them
-**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05, INFRA-06
-**Success Criteria** (what must be TRUE):
-
-1. `systemctl status stream` on the droplet shows `active (running)` with `Restart=always`, `MemoryMax`, `LimitNOFILE`, `RuntimeDirectory=stream`, and `StartLimitBurst` tuned; journald retention capped near 500M.
-2. `dig stream.traskriver.com` returns Cloudflare-proxied (orange-cloud) A record; `curl -I https://stream.traskriver.com/...` returns valid Let's Encrypt TLS with auto-renewal timer armed on the droplet.
-3. OpenLiteSpeed (already on the droplet) fronts MediaMTX's HLS origin port with `Cache-Control: public, max-age=1` on `.m3u8` responses and `Cache-Control: public, max-age=86400, immutable` on `.ts` responses. (Caddy is a documented fallback if OLS config proves impractical.)
-4. External scan from the VPS (`nmap -p 554 cam.ddns.example`) returns `open`; other ports (80, 443, 8000, 37777) return `filtered`/`closed`; UPnP disabled on router.
-5. Camera DDNS hostname resolves to home WAN; camera produces H.264 at 2s closed GOP, 3–6 Mbps CBR; a dedicated RTSP-only user (20+ char password, distinct from admin) is configured.
-6. `FIRMWARE.md` records current camera model + firmware version + date, with CVE pre-flight checked against CVE-2021-33044/45, CVE-2025-31700/31701, CVE-2025-65857, CVE-2025-66176/66177.
-   **Plans**: TBD
-
-### Phase 9: Web Swap + Full Cleanup
+### Phase 8: Web Swap + Full Cleanup
 
 **Goal**: The web client plays from the new self-hosted HLS URL, the page state machine is collapsed to `connecting → viewing ⇌ degraded → error`, and every trace of the relay/demand/JWT/Cloudflare Stream path is deleted in the same branch that ships the milestone.
-**Depends on**: Phases 6, 7, 8 (needs working origin + clean shared types)
+**Depends on**: Phases 6, 7 (needs working origin + clean shared types) · stream service already deployed on VPS
 **Requirements**: WEB-01, WEB-02, WEB-03, WEB-04, CLEAN-01, CLEAN-02, CLEAN-03, CLEAN-05
 **Success Criteria** (what must be TRUE):
 
@@ -133,7 +117,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 
 ## Progress
 
-**Execution Order:** Phases execute in numeric order: 5 → 6 → 7 → 8 → 9
+**Execution Order:** Phases execute in numeric order: 5 → 6 → 7 → 8
 
 | Phase                                | Milestone | Plans Complete | Status      | Completed  |
 | ------------------------------------ | --------- | -------------- | ----------- | ---------- |
@@ -145,8 +129,7 @@ PostHog analytics (replaced Counterscale), sidebar overhaul with branding + weat
 | 5. `packages/stream` Skeleton        | v1.2      | 3/3            | Complete    | 2026-04-20 |
 | 6. MediaMTX Supervisor + RTSP Ingest | v1.2      | 4/4            | Complete    | 2026-04-20 |
 | 7. `/health` + Shared-Types Purge    | v1.2      | 4/4            | Complete    | 2026-04-22 |
-| 8. VPS + DNS + Camera Infra          | v1.2      | 0/TBD          | Not started | -          |
-| 9. Web Swap + Full Cleanup           | v1.2      | 0/TBD          | Not started | -          |
+| 8. Web Swap + Full Cleanup           | v1.2      | 0/TBD          | Not started | -          |
 
 ## Backlog
 
@@ -154,4 +137,4 @@ See `.planning/BACKLOG.md` for deferred work.
 
 ---
 
-_Roadmap updated: 2026-04-22 — Phase 7 complete; Phase 8 next_
+_Roadmap updated: 2026-04-22 — Phase 7 complete; old Phase 8 (infra) deferred to v1.3; web swap promoted to Phase 8_

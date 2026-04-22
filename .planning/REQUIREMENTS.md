@@ -15,15 +15,6 @@
 - [x] **STRM-07**: HLS files are written to the runtime directory (`HLS_DIR`, defaulting to `/run/stream/hls` — tmpfs via `RuntimeDirectory=stream` in Phase 8) and served by MediaMTX on its HTTP origin port. `hlsAlwaysRemux: yes` keeps the muxer warm between viewers.
 - [x] **STRM-08**: `/health` returns `{ status, rtspConnected, codec, lastSegmentWrittenAgoMs, restartsLast1h, uptimeMs }` and is bound to an ops-only interface (not the public HLS hostname).
 
-### Deployment & Infrastructure (VPS + DNS + Camera)
-
-- [ ] **INFRA-01**: The service runs on a DigitalOcean droplet under systemd (`Restart=always`, resource limits, journald retention capped ~500M). CI/CD is user-owned and out of scope.
-- [ ] **INFRA-02**: `stream.traskriver.com` is configured in Cloudflare DNS, orange-cloud by default with grey-cloud documented as the fallback if Cloudflare's CDN-video ToS is enforced against the zone.
-- [ ] **INFRA-03**: TLS termination on the droplet via Let's Encrypt with auto-renewal. OpenLiteSpeed (already installed) is the primary reverse proxy in front of MediaMTX's HLS origin port — Caddy is documented as a fallback if OLS config proves impractical. Proxy adds required HLS cache headers: `Cache-Control: public, max-age=1` on `.m3u8`, `public, max-age=86400, immutable` on `.ts`.
-- [ ] **INFRA-04**: Home router forwards only port 554/tcp to the camera; UPnP disabled.
-- [ ] **INFRA-05**: The Reolink camera is configured with a DDNS hostname, fixed H.264 output (2s closed GOP, 3–6 Mbps CBR), and a dedicated RTSP user (minimum privileges, 20+ char password) distinct from the admin account.
-- [ ] **INFRA-06**: Camera firmware version is documented in a `FIRMWARE.md` note with the CVE pre-flight check completed at phase execution time.
-
 ### Web Client Migration (`packages/web`)
 
 - [ ] **WEB-01**: `VideoPlayer.svelte` points at `PUBLIC_STREAM_HLS_URL` (new build-time env var); the existing CF-Stream-specific playback URL logic is removed.
@@ -43,6 +34,12 @@
 
 Deferred to v1.3 or later:
 
+- **INFRA-01**: systemd service (`Restart=always`, resource limits, journald retention ~500M)
+- **INFRA-02**: Cloudflare DNS (`stream.traskriver.com`, orange-cloud default, grey-cloud fallback)
+- **INFRA-03**: TLS via Let's Encrypt + OLS reverse proxy with HLS cache headers
+- **INFRA-04**: Router port-forward (554/tcp only, UPnP disabled)
+- **INFRA-05**: Camera DDNS, H.264 config, dedicated RTSP user
+- **INFRA-06**: FIRMWARE.md + CVE pre-flight check
 - River conditions footer (sunrise/sunset, USGS flow/temp, fish run status) — see `BACKLOG.md`
 - `/preview.jpg` latest-frame endpoint (dynamic poster, OG image, offline fallback)
 - LL-HLS upgrade (MediaMTX config flip when latency matters)
@@ -70,24 +67,24 @@ Deferred to v1.3 or later:
 | STRM-06     | Phase 6 | Complete |
 | STRM-07     | Phase 6 | Complete |
 | STRM-08     | Phase 7 | Complete |
-| INFRA-01    | Phase 8 | Pending  |
-| INFRA-02    | Phase 8 | Pending  |
-| INFRA-03    | Phase 8 | Pending  |
-| INFRA-04    | Phase 8 | Pending  |
-| INFRA-05    | Phase 8 | Pending  |
-| INFRA-06    | Phase 8 | Pending  |
-| WEB-01      | Phase 9 | Pending  |
-| WEB-02      | Phase 9 | Pending  |
-| WEB-03      | Phase 9 | Pending  |
-| WEB-04      | Phase 9 | Pending  |
-| CLEAN-01    | Phase 9 | Pending  |
-| CLEAN-02    | Phase 9 | Pending  |
-| CLEAN-03    | Phase 9 | Pending  |
+| INFRA-01    | v1.3    | Deferred |
+| INFRA-02    | v1.3    | Deferred |
+| INFRA-03    | v1.3    | Deferred |
+| INFRA-04    | v1.3    | Deferred |
+| INFRA-05    | v1.3    | Deferred |
+| INFRA-06    | v1.3    | Deferred |
+| WEB-01      | Phase 8 | Pending  |
+| WEB-02      | Phase 8 | Pending  |
+| WEB-03      | Phase 8 | Pending  |
+| WEB-04      | Phase 8 | Pending  |
+| CLEAN-01    | Phase 8 | Pending  |
+| CLEAN-02    | Phase 8 | Pending  |
+| CLEAN-03    | Phase 8 | Pending  |
 | CLEAN-04    | Phase 7 | Complete |
-| CLEAN-05    | Phase 9 | Pending  |
+| CLEAN-05    | Phase 8 | Pending  |
 
 **Coverage:** 23/23 requirements mapped ✓ · No orphans · No duplicates
 
 ---
 
-_Requirements defined: 2026-04-20_
+_Requirements updated: 2026-04-22 — INFRA-01 through INFRA-06 deferred to v1.3; WEB/CLEAN requirements promoted to Phase 8_
