@@ -13,4 +13,8 @@ bun install --frozen-lockfile
 bun run build:stream
 
 pkill -f "/var/www/stream.traskriver.com/packages/stream/dist/index.js" || true
-nohup bun run start:stream > /var/www/stream.traskriver.com/logs/stream.log 2>&1 &
+if command -v setsid >/dev/null 2>&1; then
+	setsid -f bun run start:stream > /var/www/stream.traskriver.com/logs/stream.log 2>&1 < /dev/null
+else
+	nohup bun run start:stream > /var/www/stream.traskriver.com/logs/stream.log 2>&1 < /dev/null &
+fi
