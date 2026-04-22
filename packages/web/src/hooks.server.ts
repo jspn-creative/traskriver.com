@@ -1,5 +1,6 @@
 import type { Handle, HandleServerError } from '@sveltejs/kit';
-import { createPostHogClient } from '$lib/server/posthog';
+import { PostHog } from 'posthog-node';
+import { PUBLIC_POSTHOG_HOST, PUBLIC_POSTHOG_PROJECT_TOKEN } from '$env/static/public';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const { pathname } = event.url;
@@ -39,7 +40,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError: HandleServerError = async ({ error, status, message }) => {
-	const posthog = createPostHogClient();
+	const posthog = new PostHog(PUBLIC_POSTHOG_PROJECT_TOKEN, {
+		host: PUBLIC_POSTHOG_HOST,
+		flushAt: 1,
+		flushInterval: 0
+	});
 
 	posthog.capture({
 		distinctId: 'server',
