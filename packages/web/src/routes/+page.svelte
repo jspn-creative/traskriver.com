@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { RelayStatusResponse } from '@traskriver/shared';
+	import type { RelayStatusResponse } from '$lib/types';
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 	import LocalWeather from '$lib/components/LocalWeather.svelte';
 	import RiverConditions from '$lib/components/RiverConditions.svelte';

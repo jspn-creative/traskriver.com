@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 
-import type { DemandResponse } from '@traskriver/shared';
+import type { DemandResponse } from '$lib/types';
 import { createPostHogClient } from '$lib/server/posthog';
 
 const DEMAND_KEY = 'stream-demand';

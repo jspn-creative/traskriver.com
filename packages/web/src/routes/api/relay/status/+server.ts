@@ -5,7 +5,7 @@ import {
 	RELAY_STATUS_TTL_SECONDS,
 	type RelayStatusPayload,
 	type RelayStatusResponse
-} from '@traskriver/shared';
+} from '$lib/types';
 import { createPostHogClient } from '$lib/server/posthog';
 
 const RELAY_STATUS_KEY = 'relay-status';
