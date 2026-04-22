@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
-status: executing
-stopped_at: Phase 8 context gathered (web swap + full cleanup)
-last_updated: '2026-04-22T20:32:17.106Z'
+status: unknown
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-22T21:15:29.404Z"
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 13
-  percent: 100
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # State: Trask River Cam
@@ -23,8 +22,8 @@ progress:
 
 ## Current Position
 
-Phase: 08 (web-swap-full-cleanup) — NEXT
-Plan: 0 of TBD
+Phase: 08 (web-swap-full-cleanup) — EXECUTING
+Plan: 2 of 3
 
 ## Accumulated Context
 
@@ -45,6 +44,8 @@ Plan: 0 of TBD
 
 ### Recent Decisions
 
+- **[Phase 08] Plan 01:** Web playback now mounts `VideoPlayer` unconditionally and reads `env.PUBLIC_STREAM_HLS_URL` directly (no demand/relay/JWT path).
+- **[Phase 08] Plan 01:** Degraded/recovered state is driven by HLS `LEVEL_LOADED` media-sequence progression checks (~30s stall threshold).
 - **Phase 6 supervisor:** backoff 1→30s, stall 75s, codec guard fatal on non-H264; static gates green (`06-04-SUMMARY.md`, rollup `06-SUMMARY.md`)
 - **Phase 5 HTTP stack:** Hono + `@hono/node-server` (see `05-CONTEXT.md`; scaffold deps in `packages/stream/package.json`)
 - **v1.2 scope:** branch-based delivery, no parallel-run or cutover window (app not in active use)
@@ -70,9 +71,9 @@ Plan: 0 of TBD
 
 ### Next Session Should
 
-1. Plan and execute Phase 8 — Web swap (point VideoPlayer at self-hosted HLS) + full cleanup (delete relay, demand, JWT, CF Stream paths)
+1. Execute `08-02-PLAN.md` to continue relay-era cleanup across API/routes/config surfaces.
 
-**Stopped At:** Phase 8 context gathered (web swap + full cleanup)
+**Stopped At:** Completed 08-01-PLAN.md
 
 ---
 
@@ -87,3 +88,4 @@ Plan: 0 of TBD
 | Phase 07-health-endpoint-shared-types-purge P02 | 6m       | 2 tasks | 2 files  |
 | Phase 07 P01                                    | 5m       | 3 tasks | 11 files |
 | Phase 07-health-endpoint-shared-types-purge P04 | 3m       | 2 tasks | 6 files  |
+| Phase 08 P01 | 6 min | 2 tasks | 4 files |

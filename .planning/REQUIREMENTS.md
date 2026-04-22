@@ -17,10 +17,10 @@
 
 ### Web Client Migration (`packages/web`)
 
-- [ ] **WEB-01**: `VideoPlayer.svelte` points at `PUBLIC_STREAM_HLS_URL` (new build-time env var); the existing CF-Stream-specific playback URL logic is removed.
-- [ ] **WEB-02**: A manifest-freshness watcher (driven by hls.js `LEVEL_LOADED` / `EXT-X-MEDIA-SEQUENCE` progression) drives a new `degraded` page state; the browser no longer polls the origin's `/health`.
-- [ ] **WEB-03**: The page state machine collapses to `connecting → viewing ⇌ degraded → error`. Start-button, demand POST, and relay-status polling are removed.
-- [ ] **WEB-04**: Camera-offline UX shows a clear "Camera offline — retrying" overlay while in `degraded`, recovers automatically when segments resume.
+- [x] **WEB-01**: `VideoPlayer.svelte` points at `PUBLIC_STREAM_HLS_URL` (new build-time env var); the existing CF-Stream-specific playback URL logic is removed.
+- [x] **WEB-02**: A manifest-freshness watcher (driven by hls.js `LEVEL_LOADED` / `EXT-X-MEDIA-SEQUENCE` progression) drives a new `degraded` page state; the browser no longer polls the origin's `/health`.
+- [x] **WEB-03**: The page state machine collapses to `connecting → viewing ⇌ degraded → error`. Start-button, demand POST, and relay-status polling are removed.
+- [x] **WEB-04**: Camera-offline UX shows a clear "Camera offline — retrying" overlay while in `degraded`, recovers automatically when segments resume.
 
 ### Cleanup & Deletions (same branch / same merge)
 
@@ -73,10 +73,10 @@ Deferred to v1.3 or later:
 | INFRA-04    | v1.3    | Deferred |
 | INFRA-05    | v1.3    | Deferred |
 | INFRA-06    | v1.3    | Deferred |
-| WEB-01      | Phase 8 | Pending  |
-| WEB-02      | Phase 8 | Pending  |
-| WEB-03      | Phase 8 | Pending  |
-| WEB-04      | Phase 8 | Pending  |
+| WEB-01      | Phase 8 | Complete |
+| WEB-02      | Phase 8 | Complete |
+| WEB-03      | Phase 8 | Complete |
+| WEB-04      | Phase 8 | Complete |
 | CLEAN-01    | Phase 8 | Pending  |
 | CLEAN-02    | Phase 8 | Pending  |
 | CLEAN-03    | Phase 8 | Pending  |
