@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Self-Hosted Stream
 status: complete
-stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-04-22T21:23:43.638Z"
+stopped_at: Completed 260423-h1q-PLAN.md
+last_updated: '2026-04-23T19:21:28.841Z'
 progress:
   total_phases: 4
   completed_phases: 4
@@ -44,6 +44,8 @@ Plan: 3 of 3 (complete)
 
 ### Recent Decisions
 
+- **[Quick 260423-h1q] Plan 01:** OLS `/trask/` route is now managed via marker-delimited idempotent config updates in `scripts/configure-stream-ols-route.sh`.
+- **[Quick 260423-h1q] Plan 01:** Deploy now applies route config and reloads `lsws` only when config changed, with restart fallback on reload failure.
 - **[Phase 08] Plan 03:** Deleted `packages/relay` + relay deploy workflow and removed relay workspace/scripts from root `package.json`.
 - **[Phase 08] Plan 03:** Removed stale `packages/web/scripts/setup-signing.ts` and script entry after final orphan-reference scan.
 - **[Phase 08] Plan 02:** Deleted all remaining relay-era web routes/helpers/types and removed worker KV/relay env bindings.
@@ -77,21 +79,22 @@ Plan: 3 of 3 (complete)
 
 1. Run milestone v1.2 closeout (`/gsd-complete-milestone`) now that Phase 08 is complete.
 
-**Stopped At:** Completed 08-03-PLAN.md
+**Stopped At:** Completed 260423-h1q-PLAN.md
 
 ---
 
 ## Performance Metrics
 
-| Run                                             | Duration | Tasks   | Files    |
-| ----------------------------------------------- | -------- | ------- | -------- |
-| Phase 06 P01                                    | 12m      | 3 tasks | 5 files  |
-| Phase 06-mediamtx-supervisor-rtsp-ingest P02    | 5m       | 1 tasks | 1 files  |
-| Phase 06-mediamtx-supervisor-rtsp-ingest P03    | 1m       | 2 tasks | 2 files  |
-| Phase 06-mediamtx-supervisor-rtsp-ingest P04    | 10m      | 2 tasks | 4 files  |
-| Phase 07-health-endpoint-shared-types-purge P02 | 6m       | 2 tasks | 2 files  |
-| Phase 07 P01                                    | 5m       | 3 tasks | 11 files |
-| Phase 07-health-endpoint-shared-types-purge P04 | 3m       | 2 tasks | 6 files  |
-| Phase 08 P01 | 6 min | 2 tasks | 4 files |
-| Phase 08 P02 | 1m | 2 tasks | 11 files |
-| Phase 08-web-swap-full-cleanup P03 | 3m | 3 tasks | 28 files |
+| Run                                                                 | Duration | Tasks   | Files    |
+| ------------------------------------------------------------------- | -------- | ------- | -------- |
+| Phase 06 P01                                                        | 12m      | 3 tasks | 5 files  |
+| Phase 06-mediamtx-supervisor-rtsp-ingest P02                        | 5m       | 1 tasks | 1 files  |
+| Phase 06-mediamtx-supervisor-rtsp-ingest P03                        | 1m       | 2 tasks | 2 files  |
+| Phase 06-mediamtx-supervisor-rtsp-ingest P04                        | 10m      | 2 tasks | 4 files  |
+| Phase 07-health-endpoint-shared-types-purge P02                     | 6m       | 2 tasks | 2 files  |
+| Phase 07 P01                                                        | 5m       | 3 tasks | 11 files |
+| Phase 07-health-endpoint-shared-types-purge P04                     | 3m       | 2 tasks | 6 files  |
+| Phase 08 P01                                                        | 6 min    | 2 tasks | 4 files  |
+| Phase 08 P02                                                        | 1m       | 2 tasks | 11 files |
+| Phase 08-web-swap-full-cleanup P03                                  | 3m       | 3 tasks | 28 files |
+| Phase quick-260423-h1q-make-https-stream-traskriver-com-trask-i P01 | 2m       | 3 tasks | 3 files  |
