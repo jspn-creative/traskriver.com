@@ -1,20 +1,65 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "${XCLOUD_SITE_PATH:?XCLOUD_SITE_PATH is required}"
+SITE_PATH="${XCLOUD_SITE_PATH:?XCLOUD_SITE_PATH is required}"
+UNIT_NAME="stream"
+BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
+MEDIAMTX_VERSION="${MEDIAMTX_VERSION:-v1.17.1}"
+MEDIAMTX_BIN="/var/www/stream.traskriver.com/bin/mediamtx"
 
-export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
-export PATH="$BUN_INSTALL/bin:$PATH"
+cd "$SITE_PATH"
+export BUN_INSTALL PATH="$BUN_INSTALL/bin:$PATH"
 
 mkdir -p /var/www/stream.traskriver.com/run/hls
 mkdir -p /var/www/stream.traskriver.com/logs
+mkdir -p "$(dirname "$MEDIAMTX_BIN")"
+
+install_mediamtx() {
+	local arch
+	case "$(uname -m)" in
+		x86_64) arch="amd64" ;;
+		aarch64|arm64) arch="arm64v8" ;;
+		*) echo "unsupported arch: $(uname -m)" >&2; exit 1 ;;
+	esac
+	local tarball="mediamtx_${MEDIAMTX_VERSION}_linux_${arch}.tar.gz"
+	local url="https://github.com/bluenviron/mediamtx/releases/download/${MEDIAMTX_VERSION}/${tarball}"
+	local tmp
+	tmp="$(mktemp -d)"
+	trap 'rm -rf "$tmp"' RETURN
+	echo "Installing mediamtx ${MEDIAMTX_VERSION} (${arch})..."
+	curl -fsSL "$url" -o "$tmp/${tarball}"
+	tar -xzf "$tmp/${tarball}" -C "$tmp" mediamtx
+	install -m 0755 "$tmp/mediamtx" "$MEDIAMTX_BIN"
+}
+
+current_mediamtx_version() {
+	[ -x "$MEDIAMTX_BIN" ] || return 1
+	"$MEDIAMTX_BIN" --version 2>/dev/null | head -n1 | awk '{print $NF}'
+}
+
+if [ "$(current_mediamtx_version || true)" != "$MEDIAMTX_VERSION" ]; then
+	install_mediamtx
+fi
+
+# Just in case??
+cp /var/www/stream.traskriver.com/packages/stream/.env /var/www/stream.traskriver.com/.env
 
 bun install --frozen-lockfile
 bun run build:stream
 
-pkill -f "/var/www/stream.traskriver.com/packages/stream/dist/index.js" || true
-if command -v setsid >/dev/null 2>&1; then
-	setsid -f bun run start:stream > /var/www/stream.traskriver.com/logs/stream.log 2>&1 < /dev/null
-else
-	nohup bun run start:stream > /var/www/stream.traskriver.com/logs/stream.log 2>&1 < /dev/null &
-fi
+# Unit file lives at /etc/systemd/system/stream.service (managed manually, one-time root setup).
+# Deploy only restarts the service; sudoers grants passwordless access to these specific commands.
+
+# sudo -n systemctl restart "$UNIT_NAME"
+
+# for i in $(seq 1 10); do
+# 	if sudo -n systemctl is-active --quiet "$UNIT_NAME"; then
+# 		echo "✓ ${UNIT_NAME} is active (attempt ${i})"
+# 		exit 0
+# 	fi
+# 	sleep 1
+# done
+
+# echo "✗ ${UNIT_NAME} failed to start"
+# sudo -n systemctl status "$UNIT_NAME" --no-pager || true
+# exit 1
