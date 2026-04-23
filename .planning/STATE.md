@@ -68,6 +68,12 @@ Plan: 3 of 3 (complete)
 
 - _None_
 
+### Quick Tasks Completed
+
+| #          | Description                                                                                                                   | Date       | Commit  | Directory                                                                                                           |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| 260423-h1q | make https://stream.traskriver.com/trask/index.m3u8 accessible remotely (fix 404 via xCloud/OLS routing for app on port 8088) | 2026-04-23 | 753e352 | [260423-h1q-make-https-stream-traskriver-com-trask-i](./quick/260423-h1q-make-https-stream-traskriver-com-trask-i/) |
+
 ## Session Continuity
 
 ### Last Session
@@ -78,6 +84,8 @@ Plan: 3 of 3 (complete)
 ### Next Session Should
 
 1. Run milestone v1.2 closeout (`/gsd-complete-milestone`) now that Phase 08 is complete.
+
+Last activity: 2026-04-23 - Completed quick task 260423-h1q: make https://stream.traskriver.com/trask/index.m3u8 accessible remotely (fix 404 via xCloud/OLS routing for app on port 8088)
 
 **Stopped At:** Completed 260423-h1q-PLAN.md
 
