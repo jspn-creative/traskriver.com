@@ -6,6 +6,9 @@ UNIT_NAME="stream"
 BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
 MEDIAMTX_VERSION="${MEDIAMTX_VERSION:-v1.17.1}"
 MEDIAMTX_BIN="/var/www/stream.traskriver.com/bin/mediamtx"
+ROUTE_SCRIPT_REL="scripts/configure-stream-ols-route.sh"
+OLS_RELOAD_CMD="${OLS_RELOAD_CMD:-sudo -n systemctl reload lsws}"
+OLS_RESTART_CMD="${OLS_RESTART_CMD:-sudo -n systemctl restart lsws}"
 
 cd "$SITE_PATH"
 export BUN_INSTALL PATH="$BUN_INSTALL/bin:$PATH"
@@ -41,11 +44,33 @@ if [ "$(current_mediamtx_version || true)" != "$MEDIAMTX_VERSION" ]; then
 	install_mediamtx
 fi
 
-# Just in case??
 cp /var/www/stream.traskriver.com/packages/stream/.env /var/www/stream.traskriver.com/.env
 
 bun install --frozen-lockfile
 bun run build:stream
+
+if [ ! -x "${SITE_PATH}/${ROUTE_SCRIPT_REL}" ]; then
+	echo "✗ Route provisioning script missing or not executable: ${SITE_PATH}/${ROUTE_SCRIPT_REL}" >&2
+	exit 1
+fi
+
+echo "Applying OLS route config for /trask/* ..."
+route_output="$("${SITE_PATH}/${ROUTE_SCRIPT_REL}" --apply)"
+echo "$route_output"
+
+if [[ "$route_output" == *"ROUTE_CONFIG_CHANGED=1"* ]]; then
+	echo "Route config changed; reloading OpenLiteSpeed ..."
+	if ! bash -lc "$OLS_RELOAD_CMD"; then
+		echo "Reload failed, attempting OpenLiteSpeed restart ..."
+		if ! bash -lc "$OLS_RESTART_CMD"; then
+			echo "✗ OpenLiteSpeed reload and restart both failed." >&2
+			exit 1
+		fi
+	fi
+	echo "✓ OpenLiteSpeed route update applied."
+else
+	echo "OLS route already up-to-date; skipping reload."
+fi
 
 # Unit file lives at /etc/systemd/system/stream.service (managed manually, one-time root setup).
 # Deploy only restarts the service; sudoers grants passwordless access to these specific commands.
