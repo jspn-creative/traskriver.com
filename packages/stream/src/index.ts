@@ -13,7 +13,8 @@ const supervisor = new Supervisor(config, rootLog.child({ component: 'supervisor
 const opsHosts: ReadonlySet<string> = new Set(config.OPS_HOSTS);
 const app = createApp({
 	getHealth: () => supervisor.getHealthSnapshot(),
-	opsHosts
+	opsHosts,
+	mediamtxHlsPort: config.MEDIAMTX_HLS_PORT
 });
 
 const server = serve({ fetch: app.fetch, port: config.PORT, hostname: '0.0.0.0' }, (info) =>
