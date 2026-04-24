@@ -213,7 +213,7 @@
 		></div>
 
 		<header
-			class="relative z-40 flex w-full items-end justify-between transition-opacity duration-700 ease-out {sessionActive
+			class="relative z-40 flex w-full flex-wrap items-end justify-between transition-opacity duration-700 ease-out {sessionActive
 				? headerVisible
 					? 'opacity-100'
 					: 'pointer-events-auto opacity-100 lg:pointer-events-none lg:opacity-0'
@@ -222,12 +222,12 @@
 			<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
 				<div class="flex items-baseline gap-4">
 					<span
-						class="font-display text-display tracking-display text-light transition-colors duration-700 text-shadow-lg"
+						class="min-w-fit font-display text-display tracking-display text-light transition-colors duration-700 text-shadow-lg"
 					>
 						Trask River
 					</span>
 					<span
-						class="text-sm font-medium transition-colors duration-700 {sessionActive
+						class="min-w-fit text-sm font-medium transition-colors duration-700 {sessionActive
 							? 'text-secondary [text-shadow:0_0_20px_black,0_0_10px_black,0_0_4px_black]'
 							: 'text-light/50'}"
 					>

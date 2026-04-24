@@ -34,6 +34,27 @@
 		if (!player) return;
 		const el = player;
 		let teardownHls: (() => void) | undefined;
+		let bufferingTimeout: ReturnType<typeof setTimeout> | undefined;
+		const clearBufferingTimeout = () => {
+			if (!bufferingTimeout) return;
+			clearTimeout(bufferingTimeout);
+			bufferingTimeout = undefined;
+		};
+		const setBufferingSoon = () => {
+			clearBufferingTimeout();
+			const startTime = Number(el.currentTime) || 0;
+			bufferingTimeout = setTimeout(() => {
+				const nowTime = Number(el.currentTime) || 0;
+				const advanced = nowTime - startTime > 0.2;
+				const paused = !!el.paused;
+				if (!advanced && !paused) onBuffering?.(true);
+				bufferingTimeout = undefined;
+			}, 1200);
+		};
+		const clearBuffering = () => {
+			clearBufferingTimeout();
+			onBuffering?.(false);
+		};
 		const onProviderChange = (event: any) => {
 			const provider = event.detail;
 			if (provider?.type !== 'hls') return;
@@ -80,23 +101,33 @@
 				hls.off(LEVEL_LOADED, onLevelLoaded);
 			};
 		};
-		const onCanPlay = () => onBuffering?.(false);
-		const onWaiting = () => onBuffering?.(true);
-		const onStalled = () => onBuffering?.(true);
+		const onCanPlay = () => clearBuffering();
+		const onPlaying = () => clearBuffering();
+		const onTimeUpdate = () => clearBuffering();
+		const onWaiting = () => setBufferingSoon();
+		const onStalled = () => setBufferingSoon();
 		const onMediaError = () => {
+			clearBufferingTimeout();
 			hasError = true;
 			isPlaying = false;
 			onError?.();
 		};
 		el.addEventListener('provider-change', onProviderChange);
 		el.addEventListener('can-play', onCanPlay);
+		el.addEventListener('playing', onPlaying);
+		el.addEventListener('timeupdate', onTimeUpdate);
+		el.addEventListener('time-update', onTimeUpdate);
 		el.addEventListener('waiting', onWaiting);
 		el.addEventListener('stalled', onStalled);
 		el.addEventListener('error', onMediaError);
 		return () => {
 			teardownHls?.();
+			clearBufferingTimeout();
 			el.removeEventListener('provider-change', onProviderChange);
 			el.removeEventListener('can-play', onCanPlay);
+			el.removeEventListener('playing', onPlaying);
+			el.removeEventListener('timeupdate', onTimeUpdate);
+			el.removeEventListener('time-update', onTimeUpdate);
 			el.removeEventListener('waiting', onWaiting);
 			el.removeEventListener('stalled', onStalled);
 			el.removeEventListener('error', onMediaError);
