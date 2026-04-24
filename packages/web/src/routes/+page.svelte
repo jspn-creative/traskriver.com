@@ -13,7 +13,7 @@
 	let phase = $state<'connecting' | 'viewing' | 'degraded' | 'error'>('connecting');
 	let streamBuffering = $state(false);
 	let playerKey = $state(0);
-	let drawerOpen = $state(true);
+	let drawerOpen = $state(false);
 	let drawerDirection = $state<'bottom' | 'right'>('bottom');
 	let headerVisible = $state(true);
 	let hideTimer: ReturnType<typeof setTimeout>;
@@ -36,8 +36,13 @@
 	$effect(() => {
 		if (typeof window === 'undefined') return;
 		const mediaQuery = window.matchMedia('(min-width: 768px)');
+		let initialized = false;
 		const updateDirection = (e: MediaQueryListEvent | MediaQueryList) => {
 			drawerDirection = e.matches ? 'right' : 'bottom';
+			if (!initialized) {
+				drawerOpen = e.matches;
+				initialized = true;
+			}
 		};
 		updateDirection(mediaQuery);
 		mediaQuery.addEventListener('change', updateDirection);
@@ -217,13 +222,13 @@
 			<div class="transition-colors duration-700 {sessionActive ? 'text-light' : 'text-primary'}">
 				<div class="flex items-baseline gap-4">
 					<span
-						class="font-display text-display tracking-display text-light drop-shadow-md transition-colors duration-700"
+						class="font-display text-display tracking-display text-light transition-colors duration-700 text-shadow-lg"
 					>
 						Trask River
 					</span>
 					<span
-						class="text-sm font-medium drop-shadow-md transition-colors duration-700 {sessionActive
-							? 'text-secondary'
+						class="text-sm font-medium transition-colors duration-700 {sessionActive
+							? 'text-secondary [text-shadow:0_0_20px_black,0_0_10px_black,0_0_4px_black]'
 							: 'text-light/50'}"
 					>
 						Tillamook, OR
