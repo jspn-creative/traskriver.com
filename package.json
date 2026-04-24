@@ -11,9 +11,8 @@
 	],
 	"scripts": {
 		"dev": "bun run --cwd packages/web dev",
-		"dev:web": "bun run --cwd packages/web dev",
 		"dev:stream": "bun run --cwd packages/stream dev",
-		"build": "turbo run build",
+		"build": "bun run --cwd packages/web build",
 		"build:stream": "bun run --cwd packages/stream build",
 		"deploy": "bun run --cwd packages/web deploy",
 		"deploy:preview": "bun run --cwd packages/web deploy:preview",
