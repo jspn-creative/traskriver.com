@@ -22,6 +22,8 @@
 
 - Cloudflare Workers — production runtime for the web app via `@sveltejs/adapter-cloudflare` and Wrangler (`packages/web/wrangler.jsonc`).
 
+- Node.js `>=22` — intended runtime for `packages/stream` (long-lived HLS origin service); Bun remains the monorepo package manager.
+
 **Package Manager:**
 
 - Bun — lockfile: `bun.lock` at repo root.

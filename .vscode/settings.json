@@ -1,4 +1,10 @@
 {
 	"prettier.configPath": ".prettierrc",
-	"editor.formatOnSave": true
+	"editor.formatOnSave": true,
+	"workbench.colorCustomizations": {
+		"titleBar.activeBackground": "#F5F0E8",
+		"titleBar.activeForeground": "#2A2621",
+		"titleBar.inactiveBackground": "#322D28",
+		"titleBar.inactiveForeground": "#F5F0E8"
+	}
 }

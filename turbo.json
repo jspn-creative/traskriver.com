@@ -3,7 +3,7 @@
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
-			"outputs": ["dist/**", ".svelte-kit/cloudflare/**"]
+			"outputs": ["dist/**", ".svelte-kit/cloudflare/**", "packages/stream/dist/**"]
 		},
 		"check": {}
 	}

@@ -1,3 +1,2 @@
-RELAY_API_TOKEN=dev-test-token
-# Optional — default 300
-# DEMAND_WINDOW_SECONDS=300
+# Local Cloudflare Workers dev vars (SvelteKit). Mirror of public build-time URL.
+PUBLIC_STREAM_HLS_URL=https://stream.traskriver.com/trask/index.m3u8
