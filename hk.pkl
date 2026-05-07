@@ -3,6 +3,7 @@ amends "package://github.com/jdx/hk/releases/download/v1.41.1/hk@1.41.1#/Config.
 hooks {
 	["pre-commit"] {
 		fix = true
+		stash = "git"
 		steps {
 			["format"] {
 				glob = List(
