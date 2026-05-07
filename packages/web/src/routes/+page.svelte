@@ -17,6 +17,7 @@
 	let drawerDirection = $state<'bottom' | 'right'>('bottom');
 	let headerVisible = $state(true);
 	let hideTimer: ReturnType<typeof setTimeout>;
+	let bufferingEventSent = $state(false);
 	const pageLoadTime = Date.now();
 
 	const log = (msg: string, data?: Record<string, unknown>) =>
@@ -67,8 +68,12 @@
 		streamBuffering = buffering;
 		if (buffering) {
 			log('playback buffering');
+			if (bufferingEventSent) return;
 			posthog.capture('playback_buffering_started');
+			bufferingEventSent = true;
+			return;
 		}
+		bufferingEventSent = false;
 	};
 
 	const onPlaybackError = () => {
@@ -150,7 +155,9 @@
 		</div>
 
 		{#if phase === 'connecting'}
-			<div class="absolute inset-0 z-30 flex flex-col items-center justify-center">
+			<div
+				class="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center"
+			>
 				<svg
 					class="mb-3 h-6 w-6 animate-spin text-white/70"
 					xmlns="http://www.w3.org/2000/svg"
