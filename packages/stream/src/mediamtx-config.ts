@@ -19,7 +19,7 @@ hls: yes
 hlsAddress: :${env.MEDIAMTX_HLS_PORT}
 hlsAlwaysRemux: yes
 hlsVariant: mpegts
-hlsSegmentCount: 6
+hlsSegmentCount: ${env.HLS_SEGMENT_COUNT}
 hlsSegmentDuration: 2s
 hlsDirectory: ${env.HLS_DIR}
 hlsAllowOrigins: ['*']

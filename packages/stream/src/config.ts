@@ -8,6 +8,7 @@ export const ConfigSchema = z.object({
 	RTSP_URL: z.string().url(),
 	MEDIAMTX_API_PORT: z.coerce.number().int().positive().default(9997),
 	MEDIAMTX_HLS_PORT: z.coerce.number().int().positive().default(8888),
+	HLS_SEGMENT_COUNT: z.coerce.number().int().positive().default(12),
 	HLS_DIR: z.string().default('/run/hls'),
 	MEDIAMTX_BIN: z.string().default('mediamtx'),
 	OPS_HOSTS: z
