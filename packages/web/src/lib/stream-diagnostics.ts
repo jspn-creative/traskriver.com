@@ -1,0 +1,21 @@
+export type StreamDiagnostic = {
+	type: string;
+	elapsedMs: number;
+	playerKey: number;
+	currentTime: number | null;
+	paused: boolean | null;
+	readyState: number | null;
+	networkState: number | null;
+	bufferedEnd: number | null;
+	errorCode: number | null;
+	errorMessage: string | null;
+	videoCurrentTime: number | null;
+	videoPaused: boolean | null;
+	videoReadyState: number | null;
+	videoNetworkState: number | null;
+	videoWidth: number | null;
+	videoHeight: number | null;
+	videoDecodedFrameCount: number | null;
+	videoDroppedFrameCount: number | null;
+	detail?: Record<string, unknown>;
+};

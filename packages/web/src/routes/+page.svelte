@@ -5,6 +5,7 @@
 	import FishRunStatus from '$lib/components/FishRunStatus.svelte';
 	import { Drawer, DrawerContent } from '$lib/components/ui/drawer';
 	import defaultJpg from '$lib/assets/default.jpg';
+	import type { StreamDiagnostic } from '$lib/stream-diagnostics';
 	import * as env from '$env/static/public';
 	import posthog from 'posthog-js';
 
@@ -19,9 +20,69 @@
 	let hideTimer: ReturnType<typeof setTimeout>;
 	let bufferingEventSent = $state(false);
 	const pageLoadTime = Date.now();
+	const streamSessionId =
+		typeof crypto !== 'undefined' && 'randomUUID' in crypto
+			? crypto.randomUUID()
+			: Math.random().toString(36).slice(2);
 
 	const log = (msg: string, data?: Record<string, unknown>) =>
 		console.log(`[stream] ${msg}`, data ?? '');
+	const warn = (msg: string, data?: Record<string, unknown>) =>
+		console.warn(`[stream] ${msg}`, data ?? '');
+
+	const getClientDiagnostics = () => {
+		if (typeof navigator === 'undefined') return {};
+		const connection = (
+			navigator as Navigator & {
+				connection?: {
+					effectiveType?: string;
+					downlink?: number;
+					rtt?: number;
+					saveData?: boolean;
+				};
+			}
+		).connection;
+		return {
+			user_agent: navigator.userAgent,
+			platform: navigator.platform,
+			visibility_state: typeof document === 'undefined' ? null : document.visibilityState,
+			connection_effective_type: connection?.effectiveType ?? null,
+			connection_downlink: connection?.downlink ?? null,
+			connection_rtt: connection?.rtt ?? null,
+			connection_save_data: connection?.saveData ?? null
+		};
+	};
+
+	const captureStreamDiagnostic = (diagnostic: StreamDiagnostic) => {
+		const properties = {
+			stream_session_id: streamSessionId,
+			diagnostic_type: diagnostic.type,
+			phase,
+			stream_buffering: streamBuffering,
+			live_src: env.PUBLIC_STREAM_HLS_URL,
+			page_elapsed_ms: Date.now() - pageLoadTime,
+			...diagnostic,
+			...getClientDiagnostics()
+		};
+
+		if (
+			diagnostic.type === 'startup_slow' ||
+			diagnostic.type === 'startup_hung' ||
+			diagnostic.type === 'hls_error' ||
+			diagnostic.type === 'media_error' ||
+			diagnostic.type === 'media_stalled'
+		) {
+			warn(`diagnostic: ${diagnostic.type}`, properties);
+		} else {
+			log(`diagnostic: ${diagnostic.type}`, properties);
+		}
+
+		posthog.capture('stream_diagnostic', properties);
+		if (diagnostic.type === 'startup_slow') posthog.capture('stream_startup_slow', properties);
+		if (diagnostic.type === 'startup_hung') {
+			posthog.capture('stream_startup_hang_detected', properties);
+		}
+	};
 
 	const sessionActive = $derived(phase === 'viewing' || phase === 'degraded');
 	const sidebarWidth = $derived(phase === 'viewing' ? '300px' : '420px');
@@ -60,8 +121,8 @@
 		phase = 'viewing';
 		streamBuffering = false;
 		const ttff = Date.now() - pageLoadTime;
-		posthog.capture('stream_viewed');
-		posthog.capture('time_to_first_frame', { ms: ttff });
+		posthog.capture('stream_viewed', { stream_session_id: streamSessionId });
+		posthog.capture('time_to_first_frame', { stream_session_id: streamSessionId, ms: ttff });
 	};
 
 	const onPlaybackBuffering = (buffering: boolean) => {
@@ -69,7 +130,7 @@
 		if (buffering) {
 			log('playback buffering');
 			if (bufferingEventSent) return;
-			posthog.capture('playback_buffering_started');
+			posthog.capture('playback_buffering_started', { stream_session_id: streamSessionId });
 			bufferingEventSent = true;
 			return;
 		}
@@ -80,21 +141,21 @@
 		const fromPhase = phase;
 		log('playback error — entering error phase');
 		phase = 'error';
-		posthog.capture('stream_error', { from_phase: fromPhase });
+		posthog.capture('stream_error', { stream_session_id: streamSessionId, from_phase: fromPhase });
 	};
 
 	const onDegraded = () => {
 		if (phase === 'degraded') return;
 		log('stream degraded — camera may be offline');
 		phase = 'degraded';
-		posthog.capture('stream_degraded');
+		posthog.capture('stream_degraded', { stream_session_id: streamSessionId });
 	};
 
 	const onRecovered = () => {
 		if (phase !== 'degraded') return;
 		log('stream recovered');
 		phase = 'viewing';
-		posthog.capture('stream_recovered');
+		posthog.capture('stream_recovered', { stream_session_id: streamSessionId });
 	};
 
 	const retryPlayer = () => {
@@ -145,6 +206,7 @@
 					onBuffering={onPlaybackBuffering}
 					{onDegraded}
 					{onRecovered}
+					onDiagnostic={captureStreamDiagnostic}
 				/>
 			{/key}
 			<div
