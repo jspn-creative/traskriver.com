@@ -43,6 +43,7 @@
 	"dependencies": {
 		"@fontsource-variable/dm-sans": "^5.2.8",
 		"@fontsource-variable/syne": "^5.2.7",
+		"hls.js": "^1.6.16",
 		"posthog-js": "^1.369.0",
 		"posthog-node": "^5.29.2",
 		"vidstack": "^0.6.15"
