@@ -445,7 +445,7 @@
 	{#key playerKey}
 		<video
 			bind:this={video}
-			title="River Stream"
+			aria-label="Live river stream"
 			autoplay
 			muted
 			playsinline
@@ -456,7 +456,8 @@
 	{/key}
 	<img
 		src={poster}
-		alt="Stream Poster"
+		alt=""
+		aria-hidden="true"
 		class="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover transition-opacity duration-500 {isPlaying &&
 		!hasError
 			? 'opacity-0'

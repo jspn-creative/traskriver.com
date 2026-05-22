@@ -85,7 +85,7 @@
 	};
 
 	const sessionActive = $derived(phase === 'viewing' || phase === 'degraded');
-	const sidebarWidth = $derived(phase === 'viewing' ? '300px' : '420px');
+	const sidebarWidth = $derived(phase === 'viewing' ? '420px' : '300px');
 
 	const resetHideTimer = () => {
 		clearTimeout(hideTimer);
@@ -337,19 +337,26 @@
 	</main>
 
 	<aside
-		style="width: {drawerDirection === 'right' ? sidebarWidth : '0px'}"
-		class="z-20 flex flex-col overflow-x-hidden overflow-y-auto border-sepia bg-light shadow-[-10px_0_40px_rgba(0,0,0,0.04)] transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)] {drawerDirection ===
+		style="width: {drawerDirection === 'right'
+			? sidebarWidth
+			: '0px'}; min-width: {drawerDirection === 'right' ? sidebarWidth : '0px'}"
+		class="z-20 flex flex-col overflow-x-hidden overflow-y-auto border-sepia bg-light shadow-[-10px_0_40px_rgba(0,0,0,0.04)] transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] {drawerDirection ===
 		'right'
 			? 'border-l'
 			: ''}"
 	>
-		<Drawer bind:open={drawerOpen} direction={drawerDirection} modal={drawerDirection === 'bottom'}>
+		<Drawer
+			bind:open={drawerOpen}
+			direction={drawerDirection}
+			modal={drawerDirection === 'bottom'}
+			dismissible={drawerDirection === 'bottom'}
+		>
 			<DrawerContent
 				style={drawerDirection === 'right'
 					? `width: ${sidebarWidth}; min-width: ${sidebarWidth}`
 					: ''}
 				class="border-sepia bg-light *:overflow-auto {drawerDirection === 'right'
-					? 'top-0 right-0 mt-0 h-full rounded-none transition-[width] duration-900 ease-[cubic-bezier(0.16,1,0.3,1)]'
+					? 'top-0 right-0 mt-0 h-full rounded-none transition-all! duration-1000! ease-[cubic-bezier(0.16,1,0.3,1)]'
 					: 'max-h-[85vh]'}"
 			>
 				<div class="flex min-w-0 flex-1 flex-col">
@@ -362,8 +369,8 @@
 							salmon runs on Oregon's north coast.
 						</p>
 					</div>
-					<LocalWeather />
 					<RiverConditions />
+					<LocalWeather />
 					<FishRunStatus />
 				</div>
 			</DrawerContent>

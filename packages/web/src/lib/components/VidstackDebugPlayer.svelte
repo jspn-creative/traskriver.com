@@ -428,7 +428,7 @@
 	{#key playerKey}
 		<media-player
 			bind:this={player}
-			title="River Stream"
+			aria-label="Live river stream"
 			src={liveSrc}
 			{poster}
 			autoplay

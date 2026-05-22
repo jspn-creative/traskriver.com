@@ -17,6 +17,10 @@
 		}
 		gtag('js', new Date());
 		gtag('config', 'G-T527K8JSHJ', { debug_mode: ${dev} });
+
+		if (${dev}) {
+			console.log('gtag config:', { debug_mode: ${dev} });
+		}
 	</script>`}
 </svelte:head>
 

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+	import FlowGauge from '$lib/components/gauges/FlowGauge.svelte';
+	import TemperatureGauge from '$lib/components/gauges/TemperatureGauge.svelte';
 
 	interface UsgsTimeSeries {
 		variable: { variableCode: { value: string }[] };
@@ -63,6 +65,7 @@
 
 	let relativeTime = $derived(latestIso ? formatRelativeTime(latestIso) : '');
 	let gaugeOffline = $derived(!loading && !error && flowCfs === null && tempC === null);
+	let tempF = $derived(tempC !== null ? (tempC * 9) / 5 + 32 : null);
 </script>
 
 <div
@@ -93,23 +96,11 @@
 			in:fly={{ y: 10, duration: 500, delay: 400, easing: cubicOut }}
 			class="flex flex-col gap-6"
 		>
-			<div class="grid grid-cols-2 gap-x-4 gap-y-6 border-b border-sepia pb-6">
-				<div class="flex flex-col gap-1.5">
-					<span class="text-2xs font-medium tracking-label text-secondary uppercase"
-						>River Flow</span
-					>
-					<span class="font-mono text-sm text-primary">
-						{flowCfs !== null ? `${Math.round(flowCfs)} cfs` : '—'}
-					</span>
-				</div>
-				<div class="flex flex-col gap-1.5">
-					<span class="text-2xs font-medium tracking-label text-secondary uppercase"
-						>Water Temp</span
-					>
-					<span class="font-mono text-sm text-primary">
-						{tempC !== null ? `${Math.round((tempC * 9) / 5 + 32)}°F` : '—'}
-					</span>
-				</div>
+			<div
+				class="@container grid grid-cols-2 gap-x-[clamp(0.75rem,6cqw,2rem)] gap-y-[clamp(1.25rem,8cqw,3rem)] border-b border-sepia pb-[clamp(1.25rem,8cqw,2rem)]"
+			>
+				<FlowGauge valueCfs={flowCfs} />
+				<TemperatureGauge valueF={tempF} />
 			</div>
 
 			<div class="mt-auto">
