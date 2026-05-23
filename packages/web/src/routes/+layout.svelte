@@ -10,18 +10,14 @@
 	<link rel="icon" href={favicon} />
 	<title>Trask River Cam</title>
 	<script async src="https://www.googletagmanager.com/gtag/js?id=G-T527K8JSHJ"></script>
-	{@html `<script>
+	<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag() {
 			dataLayer.push(arguments);
 		}
 		gtag('js', new Date());
-		gtag('config', 'G-T527K8JSHJ', { debug_mode: ${dev} });
-
-		if (${dev}) {
-			console.log('gtag config:', { debug_mode: ${dev} });
-		}
-	</script>`}
+		gtag('config', 'G-T527K8JSHJ');
+	</script>
 </svelte:head>
 
 {@render children()}
