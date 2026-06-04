@@ -8,6 +8,7 @@
 	import type { StreamDiagnostic } from '$lib/stream-diagnostics';
 	import * as env from '$env/static/public';
 	import posthog from 'posthog-js';
+	import type { LogAttributes } from 'posthog-js';
 
 	const __DEV__ = import.meta.env.DEV;
 
@@ -18,7 +19,11 @@
 	let drawerDirection = $state<'bottom' | 'right'>('bottom');
 	let headerVisible = $state(true);
 	let hideTimer: ReturnType<typeof setTimeout>;
-	let bufferingEventSent = $state(false);
+	let playbackConfirmed = false;
+	let startupTraceSent = false;
+	let startupTrace: Record<string, unknown>[] = [];
+	let loggedStartupDiagnosticTypes = new Set<string>();
+	let lastPageState = '';
 	const pageLoadTime = Date.now();
 	const streamSessionId =
 		typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -29,6 +34,68 @@
 		console.log(`[stream] ${msg}`, data ?? '');
 	const warn = (msg: string, data?: Record<string, unknown>) =>
 		console.warn(`[stream] ${msg}`, data ?? '');
+
+	const CONSOLE_LABELS: Record<string, string> = {
+		player_mounted: 'player mounted',
+		playback_confirmed: 'playback confirmed (first frame)',
+		video_frame: 'first video frame presented',
+		video_frame_fallback: 'first frame confirmed (no frame callback API)',
+		media_playing_event: 'browser playing event (not confirmed yet)',
+		media_loaded_metadata: 'browser loaded metadata',
+		media_loaded_data: 'browser loaded data',
+		media_can_play: 'browser can play',
+		media_resize: 'browser video resize',
+		media_waiting: 'browser waiting for data',
+		media_stalled: 'browser stalled',
+		media_error: 'browser media error',
+		play_promise_resolved: 'play() promise resolved',
+		play_promise_rejected: 'play() promise rejected',
+		startup_slow: 'startup slow (>8s, not confirmed yet)',
+		startup_hung: 'startup hung (>20s, not confirmed)',
+		hls_library_loaded: 'hls.js loaded',
+		hls_unsupported: 'hls.js unsupported',
+		hls_manifest_parsed: 'hls manifest parsed',
+		hls_level_loaded: 'hls level loaded',
+		hls_frag_loaded: 'hls fragment loaded',
+		hls_error: 'hls error',
+		hls_setup_error: 'hls setup error',
+		player_setup_error: 'player setup error'
+	};
+
+	const WARN_CONSOLE_TYPES = new Set([
+		'startup_slow',
+		'startup_hung',
+		'hls_error',
+		'hls_setup_error',
+		'media_error',
+		'player_setup_error',
+		'play_promise_rejected'
+	]);
+
+	const POSTHOG_TRACE_FAILURE_TYPES = new Set([
+		'startup_hung',
+		'hls_setup_error',
+		'player_setup_error'
+	]);
+
+	const writePosthogLog = (message: string, properties: LogAttributes) => {
+		const logger = posthog.logger as
+			| {
+					error?: (message: string, attributes?: LogAttributes) => void;
+			  }
+			| undefined;
+
+		if (typeof logger?.error === 'function') {
+			logger.error(message, properties);
+			return;
+		}
+
+		posthog.captureLog?.({
+			body: message,
+			level: 'error',
+			attributes: properties
+		});
+	};
 
 	const getClientDiagnostics = () => {
 		if (typeof navigator === 'undefined') return {};
@@ -53,34 +120,77 @@
 		};
 	};
 
-	const captureStreamDiagnostic = (diagnostic: StreamDiagnostic) => {
-		const properties = {
+	const buildDiagnosticProperties = (diagnostic: StreamDiagnostic) => ({
+		stream_session_id: streamSessionId,
+		diagnostic_type: diagnostic.type,
+		phase,
+		stream_buffering: streamBuffering,
+		live_src: env.PUBLIC_STREAM_HLS_URL,
+		page_elapsed_ms: Date.now() - pageLoadTime,
+		...diagnostic,
+		...getClientDiagnostics()
+	});
+
+	const clearStartupTrace = () => {
+		startupTrace = [];
+	};
+
+	const resetStartupTraceState = () => {
+		clearStartupTrace();
+		startupTraceSent = false;
+		loggedStartupDiagnosticTypes = new Set();
+	};
+
+	const flushStartupTraceToPosthog = (failureType: string, trigger: Record<string, unknown>) => {
+		if (playbackConfirmed || startupTraceSent || startupTrace.length === 0) return;
+		startupTraceSent = true;
+		writePosthogLog('stream startup failed', {
 			stream_session_id: streamSessionId,
-			diagnostic_type: diagnostic.type,
-			phase,
-			stream_buffering: streamBuffering,
+			player_key: playerKey,
+			failure_type: failureType,
+			log_category: 'stream',
+			log_severity: 'error',
 			live_src: env.PUBLIC_STREAM_HLS_URL,
 			page_elapsed_ms: Date.now() - pageLoadTime,
-			...diagnostic,
+			trace: startupTrace,
+			trigger,
 			...getClientDiagnostics()
-		};
+		});
+		clearStartupTrace();
+	};
 
-		if (
-			diagnostic.type === 'startup_slow' ||
-			diagnostic.type === 'startup_hung' ||
-			diagnostic.type === 'hls_error' ||
-			diagnostic.type === 'media_error' ||
-			diagnostic.type === 'media_stalled'
-		) {
-			warn(`diagnostic: ${diagnostic.type}`, properties);
-		} else {
-			log(`diagnostic: ${diagnostic.type}`, properties);
+	const captureStreamDiagnostic = (diagnostic: StreamDiagnostic) => {
+		if (playbackConfirmed && diagnostic.type !== 'playback_confirmed') return;
+
+		const properties = buildDiagnosticProperties(diagnostic);
+		const label = CONSOLE_LABELS[diagnostic.type] ?? diagnostic.type;
+		const shouldLogToConsole =
+			diagnostic.type === 'playback_confirmed' ||
+			!loggedStartupDiagnosticTypes.has(diagnostic.type);
+
+		if (shouldLogToConsole) {
+			loggedStartupDiagnosticTypes.add(diagnostic.type);
+			if (WARN_CONSOLE_TYPES.has(diagnostic.type)) warn(label, properties);
+			else log(label, properties);
 		}
 
-		posthog.capture('stream_diagnostic', properties);
-		if (diagnostic.type === 'startup_slow') posthog.capture('stream_startup_slow', properties);
-		if (diagnostic.type === 'startup_hung') {
-			posthog.capture('stream_startup_hang_detected', properties);
+		if (diagnostic.type === 'playback_confirmed') {
+			playbackConfirmed = true;
+			resetStartupTraceState();
+			return;
+		}
+
+		if (!playbackConfirmed) {
+			startupTrace.push({
+				...diagnostic,
+				phase,
+				stream_buffering: streamBuffering,
+				page_elapsed_ms: Date.now() - pageLoadTime
+			});
+		}
+
+		if (POSTHOG_TRACE_FAILURE_TYPES.has(diagnostic.type)) {
+			flushStartupTraceToPosthog(diagnostic.type, properties);
 		}
 	};
 
@@ -117,6 +227,8 @@
 	});
 
 	const onPlaybackStart = () => {
+		playbackConfirmed = true;
+		resetStartupTraceState();
 		log('playback started — entering viewing phase');
 		phase = 'viewing';
 		streamBuffering = false;
@@ -127,18 +239,16 @@
 
 	const onPlaybackBuffering = (buffering: boolean) => {
 		streamBuffering = buffering;
-		if (buffering) {
-			log('playback buffering');
-			if (bufferingEventSent) return;
-			posthog.capture('playback_buffering_started', { stream_session_id: streamSessionId });
-			bufferingEventSent = true;
-			return;
-		}
-		bufferingEventSent = false;
 	};
 
 	const onPlaybackError = () => {
 		const fromPhase = phase;
+		flushStartupTraceToPosthog('playback_error', {
+			stream_session_id: streamSessionId,
+			from_phase: fromPhase,
+			phase,
+			stream_buffering: streamBuffering
+		});
 		log('playback error — entering error phase');
 		phase = 'error';
 		posthog.capture('stream_error', { stream_session_id: streamSessionId, from_phase: fromPhase });
@@ -160,6 +270,8 @@
 
 	const retryPlayer = () => {
 		log('user retry — remounting player');
+		playbackConfirmed = false;
+		resetStartupTraceState();
 		playerKey += 1;
 		streamBuffering = false;
 		phase = 'connecting';
@@ -185,7 +297,10 @@
 	);
 
 	$effect(() => {
-		if (__DEV__) console.debug('[page]', { phase, streamBuffering });
+		const state = `${phase}:${streamBuffering}`;
+		if (!__DEV__ || state === lastPageState) return;
+		lastPageState = state;
+		console.debug('[page] phase change', { phase, streamBuffering });
 	});
 </script>
 
