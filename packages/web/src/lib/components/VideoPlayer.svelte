@@ -13,6 +13,7 @@
 
 	const STARTUP_SLOW_MS = 8_000;
 	const STARTUP_HUNG_MS = 20_000;
+	const FRAME_CALLBACK_GRACE_MS = 1_500;
 	const STALL_THRESHOLD_MS = 30_000;
 
 	type VideoFrameMetadataLike = {
@@ -77,6 +78,20 @@
 	const videoHasCurrentFrame = (el: NativeVideoElement) =>
 		el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && el.videoWidth > 0 && el.videoHeight > 0;
 
+	const isDocumentHidden = () =>
+		typeof document !== 'undefined' && document.visibilityState === 'hidden';
+
+	const hasPlayableEvidence = (el: NativeVideoElement) =>
+		videoHasCurrentFrame(el) ||
+		(el.readyState >= HTMLMediaElement.HAVE_METADATA &&
+			(el.videoWidth > 0 ||
+				el.videoHeight > 0 ||
+				readBufferedEnd(el) !== null ||
+				(Number(el.currentTime) || 0) > 0));
+
+	const isAbortPlayRejection = (err: Error) =>
+		err.name === 'AbortError' || /interrupted|aborted|save power/i.test(err.message ?? '');
+
 	$effect(() => {
 		const el = video;
 		if (!el) return;
@@ -88,7 +103,10 @@
 		let startupSlowTimer: ReturnType<typeof setTimeout> | undefined;
 		let startupHungTimer: ReturnType<typeof setTimeout> | undefined;
 		let videoFrameCallbackHandle: number | undefined;
+		let frameCallbackGraceTimer: ReturnType<typeof setTimeout> | undefined;
 		let firstFrameSeen = false;
+		let playDeferredHidden = false;
+		let pendingPlaySource: string | null = null;
 		let hlsFallbackStarted = false;
 		let lastMediaSequence = -1;
 		let lastSequenceChangeTime = Date.now();
@@ -118,11 +136,23 @@
 			onBuffering?.(false);
 		};
 
-		const markPlaybackStarted = (source: string) => {
+		const clearFrameCallbackGrace = () => {
+			if (!frameCallbackGraceTimer) return;
+			clearTimeout(frameCallbackGraceTimer);
+			frameCallbackGraceTimer = undefined;
+		};
+
+		const markPlaybackStarted = (
+			source: string,
+			diagnosticType: 'playback_confirmed' | 'playback_ready_fallback' = 'playback_confirmed'
+		) => {
 			clearStartupTimers();
+			clearFrameCallbackGrace();
 			clearBuffering();
+			playDeferredHidden = false;
+			pendingPlaySource = null;
 			if (isPlaying) return;
-			emitDiagnostic('playback_confirmed', { source });
+			emitDiagnostic(diagnosticType, { source });
 			isPlaying = true;
 			hasError = false;
 			onPlaying?.();
@@ -158,12 +188,49 @@
 			);
 		};
 
+		const schedulePlaybackReadyFallback = (source: string) => {
+			if (frameCallbackGraceTimer || !hasPlayableEvidence(el)) return;
+			frameCallbackGraceTimer = setTimeout(() => {
+				frameCallbackGraceTimer = undefined;
+				if (firstFrameSeen || isPlaying || hasError || !hasPlayableEvidence(el)) return;
+				firstFrameSeen = true;
+				markPlaybackStarted(source, 'playback_ready_fallback');
+			}, FRAME_CALLBACK_GRACE_MS);
+		};
+
+		const maybeConfirmPlaybackReady = (source: string) => {
+			if (isPlaying) return;
+			if (hasVideoFrameCallback(el)) {
+				requestFirstVideoFrame();
+				schedulePlaybackReadyFallback(source);
+				return;
+			}
+			if (!el.paused && videoHasCurrentFrame(el)) {
+				markPlaybackStarted(source);
+				return;
+			}
+			if (
+				!el.paused &&
+				hasPlayableEvidence(el) &&
+				el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+			) {
+				markPlaybackStarted(source, 'playback_ready_fallback');
+			}
+		};
+
+		const shouldDeferStartupFailure = () =>
+			isDocumentHidden() ||
+			playDeferredHidden ||
+			(hasPlayableEvidence(el) && el.paused && el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA);
+
 		const emitStartupCheck = (type: string) => {
-			if (isPlaying || hasError) return;
+			if (isPlaying || hasError || shouldDeferStartupFailure()) return;
 			emitDiagnostic(type, {
 				src: liveSrc,
 				capabilities: collectStreamCapabilities(el),
-				hlsState: readHlsState(hlsInstance)
+				hlsState: readHlsState(hlsInstance),
+				visibility_state: typeof document === 'undefined' ? null : document.visibilityState,
+				play_deferred_hidden: playDeferredHidden
 			});
 		};
 
@@ -179,27 +246,62 @@
 		};
 
 		const tryPlay = async (source: string) => {
+			if (isDocumentHidden()) {
+				playDeferredHidden = true;
+				pendingPlaySource = source;
+				emitDiagnostic('play_deferred_hidden', {
+					source,
+					visibility_state: document.visibilityState
+				});
+				maybeConfirmPlaybackReady('play_deferred_hidden');
+				return;
+			}
+
 			try {
 				await el.play();
+				playDeferredHidden = false;
+				pendingPlaySource = null;
 				emitDiagnostic('play_promise_resolved', { source });
 				requestFirstVideoFrame();
+				maybeConfirmPlaybackReady('play_promise_resolved');
 			} catch (error) {
 				const err = error as Error;
+				if (isDocumentHidden() || (isAbortPlayRejection(err) && hasPlayableEvidence(el))) {
+					playDeferredHidden = true;
+					pendingPlaySource = source;
+					emitDiagnostic(isDocumentHidden() ? 'play_deferred_hidden' : 'play_deferred_abort', {
+						source,
+						name: err.name ?? null,
+						message: err.message ?? null,
+						visibility_state: document.visibilityState
+					});
+					maybeConfirmPlaybackReady(
+						isDocumentHidden() ? 'play_deferred_hidden' : 'play_deferred_abort'
+					);
+					return;
+				}
 				emitDiagnostic('play_promise_rejected', {
 					source,
 					name: err.name ?? null,
-					message: err.message ?? null
+					message: err.message ?? null,
+					visibility_state: document.visibilityState
 				});
 			}
 		};
 
-		const maybeConfirmWithoutFrameCallback = (source: string) => {
-			if (hasVideoFrameCallback(el)) {
-				requestFirstVideoFrame();
+		const onVisibilityChange = () => {
+			if (isDocumentHidden() || isPlaying || hasError) return;
+			emitDiagnostic('visibility_visible_retry', {
+				visibility_state: document.visibilityState,
+				play_deferred_hidden: playDeferredHidden
+			});
+			if (playDeferredHidden || pendingPlaySource) {
+				void tryPlay(pendingPlaySource ?? 'visibility_retry');
 				return;
 			}
-			if (!el.paused && videoHasCurrentFrame(el)) markPlaybackStarted(source);
+			if (hasPlayableEvidence(el)) maybeConfirmPlaybackReady('visibility_ready');
 		};
+		document.addEventListener('visibilitychange', onVisibilityChange);
 
 		const eventListeners: Array<() => void> = [];
 		const listen = (name: keyof HTMLMediaElementEventMap, listener: EventListener) => {
@@ -210,20 +312,21 @@
 		listen('loadedmetadata', () => emitDiagnostic('media_loaded_metadata'));
 		listen('loadeddata', () => {
 			emitDiagnostic('media_loaded_data');
-			maybeConfirmWithoutFrameCallback('media_loaded_data');
+			maybeConfirmPlaybackReady('media_loaded_data');
 		});
 		listen('canplay', () => {
 			emitDiagnostic('media_can_play');
 			clearBuffering();
-			maybeConfirmWithoutFrameCallback('media_can_play');
+			maybeConfirmPlaybackReady('media_can_play');
 		});
 		listen('playing', () => {
 			emitDiagnostic('media_playing_event');
 			requestFirstVideoFrame();
+			maybeConfirmPlaybackReady('media_playing_event');
 		});
 		listen('resize', () => {
 			emitDiagnostic('media_resize');
-			maybeConfirmWithoutFrameCallback('media_resize');
+			maybeConfirmPlaybackReady('media_resize');
 		});
 		listen('waiting', () => {
 			emitDiagnostic('media_waiting');
@@ -399,6 +502,8 @@
 			teardownHls?.();
 			clearBufferingTimeout();
 			clearStartupTimers();
+			clearFrameCallbackGrace();
+			document.removeEventListener('visibilitychange', onVisibilityChange);
 			if (videoFrameCallbackHandle !== undefined)
 				el.cancelVideoFrameCallback?.(videoFrameCallbackHandle);
 			for (const remove of eventListeners) remove();

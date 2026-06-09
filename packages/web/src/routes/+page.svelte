@@ -38,6 +38,7 @@
 	const CONSOLE_LABELS: Record<string, string> = {
 		player_mounted: 'player mounted',
 		playback_confirmed: 'playback confirmed (first frame)',
+		playback_ready_fallback: 'playback ready (fallback, no frame callback)',
 		video_frame: 'first video frame presented',
 		video_frame_fallback: 'first frame confirmed (no frame callback API)',
 		media_playing_event: 'browser playing event (not confirmed yet)',
@@ -50,6 +51,9 @@
 		media_error: 'browser media error',
 		play_promise_resolved: 'play() promise resolved',
 		play_promise_rejected: 'play() promise rejected',
+		play_deferred_hidden: 'play deferred (tab hidden)',
+		play_deferred_abort: 'play deferred (abort with playable data)',
+		visibility_visible_retry: 'retrying play after tab visible',
 		startup_slow: 'startup slow (>8s, not confirmed yet)',
 		startup_hung: 'startup hung (>20s, not confirmed)',
 		hls_library_loaded: 'hls.js loaded',
@@ -160,12 +164,19 @@
 	};
 
 	const captureStreamDiagnostic = (diagnostic: StreamDiagnostic) => {
-		if (playbackConfirmed && diagnostic.type !== 'playback_confirmed') return;
+		if (
+			playbackConfirmed &&
+			diagnostic.type !== 'playback_confirmed' &&
+			diagnostic.type !== 'playback_ready_fallback'
+		) {
+			return;
+		}
 
 		const properties = buildDiagnosticProperties(diagnostic);
 		const label = CONSOLE_LABELS[diagnostic.type] ?? diagnostic.type;
 		const shouldLogToConsole =
 			diagnostic.type === 'playback_confirmed' ||
+			diagnostic.type === 'playback_ready_fallback' ||
 			!loggedStartupDiagnosticTypes.has(diagnostic.type);
 
 		if (shouldLogToConsole) {
@@ -174,7 +185,7 @@
 			else log(label, properties);
 		}
 
-		if (diagnostic.type === 'playback_confirmed') {
+		if (diagnostic.type === 'playback_confirmed' || diagnostic.type === 'playback_ready_fallback') {
 			playbackConfirmed = true;
 			resetStartupTraceState();
 			return;
