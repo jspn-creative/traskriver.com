@@ -5,6 +5,8 @@ export const ConfigSchema = z.object({
 	NODE_ENV: z.enum(['development', 'production', 'test']).default('production'),
 	LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
 	PORT: z.coerce.number().int().positive().default(8088),
+	POSTHOG_PROJECT_TOKEN: z.string().min(1).nullable().default(null),
+	POSTHOG_OTLP_LOGS_ENDPOINT: z.string().url().default('https://us.i.posthog.com/i/v1/logs'),
 	RTSP_URL: z.string().url(),
 	MEDIAMTX_API_PORT: z.coerce.number().int().positive().default(9997),
 	MEDIAMTX_HLS_PORT: z.coerce.number().int().positive().default(8888),

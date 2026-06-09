@@ -1,5 +1,6 @@
 import posthog from 'posthog-js';
 import { PUBLIC_POSTHOG_PROJECT_TOKEN } from '$env/static/public';
+import { dev } from '$app/environment';
 import type { HandleClientError } from '@sveltejs/kit';
 
 export async function init() {
@@ -7,7 +8,15 @@ export async function init() {
 		api_host: '/ingest',
 		ui_host: 'https://us.posthog.com',
 		defaults: '2026-01-30',
-		capture_exceptions: true
+		capture_exceptions: true,
+		logs: {
+			serviceName: 'traskriver-web',
+			environment: dev ? 'development' : 'production',
+			serviceVersion: '0.0.1',
+			resourceAttributes: {
+				'app.stream': 'trask'
+			}
+		}
 	});
 }
 

@@ -207,37 +207,37 @@
 			eventListeners.push(() => el.removeEventListener(name, listener));
 		};
 
-		listen('loadedmetadata', () => emitDiagnostic('native_video_loaded_metadata'));
+		listen('loadedmetadata', () => emitDiagnostic('media_loaded_metadata'));
 		listen('loadeddata', () => {
-			emitDiagnostic('native_video_loaded_data');
-			maybeConfirmWithoutFrameCallback('native_loaded_data');
+			emitDiagnostic('media_loaded_data');
+			maybeConfirmWithoutFrameCallback('media_loaded_data');
 		});
 		listen('canplay', () => {
-			emitDiagnostic('native_video_can_play');
+			emitDiagnostic('media_can_play');
 			clearBuffering();
-			maybeConfirmWithoutFrameCallback('native_can_play');
+			maybeConfirmWithoutFrameCallback('media_can_play');
 		});
 		listen('playing', () => {
-			emitDiagnostic('native_video_playing');
+			emitDiagnostic('media_playing_event');
 			requestFirstVideoFrame();
 		});
 		listen('resize', () => {
-			emitDiagnostic('native_video_resize');
-			maybeConfirmWithoutFrameCallback('native_resize');
+			emitDiagnostic('media_resize');
+			maybeConfirmWithoutFrameCallback('media_resize');
 		});
 		listen('waiting', () => {
-			emitDiagnostic('native_video_waiting');
+			emitDiagnostic('media_waiting');
 			setBufferingSoon();
 		});
 		listen('stalled', () => {
-			emitDiagnostic('native_video_stalled');
+			emitDiagnostic('media_stalled');
 			setBufferingSoon();
 		});
 		listen('timeupdate', clearBuffering);
 		listen('error', () => {
 			clearBufferingTimeout();
 			clearStartupTimers();
-			emitDiagnostic('native_video_error');
+			emitDiagnostic('media_error');
 
 			if (!hlsFallbackStarted) {
 				hlsFallbackStarted = true;

@@ -1,11 +1,22 @@
 import { serve } from '@hono/node-server';
 import { loadConfig } from './config.ts';
 import { createLogger } from './logger.ts';
+import { startOtelLogs } from './otel-logs.ts';
 import { createApp } from './server.ts';
 import { Supervisor } from './supervisor.ts';
 
 const config = loadConfig();
-const rootLog = createLogger({ level: config.LOG_LEVEL, nodeEnv: config.NODE_ENV });
+const otelLogs = startOtelLogs({
+	projectToken: config.POSTHOG_PROJECT_TOKEN,
+	logsEndpoint: config.POSTHOG_OTLP_LOGS_ENDPOINT,
+	serviceName: 'traskriver-stream',
+	environment: config.NODE_ENV
+});
+const rootLog = createLogger({
+	level: config.LOG_LEVEL,
+	nodeEnv: config.NODE_ENV,
+	otelLogger: otelLogs?.logger
+});
 const log = rootLog.child({ component: 'server' });
 
 const supervisor = new Supervisor(config, rootLog.child({ component: 'supervisor' }));
@@ -21,9 +32,9 @@ const server = serve({ fetch: app.fetch, port: config.PORT, hostname: '0.0.0.0' 
 	log.info({ port: info.port }, 'stream service listening')
 );
 
-void supervisor.start().catch((err) => {
+void supervisor.start().catch(async (err) => {
 	log.error({ err }, 'supervisor failed to start');
-	process.exit(1);
+	await exit(1);
 });
 
 async function shutdown(signal: NodeJS.Signals) {
@@ -36,11 +47,20 @@ async function shutdown(signal: NodeJS.Signals) {
 	server.close((err) => {
 		if (err) {
 			log.error({ err }, 'error closing server');
-			process.exit(1);
+			void exit(1);
+			return;
 		}
-		process.exit(0);
+		void exit(0);
 	});
 }
 
 process.on('SIGTERM', () => void shutdown('SIGTERM'));
 process.on('SIGINT', () => void shutdown('SIGINT'));
+
+async function exit(code: number) {
+	try {
+		await otelLogs?.shutdown();
+	} finally {
+		process.exit(code);
+	}
+}
