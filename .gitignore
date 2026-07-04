@@ -50,3 +50,4 @@ packages/*/.dev.vars
 packages/*/*.local
 !packages/*/.env.example
 !packages/*/.dev.vars.example
+.mcp.json

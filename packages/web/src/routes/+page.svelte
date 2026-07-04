@@ -8,7 +8,7 @@
 	import type { StreamDiagnostic } from '$lib/stream-diagnostics';
 	import * as env from '$env/static/public';
 	import posthog from 'posthog-js';
-	import type { LogAttributes } from 'posthog-js';
+	import { browser } from '$app/environment';
 
 	const __DEV__ = import.meta.env.DEV;
 
@@ -29,6 +29,10 @@
 		typeof crypto !== 'undefined' && 'randomUUID' in crypto
 			? crypto.randomUUID()
 			: Math.random().toString(36).slice(2);
+
+	if (browser) {
+		posthog.register_for_session({ stream_session_id: streamSessionId });
+	}
 
 	const log = (msg: string, data?: Record<string, unknown>) =>
 		console.log(`[stream] ${msg}`, data ?? '');
@@ -82,25 +86,6 @@
 		'player_setup_error'
 	]);
 
-	const writePosthogLog = (message: string, properties: LogAttributes) => {
-		const logger = posthog.logger as
-			| {
-					error?: (message: string, attributes?: LogAttributes) => void;
-			  }
-			| undefined;
-
-		if (typeof logger?.error === 'function') {
-			logger.error(message, properties);
-			return;
-		}
-
-		posthog.captureLog?.({
-			body: message,
-			level: 'error',
-			attributes: properties
-		});
-	};
-
 	const getClientDiagnostics = () => {
 		if (typeof navigator === 'undefined') return {};
 		const connection = (
@@ -148,17 +133,21 @@
 	const flushStartupTraceToPosthog = (failureType: string, trigger: Record<string, unknown>) => {
 		if (playbackConfirmed || startupTraceSent || startupTrace.length === 0) return;
 		startupTraceSent = true;
-		writePosthogLog('stream startup failed', {
-			stream_session_id: streamSessionId,
-			player_key: playerKey,
-			failure_type: failureType,
-			log_category: 'stream',
-			log_severity: 'error',
-			live_src: env.PUBLIC_STREAM_HLS_URL,
-			page_elapsed_ms: Date.now() - pageLoadTime,
-			trace: startupTrace,
-			trigger,
-			...getClientDiagnostics()
+		posthog.captureLog({
+			body: 'stream startup failed',
+			level: 'error',
+			attributes: {
+				stream_session_id: streamSessionId,
+				player_key: playerKey,
+				failure_type: failureType,
+				log_category: 'stream',
+				log_severity: 'error',
+				live_src: env.PUBLIC_STREAM_HLS_URL,
+				page_elapsed_ms: Date.now() - pageLoadTime,
+				trace: startupTrace,
+				trigger,
+				...getClientDiagnostics()
+			}
 		});
 		clearStartupTrace();
 	};
@@ -244,8 +233,7 @@
 		phase = 'viewing';
 		streamBuffering = false;
 		const ttff = Date.now() - pageLoadTime;
-		posthog.capture('stream_viewed', { stream_session_id: streamSessionId });
-		posthog.capture('time_to_first_frame', { stream_session_id: streamSessionId, ms: ttff });
+		posthog.capture('stream_viewed', { ttff_ms: ttff });
 	};
 
 	const onPlaybackBuffering = (buffering: boolean) => {
@@ -262,21 +250,21 @@
 		});
 		log('playback error — entering error phase');
 		phase = 'error';
-		posthog.capture('stream_error', { stream_session_id: streamSessionId, from_phase: fromPhase });
+		posthog.capture('stream_error', { from_phase: fromPhase });
 	};
 
 	const onDegraded = () => {
 		if (phase === 'degraded') return;
 		log('stream degraded — camera may be offline');
 		phase = 'degraded';
-		posthog.capture('stream_degraded', { stream_session_id: streamSessionId });
+		posthog.capture('stream_degraded');
 	};
 
 	const onRecovered = () => {
 		if (phase !== 'degraded') return;
 		log('stream recovered');
 		phase = 'viewing';
-		posthog.capture('stream_recovered', { stream_session_id: streamSessionId });
+		posthog.capture('stream_recovered');
 	};
 
 	const retryPlayer = () => {
