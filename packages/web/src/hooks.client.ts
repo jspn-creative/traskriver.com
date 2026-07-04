@@ -9,6 +9,7 @@ export async function init() {
 		ui_host: 'https://us.posthog.com',
 		defaults: '2026-01-30',
 		capture_exceptions: true,
+		person_profiles: 'always',
 		logs: {
 			serviceName: 'traskriver-web',
 			environment: dev ? 'development' : 'production',
