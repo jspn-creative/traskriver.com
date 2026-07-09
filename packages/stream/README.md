@@ -2,9 +2,9 @@
 
 Node 22 ESM service that pulls RTSP from the Trask River camera and serves self-hosted HLS.
 
-## Phase 5 status
+## Deployment
 
-Skeleton only — zod-validated config, Pino logger, Hono `/health` returning `{ status: "starting" }`. MediaMTX supervisor lands in Phase 6.
+`reference/deploy-script.sh`, `reference/pull-stream.sh`, and `.env` are **reference only**. The live copies are maintained in the xCloud dashboard for the stream VPS and are not applied from this repo on deploy.
 
 ## Scripts
 
