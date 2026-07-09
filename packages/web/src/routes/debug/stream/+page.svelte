@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import VidstackDebugPlayer from '$lib/components/VidstackDebugPlayer.svelte';
 	import StreamDebugProbe from '$lib/components/StreamDebugProbe.svelte';
-	import defaultJpg from '$lib/assets/default.jpg';
 	import type { StreamDiagnostic } from '$lib/stream-diagnostics';
 	import { collectStreamCapabilities } from '$lib/stream-diagnostics';
 	import * as env from '$env/static/public';
@@ -194,7 +193,6 @@
 					<div class="relative aspect-video overflow-hidden rounded-md bg-black">
 						<VidstackDebugPlayer
 							liveSrc={env.PUBLIC_STREAM_HLS_URL}
-							poster={defaultJpg}
 							class="h-full w-full rounded-none border-0 shadow-none"
 							onDiagnostic={onVidstackDiagnostic}
 						/>

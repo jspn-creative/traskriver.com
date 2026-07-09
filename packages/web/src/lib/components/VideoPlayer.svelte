@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import defaultPoster from '$lib/assets/default.jpg';
 	import {
 		collectStreamCapabilities,
 		readBufferedEnd,
@@ -25,7 +24,6 @@
 
 	let {
 		liveSrc,
-		poster = defaultPoster,
 		class: className,
 		onPlaying,
 		onError,
@@ -35,7 +33,6 @@
 		onDiagnostic
 	} = $props<{
 		liveSrc: string;
-		poster?: string;
 		class?: string;
 		onPlaying?: () => void;
 		onError?: () => void;
@@ -110,8 +107,10 @@
 		let hlsFallbackStarted = false;
 		let lastMediaSequence = -1;
 		let lastSequenceChangeTime = Date.now();
-		let levelLoadedCount = 0;
-		let fragLoadedCount = 0;
+		let nativeSrcCleared = false;
+
+		type HlsLoader = { stopLoad: () => void; startLoad: (startPosition?: number) => void };
+		const getHlsLoader = () => hlsInstance as HlsLoader | undefined;
 
 		const emitDiagnostic = (type: string, detail?: Record<string, unknown>) => {
 			const diagnostic = untrack(() => ({ ...snapshot(el, startedAt, detail), type }));
@@ -289,17 +288,54 @@
 			}
 		};
 
+		const stopLoading = () => {
+			const hls = getHlsLoader();
+			if (hls?.stopLoad) {
+				hls.stopLoad();
+				return;
+			}
+			if (el.src) {
+				nativeSrcCleared = true;
+				el.removeAttribute('src');
+				el.load();
+			}
+		};
+
+		const startLoading = () => {
+			if (isDocumentHidden()) return;
+			const hls = getHlsLoader();
+			if (hls?.startLoad) {
+				hls.startLoad(-1);
+				return;
+			}
+			if (nativeSrcCleared || !el.src) {
+				el.src = liveSrc;
+				el.load();
+				nativeSrcCleared = false;
+			}
+		};
+
 		const onVisibilityChange = () => {
-			if (isDocumentHidden() || isPlaying || hasError) return;
-			emitDiagnostic('visibility_visible_retry', {
-				visibility_state: document.visibilityState,
-				play_deferred_hidden: playDeferredHidden
-			});
+			if (isDocumentHidden()) {
+				stopLoading();
+				return;
+			}
+			startLoading();
+			if (hasError) return;
 			if (playDeferredHidden || pendingPlaySource) {
 				void tryPlay(pendingPlaySource ?? 'visibility_retry');
 				return;
 			}
+			if (isPlaying) {
+				void tryPlay('visibility_resume');
+				return;
+			}
+			emitDiagnostic('visibility_visible_retry', {
+				visibility_state: document.visibilityState,
+				play_deferred_hidden: playDeferredHidden
+			});
 			if (hasPlayableEvidence(el)) maybeConfirmPlaybackReady('visibility_ready');
+			else void tryPlay('visibility_retry');
 		};
 		document.addEventListener('visibilitychange', onVisibilityChange);
 
@@ -319,6 +355,10 @@
 			clearBuffering();
 			maybeConfirmPlaybackReady('media_can_play');
 		});
+		listen('play', () => {
+			if (!isDocumentHidden()) startLoading();
+		});
+		listen('pause', () => stopLoading());
 		listen('playing', () => {
 			emitDiagnostic('media_playing_event');
 			requestFirstVideoFrame();
@@ -376,6 +416,7 @@
 				liveSyncDurationCount: 3,
 				liveMaxLatencyDurationCount: 5,
 				maxLiveSyncPlaybackRate: 1.5,
+				maxBufferLength: 15,
 				backBufferLength: 10,
 				xhrSetup(xhr) {
 					xhr.withCredentials = false;
@@ -400,18 +441,6 @@
 			};
 			const onLevelLoaded = (_event: string, data: any) => {
 				const seq = data.details?.startSN ?? -1;
-				levelLoadedCount += 1;
-				if (levelLoadedCount <= 3 || levelLoadedCount % 10 === 0) {
-					emitDiagnostic('hls_level_loaded', {
-						...readHlsState(hls),
-						levelLoadedCount,
-						mediaSequence: seq,
-						live: data.details?.live ?? null,
-						fragmentCount: data.details?.fragments?.length ?? null,
-						targetDuration: data.details?.targetduration ?? null,
-						totalDuration: data.details?.totalduration ?? null
-					});
-				}
 				if (seq !== lastMediaSequence) {
 					lastMediaSequence = seq;
 					lastSequenceChangeTime = Date.now();
@@ -419,19 +448,6 @@
 						isDegraded = false;
 						onRecovered?.();
 					}
-				}
-			};
-			const onFragLoaded = (_event: string, data: any) => {
-				fragLoadedCount += 1;
-				if (fragLoadedCount <= 3 || fragLoadedCount % 10 === 0) {
-					emitDiagnostic('hls_frag_loaded', {
-						...readHlsState(hls),
-						fragLoadedCount,
-						sn: data.frag?.sn ?? null,
-						level: data.frag?.level ?? null,
-						duration: data.frag?.duration ?? null,
-						url: data.frag?.url ?? null
-					});
 				}
 			};
 			const onHlsError = (_event: string, data: any) =>
@@ -446,7 +462,6 @@
 
 			hls.on(Events.MANIFEST_PARSED, onManifestParsed);
 			hls.on(Events.LEVEL_LOADED, onLevelLoaded);
-			hls.on(Events.FRAG_LOADED, onFragLoaded);
 			hls.on(Events.ERROR, onHlsError);
 			hls.attachMedia(el);
 			hls.loadSource(liveSrc);
@@ -454,7 +469,6 @@
 			teardownHls = () => {
 				hls.off(Events.MANIFEST_PARSED, onManifestParsed);
 				hls.off(Events.LEVEL_LOADED, onLevelLoaded);
-				hls.off(Events.FRAG_LOADED, onFragLoaded);
 				hls.off(Events.ERROR, onHlsError);
 				hls.destroy();
 			};
@@ -466,7 +480,6 @@
 			el.crossOrigin = 'anonymous';
 			el.muted = true;
 			el.playsInline = true;
-			el.poster = poster;
 			emitDiagnostic('player_mounted', {
 				src: liveSrc,
 				provider: 'native',
@@ -555,19 +568,9 @@
 			muted
 			playsinline
 			crossorigin="anonymous"
-			{poster}
 			class="absolute inset-0 z-0 h-full w-full object-cover"
 		></video>
 	{/key}
-	<img
-		src={poster}
-		alt=""
-		aria-hidden="true"
-		class="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover transition-opacity duration-500 {isPlaying &&
-		!hasError
-			? 'opacity-0'
-			: 'opacity-100'}"
-	/>
 	<div
 		class="absolute inset-x-0 bottom-0 z-20 flex items-center justify-end bg-linear-to-t from-black/70 to-transparent px-6 py-6 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100"
 	>

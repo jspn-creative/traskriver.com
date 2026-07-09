@@ -4,7 +4,6 @@
 	import RiverConditions from '$lib/components/RiverConditions.svelte';
 	import FishRunStatus from '$lib/components/FishRunStatus.svelte';
 	import { Drawer, DrawerContent } from '$lib/components/ui/drawer';
-	import defaultJpg from '$lib/assets/default.jpg';
 	import type { StreamDiagnostic } from '$lib/stream-diagnostics';
 	import * as env from '$env/static/public';
 	import posthog from 'posthog-js';
@@ -63,8 +62,6 @@
 		hls_library_loaded: 'hls.js loaded',
 		hls_unsupported: 'hls.js unsupported',
 		hls_manifest_parsed: 'hls manifest parsed',
-		hls_level_loaded: 'hls level loaded',
-		hls_frag_loaded: 'hls fragment loaded',
 		hls_error: 'hls error',
 		hls_setup_error: 'hls setup error',
 		player_setup_error: 'player setup error'
@@ -313,7 +310,6 @@
 			{#key playerKey}
 				<VideoPlayer
 					liveSrc={env.PUBLIC_STREAM_HLS_URL}
-					poster={defaultJpg}
 					class="relative h-full w-full"
 					onPlaying={onPlaybackStart}
 					onError={onPlaybackError}

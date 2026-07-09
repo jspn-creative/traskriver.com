@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { defineCustomElements } from 'vidstack/elements';
-	import defaultPoster from '$lib/assets/default.jpg';
 	import {
 		collectStreamCapabilities,
 		readBufferedEnd,
@@ -24,7 +23,7 @@
 
 	let {
 		liveSrc,
-		poster = defaultPoster,
+		poster,
 		class: className,
 		onPlaying,
 		onError,
@@ -441,14 +440,16 @@
 			<media-outlet></media-outlet>
 		</media-player>
 	{/key}
-	<img
-		src={poster}
-		alt="Stream Poster"
-		class="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover transition-opacity duration-500 {isPlaying &&
-		!hasError
-			? 'opacity-0'
-			: 'opacity-100'}"
-	/>
+	{#if poster}
+		<img
+			src={poster}
+			alt="Stream Poster"
+			class="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover transition-opacity duration-500 {isPlaying &&
+			!hasError
+				? 'opacity-0'
+				: 'opacity-100'}"
+		/>
+	{/if}
 	<div
 		class="absolute inset-x-0 bottom-0 z-20 flex items-center justify-end bg-linear-to-t from-black/70 to-transparent px-6 py-6 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100"
 	>
