@@ -9,6 +9,12 @@ export interface AppOptions {
 	mediamtxHlsPort: number;
 }
 
+function cacheControlForTraskPath(pathname: string): string | null {
+	if (pathname.endsWith('.m3u8')) return 'public, max-age=1';
+	if (pathname.endsWith('.ts')) return 'public, max-age=86400, immutable';
+	return null;
+}
+
 export function createApp(opts: AppOptions) {
 	const app = new Hono();
 	const hopByHopHeaders = new Set([
@@ -72,6 +78,10 @@ export function createApp(opts: AppOptions) {
 			const responseHeaders = new Headers(upstreamResponse.headers);
 			for (const headerName of hopByHopHeaders) {
 				responseHeaders.delete(headerName);
+			}
+			const cacheControl = cacheControlForTraskPath(incomingUrl.pathname);
+			if (cacheControl !== null) {
+				responseHeaders.set('Cache-Control', cacheControl);
 			}
 			return new Response(upstreamResponse.body, {
 				status: upstreamResponse.status,
